@@ -8,10 +8,9 @@ import 'package:yadda/objects/user.dart';
 import 'package:yadda/pages/group/new/newGroup.dart';
 import 'package:yadda/pages/inAppPurchase/consumeable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:yadda/pages/bottomNavigation/third_tab/profile_page.dart';
+import 'package:yadda/pages/profile/profile_page.dart';
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
-
 
 SearchBar searchBar;
 bool _fresh = false;
@@ -269,23 +268,26 @@ class GamePageState extends State<GamePage> {
   }
 
   Widget addImage() {
-    // if (widget.user.profilePic == null) {
-    //   return new CircleAvatar(
-    //     radius: 35,
-    //     child: Icon(Icons.add_a_photo),
-    //     backgroundColor: Colors.grey[600],
-    //   );
-    // } else {
-    return new CircleAvatar(
-
-      radius: 35,
-      backgroundImage: new CachedNetworkImageProvider("https://firebasestorage.googleapis.com/v0/b/login-5a8c9.appspot.com/o/VboR4LOOM6Z3buxZ0JjnoMycfHI2?alt=media&token=c80471f1-c1d3-4c22-b60d-9fc0fa092241"),
-      backgroundColor: Colors.grey[600],
-    );
-    // }
+    if (widget.user.profilePic == null) {
+      return new CircleAvatar(
+        radius: 35,
+        child: Icon(
+          Icons.person_outline,
+          color: UIData.blackOrWhite,
+          size: 40,
+        ),
+        backgroundColor: Colors.grey[600],
+      );
+    } else {
+      return new CircleAvatar(
+        radius: 35,
+        backgroundImage: FileImage(widget.user.profilePic),
+        backgroundColor: UIData.darkest,
+      );
+    }
   }
 
-  // Check how many games is registered in this group.
+  // Check how many games is registered in each group.
   _registeredGames() {
     CollectionReference cRef1 =
         firestoreInstance.collection("users/$currentUserId/groups");

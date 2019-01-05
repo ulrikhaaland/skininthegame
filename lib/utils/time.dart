@@ -25,42 +25,43 @@ class Time {
         break;
       case (2):
         _day = "Tuesday";
-         break;
+        break;
       case (3):
         _day = "Wednesday";
-         break;
+        break;
       case (4):
         _day = "Thursday";
-         break;
+        break;
       case (5):
         _day = "Friday";
-         break;
+        break;
       case (6):
         _day = "Saturday";
-         break;
+        break;
       case (7):
         _day = "Sunday";
-         break;
+        break;
     }
     print(_day);
     return _day;
   }
 
   String getFormattedDate() {
-    getDate();
-    _date = _date.toString();
-    List parts = _date.split(" ");
-    print(parts[0]);
+    // getDate();
+    // // _date = _date.toString();
+    // List parts = _date.split(" ");
+    // print(parts[0]);
 
-    _date = parts[0];
+    // _date = parts[0];
 
-    List parts2 = _date.split("2018-");
-    _date = parts2[1];
-    print(_date);
-    List parts3 = _date.split("-");
-    _date = "${parts3[1]}/${parts3[0]}";
-    print(_date);
-    return _date;
+    // List parts2 = _date.split("2019-");
+    // _date = parts2[1];
+    // print(_date);
+    // List parts3 = _date.split("-");
+    // _date = "${parts3[1]}/${parts3[0]}";
+    // print(_date);
+    // return _date;
+    return "${DateTime.now().day}/${DateTime.now().month}";
   }
 
   String getFormattedTime() {

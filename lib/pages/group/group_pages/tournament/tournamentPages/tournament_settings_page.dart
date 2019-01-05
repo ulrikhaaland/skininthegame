@@ -549,7 +549,9 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
 
   Future<Null> saveResults() async {
     String string = widget.game.orderByTime.toString();
-    string = string.substring(0, 4);
+    if (string != "0") {
+      string = string.substring(0, 4);
+    }
     await firestoreInstance.runTransaction((Transaction tx) async {
       QuerySnapshot qSnap = await firestoreInstance
           .collection("$pathToTournament/activeplayers")
@@ -557,9 +559,8 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
       qSnap.documents.forEach((DocumentSnapshot doc) {
         if (doc.data["id"] != null) {
           firestoreInstance
-              .document(
-                  "users/${doc.data["id"]}/tournamentresults/${widget.game.id}")
-              .setData({
+              .collection("users/${doc.data["id"]}/tournamentresults")
+              .add({
             "gamename": widget.game.name,
             "groupname": widget.group.name,
             "gametype": widget.game.gameType,
@@ -568,10 +569,16 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
             "year": int.tryParse(string),
             "profit": calculateProfits(
                 doc.data["payout"], doc.data["rebuy"], doc.data["addon"]),
+            "rebuy": doc.data["rebuy"],
+            "buyin": widget.game.buyin,
+            "addon": doc.data["addon"],
+            "payout": doc.data["payout"],
             "placing": doc.data["placing"],
             "playeramount": qSnap.documents.length,
             "currency": widget.game.currency,
             "orderbytime": widget.game.orderByTime,
+            "prizepool": widget.game.totalPrizePool,
+            "share": widget.group.shareResults
           });
         }
       });
@@ -762,8 +769,8 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
     final DateTime picked = await showDatePicker(
       context: context,
       initialDate: _date,
-      firstDate: new DateTime(2018),
-      lastDate: new DateTime(2019),
+      firstDate: new DateTime(_date.year),
+      lastDate: new DateTime(_date.year + 1),
     );
 
     if (picked != null) {

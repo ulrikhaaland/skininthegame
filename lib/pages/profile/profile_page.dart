@@ -4,13 +4,14 @@ import 'package:yadda/auth.dart';
 import 'package:yadda/utils/uidata.dart';
 import 'invite_page.dart';
 import 'package:yadda/objects/user.dart';
-import 'package:yadda/pages/user_profile/profile_page_settings.dart';
+import 'package:yadda/pages/profile/profile_page_settings.dart';
 import 'package:yadda/utils/essentials.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:yadda/utils/ProfilePic.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-
+import 'package:yadda/pages/profile/profile_page_results.dart';
+import 'package:yadda/objects/game.dart';
+import 'package:yadda/objects/result.dart';
 
 class ProfilePage extends StatefulWidget {
   ProfilePage(
@@ -44,7 +45,7 @@ class ProfilePageState extends State<ProfilePage>
 
   User userProfile;
 
-  double profileBGSize;
+  double profileBGSize = 250;
 
   @override
   void initState() {
@@ -71,16 +72,19 @@ class ProfilePageState extends State<ProfilePage>
         DocumentSnapshot docSnap =
             await firestoreInstance.document("users/${widget.profileId}").get();
         userProfile = new User(
-            docSnap.data["email"],
-            docSnap.data["id"],
-            docSnap.data["name"],
-            docSnap.data["fcm"],
-            docSnap.data["bio"],
-            docSnap.data["nightmode"],
-            docSnap.data["shareresults"],
-            docSnap.data["following"],
-            docSnap.data["followers"],
-            await ProfilePicture().downloadFile(docSnap.data["id"], false));
+          docSnap.data["email"],
+          docSnap.data["id"],
+          docSnap.data["name"],
+          docSnap.data["fcm"],
+          docSnap.data["bio"],
+          docSnap.data["nightmode"],
+          docSnap.data["shareresults"],
+          docSnap.data["following"],
+          docSnap.data["followers"],
+          docSnap.data["hasprofilepic"],
+          await ProfilePicture().downloadFile(
+              docSnap.data["id"], true, docSnap.data["hasprofilepic"]),
+        );
         setState(() {
           userFound = true;
         });
@@ -273,23 +277,19 @@ class ProfilePageState extends State<ProfilePage>
   }
 
   Widget addImage() {
-    // if (userProfile.profilePic == null) {
-    //   return new CircleAvatar(
-    //     radius: 35,
-    //     child: Icon(
-    //       Icons.person_outline,
-    //       size: 40,
-    //     ),
-    //     backgroundColor: Colors.grey[600],
-    //   );
-    // } else {
-    return new CircleAvatar(
-      radius: 35,
-      backgroundImage: new CachedNetworkImageProvider(
-          "https://firebasestorage.googleapis.com/v0/b/login-5a8c9.appspot.com/o/VboR4LOOM6Z3buxZ0JjnoMycfHI2?alt=media&token=c80471f1-c1d3-4c22-b60d-9fc0fa092241"),
-      backgroundColor: Colors.grey[600],
-    );
-    // }
+    if (userProfile.profilePic == null) {
+      return new CircleAvatar(
+        radius: 35,
+        child: Icon(Icons.person_outline),
+        backgroundColor: Colors.grey[600],
+      );
+    } else {
+      return new CircleAvatar(
+        radius: 35,
+        backgroundImage: FileImage(userProfile.profilePic),
+        backgroundColor: Colors.grey[600],
+      );
+    }
   }
 
   Widget notSharing(String type) {
@@ -451,7 +451,7 @@ class ProfilePageState extends State<ProfilePage>
             overflow: TextOverflow.ellipsis,
           ),
           new Text(
-            "${document.data["time"]} - ${document.data["date"]} - ${document.data["year"]}",
+            "${document.data["date"]}/${document.data["year"]} ${document.data["time"]}",
             style: new TextStyle(color: UIData.blackOrWhite),
             overflow: TextOverflow.ellipsis,
           )
@@ -472,7 +472,34 @@ class ProfilePageState extends State<ProfilePage>
           ),
         ],
       ),
-      onTap: null,
+      onTap: () {
+        Result result = new Result(
+            document.data["buyin"],
+            document.data["addon"],
+            null,
+            document.data["currency"],
+            document.data["date"],
+            document.data["gamename"],
+            document.data["gametype"],
+            document.data["groupname"],
+            document.data["orderbytime"],
+            document.data["payout"],
+            document.data["placing"],
+            document.data["playeramount"],
+            document.data["prizepool"],
+            document.data["profit"],
+            document.data["rebuy"],
+            null,
+            document.data["time"],
+            document.data["year"]);
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ProfilePageResults(
+                      user: widget.user,
+                      result: result,
+                    )));
+      },
     );
   }
 

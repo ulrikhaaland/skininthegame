@@ -8,6 +8,7 @@ import 'package:yadda/utils/time.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/log.dart';
+import 'package:yadda/pages/profile/profile_page.dart';
 
 class TournamentPlayerPage extends StatefulWidget {
   TournamentPlayerPage(
@@ -261,6 +262,14 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
               style: new TextStyle(
                   fontSize: UIData.fontSize20, color: UIData.blackOrWhite),
             ),
+            onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ProfilePage(
+                            user: widget.user,
+                            profileId: widget.playerId,
+                          )),
+                ),
           ),
           new Divider(
             height: 10.0,
@@ -322,7 +331,6 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
                   }
                 }),
           ),
-         
           new ListTile(
             leading: new Icon(
               Icons.attach_money,
@@ -344,7 +352,6 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
                   }
                 }),
           ),
-         
           new ListTile(
             leading: new Icon(
               Icons.refresh,
@@ -367,7 +374,6 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
                   }
                 }),
           ),
-         
           new ListTile(
             leading: new Icon(
               Icons.add,

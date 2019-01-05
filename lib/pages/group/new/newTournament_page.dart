@@ -143,6 +143,9 @@ class NewTournamentState extends State<NewTournament> {
     if (validateAndSave()) {
       String orderByTime = "$date$time";
       game.setOrderByTime(int.tryParse(orderByTime));
+      if (game.getOrderByTime() == null) {
+        game.setOrderByTime(0);
+      }
       game.setId(gameId);
       game.pushGameToFirestore(
           "groups/$groupId/games/type/tournamentactive/$gameId", false);
@@ -436,8 +439,8 @@ class NewTournamentState extends State<NewTournament> {
     final DateTime picked = await showDatePicker(
       context: context,
       initialDate: _date,
-      firstDate: new DateTime(2018),
-      lastDate: new DateTime(2019),
+      firstDate: new DateTime(_date.year),
+      lastDate: new DateTime(_date.year+1),
     );
 
     if (picked != null) {
@@ -451,8 +454,8 @@ class NewTournamentState extends State<NewTournament> {
         _gameDate = parts[0];
         date = _gameDate.replaceAll("-", "");
 
-        List parts2 = _gameDate.split("2018-");
-        _gameDate = parts2[1];
+        String parts2 = _gameDate.substring(5);
+        _gameDate = parts2;
 
         List parts3 = _gameDate.split("-");
         _gameDate = "${parts3[1]}/${parts3[0]}";

@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/utils/uidata.dart';
 import 'package:yadda/objects/group.dart';
+import 'package:yadda/pages/profile/profile_page.dart';
 
 class ProfilePageAlt extends StatefulWidget {
   ProfilePageAlt({
@@ -125,6 +126,14 @@ class ProfilePageAltState extends State<ProfilePageAlt> {
             "${widget.profileUserName}",
             style:
                 new TextStyle(fontSize: UIData.fontSize20, color: UIData.white),
+          ),
+          onTap: () =>  Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ProfilePage(
+                      user: widget.user,
+                      profileId: widget.profileUserId,
+                    )),
           ),
         ),
         new Divider(

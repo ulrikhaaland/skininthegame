@@ -5,7 +5,7 @@ import 'package:yadda/pages/bottomNavigation/second_tab/game_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yadda/root_page.dart';
 import 'package:yadda/utils/uidata.dart';
-import 'package:yadda/pages/bottomNavigation/third_tab/profile_page.dart';
+import 'package:yadda/pages/profile/profile_page.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/utils/layout.dart';
 import 'package:yadda/utils/groupLeft.dart';

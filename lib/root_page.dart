@@ -14,6 +14,7 @@ import 'package:yadda/utils/uidata.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'utils/ProfilePic.dart';
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
 
@@ -178,8 +179,9 @@ class RootPageState extends State<RootPage> {
           docSnap.data["shareresults"],
           docSnap.data["following"],
           docSnap.data["followers"],
-          null,
-          // await ProfilePicture().downloadFile(docSnap.data["id"], true),
+          docSnap.data["hasprofilepic"],
+          await ProfilePicture().downloadFile(
+              docSnap.data["id"], true, docSnap.data["hasprofilepic"]),
         );
         setState(() {
           authStatus = currentUser != null

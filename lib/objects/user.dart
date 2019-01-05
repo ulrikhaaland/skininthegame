@@ -11,6 +11,7 @@ class User {
     this.shareResults,
     this.following,
     this.followers,
+    this.hasProfilePic,
     this.profilePic,
   );
 
@@ -23,6 +24,7 @@ class User {
   bool shareResults;
   int following;
   int followers;
+  bool hasProfilePic;
   File profilePic;
 
   String getToken() {
@@ -50,6 +52,7 @@ class User {
         'nightmode': this.nightMode,
         'shareresults': this.shareResults,
         'following': this.following,
-        'followers': this.followers
+        'followers': this.followers,
+        'hasprofilepic': this.hasProfilePic
       };
 }

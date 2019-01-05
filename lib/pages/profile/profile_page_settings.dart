@@ -53,6 +53,7 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
   void initState() {
     super.initState();
     userFound = true;
+    _image = widget.user.profilePic;
   }
 
   void loadImage() async {
@@ -192,6 +193,9 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
       if (_image != null) {
         widget.user.profilePic = _image;
         ProfilePicture().uploadFile(widget.user.id, widget.user.profilePic);
+        Firestore.instance.document("users/${widget.user.id}").updateData({
+          "hasprofilepic": true,
+        });
       }
       Navigator.pop(context);
       await Firestore.instance.runTransaction((Transaction tx) async {
@@ -206,26 +210,20 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
   }
 
   Widget addImage() {
-    if (widget.user.profilePic == null) {
+    if (_image == null) {
       return new CircleAvatar(
         radius: 40,
         child: Icon(Icons.add_a_photo),
         backgroundColor: Colors.grey[600],
       );
     } else {
-      File file;
-      if (_image == null) {
-        file = widget.user.profilePic;
-      } else {
-        file = _image;
-      }
       return new CircleAvatar(
         radius: 40,
         child: Icon(
           Icons.add_a_photo,
           color: Colors.white,
         ),
-        backgroundImage: FileImage(file),
+        backgroundImage: FileImage(_image),
         backgroundColor: Colors.grey[600],
       );
     }

@@ -6,7 +6,7 @@ import 'package:yadda/pages/userSearch/search.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/pages/user_profile/profile_page_alt.dart';
 
-import 'package:yadda/pages/bottomNavigation/third_tab/profile_page.dart';
+import 'package:yadda/pages/profile/profile_page.dart';
 import 'package:yadda/objects/group.dart';
 
 SearchBar searchBar;

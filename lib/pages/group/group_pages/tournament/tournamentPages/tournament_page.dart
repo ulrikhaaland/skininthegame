@@ -10,7 +10,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/log.dart';
 import 'package:yadda/objects/game.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class TournamentPage extends StatefulWidget {
   TournamentPage({
@@ -263,7 +263,6 @@ class TournamentPageState extends State<TournamentPage>
           docSnap.data["time"],
           docSnap.data["calculatepayouts"],
           docSnap.data["currency"],
-
         );
         checkIfFull();
         userFound = true;
@@ -290,8 +289,11 @@ class TournamentPageState extends State<TournamentPage>
       );
     } else {
       return new IconButton(
-        icon: Icon(Icons.person, color: UIData.appBarColor, size: 0,)
-        ,
+        icon: Icon(
+          Icons.person,
+          color: UIData.appBarColor,
+          size: 0,
+        ),
       );
     }
   }
@@ -319,9 +321,12 @@ class TournamentPageState extends State<TournamentPage>
         },
       );
     } else {
-       return new IconButton(
-        icon: Icon(Icons.person, color: UIData.appBarColor, size: 0,)
-        ,
+      return new IconButton(
+        icon: Icon(
+          Icons.person,
+          color: UIData.appBarColor,
+          size: 0,
+        ),
       );
     }
   }
@@ -331,12 +336,14 @@ class TournamentPageState extends State<TournamentPage>
         floatingActionButton: floatingActionButton(),
         backgroundColor: UIData.dark,
         appBar: AppBar(
-          // centerTitle: true,
+            // centerTitle: true,
             iconTheme: IconThemeData(color: UIData.blackOrWhite),
             actions: <Widget>[
               newPostButton(),
               settingsButton(),
-              Padding(padding: EdgeInsets.only(left: 10),),
+              Padding(
+                padding: EdgeInsets.only(left: 10),
+              ),
             ],
             backgroundColor: UIData.appBarColor,
             bottom: TabBar(
@@ -523,13 +530,18 @@ class TournamentPageState extends State<TournamentPage>
     );
   }
 
+  Widget addImage(String uid) {
+    return new CircleAvatar(
+      radius: 25,
+      backgroundImage: CachedNetworkImageProvider(
+          "https://firebasestorage.googleapis.com/v0/b/login-5a8c9.appspot.com/o/$uid?alt=media&token=73c1e4f4-a080-402e-adea-4aeabcdeb823"),
+      backgroundColor: Colors.grey[600],
+    );
+  }
+
   Widget _playerListItems(BuildContext context, DocumentSnapshot document) {
     return ListTile(
-      leading: new Icon(
-        Icons.person,
-        color: Colors.blue,
-        size: 40.0,
-      ),
+      leading: addImage(document.documentID),
       title: new Text(
         document.data["name"],
         style: new TextStyle(fontSize: 25.0),
@@ -566,7 +578,7 @@ class TournamentPageState extends State<TournamentPage>
         builder: (context, snapshot) {
           if (!snapshot.hasData) return loading();
           return ListView.builder(
-            itemExtent: 50.0,
+            itemExtent: 60.0,
             itemCount: snapshot.data.documents.length,
             itemBuilder: (context, index) =>
                 _playerListItems(context, snapshot.data.documents[index]),

@@ -424,8 +424,8 @@ class NewCashGameState extends State<NewCashGame> {
     final DateTime picked = await showDatePicker(
       context: context,
       initialDate: _date,
-      firstDate: new DateTime(2018),
-      lastDate: new DateTime(2019),
+      firstDate: new DateTime(_date.year),
+      lastDate: new DateTime(_date.year+1),
     );
 
     if (picked != null) {
