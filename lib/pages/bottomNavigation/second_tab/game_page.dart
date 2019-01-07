@@ -268,7 +268,7 @@ class GamePageState extends State<GamePage> {
   }
 
   Widget addImage() {
-    if (widget.user.profilePic == null) {
+    if (widget.user.profilePicURL == null) {
       return new CircleAvatar(
         radius: 35,
         child: Icon(
@@ -281,7 +281,9 @@ class GamePageState extends State<GamePage> {
     } else {
       return new CircleAvatar(
         radius: 35,
-        backgroundImage: FileImage(widget.user.profilePic),
+        backgroundImage: CachedNetworkImageProvider(
+          widget.user.profilePicURL,
+        ),
         backgroundColor: UIData.darkest,
       );
     }

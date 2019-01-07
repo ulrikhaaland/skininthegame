@@ -84,8 +84,9 @@ class GroupTournamentsState extends State<GroupTournaments>
           )),
           actions: <Widget>[
             plussButton(),
-            Padding(padding: EdgeInsets.only(left: 10),),
-
+            Padding(
+              padding: EdgeInsets.only(left: 10),
+            ),
           ],
           backgroundColor: UIData.appBarColor,
           bottom: TabBar(
@@ -93,7 +94,7 @@ class GroupTournamentsState extends State<GroupTournaments>
             tabs: [
               Tab(
                 icon: Icon(
-                  Icons.play_arrow,
+                  Icons.play_circle_outline,
                   color: UIData.blackOrWhite,
                   size: 30,
                 ),
@@ -155,13 +156,22 @@ class GroupTournamentsState extends State<GroupTournaments>
           });
     } else {
       return new IconButton(
-        icon: Icon(Icons.settings, color: UIData.appBarColor,),
+        icon: Icon(
+          Icons.settings,
+          color: UIData.appBarColor,
+        ),
       );
     }
   }
 
   Widget _activeTournamentList(
       BuildContext context, DocumentSnapshot document) {
+    String isRunning = "${document.data["date"]} - ${document.data["time"]}";
+    Color color = UIData.blackOrWhite;
+    if (document.data["isrunning"] == true) {
+      isRunning = "Running";
+      color = UIData.red;
+    }
     return ListTile(
       contentPadding: EdgeInsets.all(3.0),
       leading: new Icon(
@@ -179,8 +189,8 @@ class GroupTournamentsState extends State<GroupTournaments>
             style: new TextStyle(color: UIData.blackOrWhite),
           ),
           new Text(
-            "${document.data["date"]} - ${document.data["time"]}",
-            style: new TextStyle(color: UIData.blackOrWhite),
+            isRunning,
+            style: new TextStyle(color: color),
           )
         ],
       ),

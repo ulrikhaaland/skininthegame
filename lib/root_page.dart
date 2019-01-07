@@ -180,8 +180,7 @@ class RootPageState extends State<RootPage> {
           docSnap.data["following"],
           docSnap.data["followers"],
           docSnap.data["hasprofilepic"],
-          await ProfilePicture().downloadFile(
-              docSnap.data["id"], true, docSnap.data["hasprofilepic"]),
+          docSnap.data["profilepicurl"]
         );
         setState(() {
           authStatus = currentUser != null

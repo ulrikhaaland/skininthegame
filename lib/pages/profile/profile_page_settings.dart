@@ -9,7 +9,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:yadda/utils/essentials.dart';
 import 'package:yadda/utils/ProfilePic.dart';
-
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:yadda/utils/essentials.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 class ProfileSettingsPage extends StatefulWidget {
@@ -20,12 +21,14 @@ class ProfileSettingsPage extends StatefulWidget {
     this.user,
     this.setGroupPage,
     this.setBGSize,
+    this.loading,
   }) : super(key: key);
   final BaseAuth auth;
   final VoidCallback onSignOut;
   final VoidCallback setGroupPage;
   final VoidCallback setBGSize;
   final User user;
+  bool loading;
 
   @override
   ProfileSettingsPageState createState() => ProfileSettingsPageState();
@@ -53,7 +56,6 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
   void initState() {
     super.initState();
     userFound = true;
-    _image = widget.user.profilePic;
   }
 
   void loadImage() async {
@@ -77,124 +79,140 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
 
   @override
   Widget build(BuildContext context) {
-    if (userFound == true) {
-      return Scaffold(
-        backgroundColor: UIData.dark,
-        appBar: AppBar(
-          backgroundColor: UIData.appBarColor,
-          iconTheme: IconThemeData(color: UIData.blackOrWhite),
-          title: new Text(
-            "Edit Profile",
-            style: TextStyle(
-                color: UIData.blackOrWhite, fontSize: UIData.fontSize24),
-          ),
-          actions: <Widget>[
-            new FlatButton(
-                child: new Text(
-                  "Update",
-                  style: new TextStyle(
-                      fontSize: UIData.fontSize16, color: UIData.blackOrWhite),
-                  textAlign: TextAlign.center,
-                ),
-                onPressed: () => postData()),
-          ],
+    return Scaffold(
+      backgroundColor: UIData.dark,
+      appBar: AppBar(
+        backgroundColor: UIData.appBarColor,
+        iconTheme: IconThemeData(color: UIData.blackOrWhite),
+        title: new Text(
+          "Edit Profile",
+          style: TextStyle(
+              color: UIData.blackOrWhite, fontSize: UIData.fontSize24),
         ),
-        body: new Form(
-            key: formKey,
-            child: new Column(children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(top: 16),
+        actions: <Widget>[
+          new FlatButton(
+              child: new Text(
+                "Update",
+                style: new TextStyle(
+                    fontSize: UIData.fontSize16, color: UIData.blackOrWhite),
+                textAlign: TextAlign.center,
               ),
-              new Align(
-                alignment: Alignment.centerLeft,
-                child: new Padding(
-                  padding: EdgeInsets.only(left: 16),
-                  child: GestureDetector(
-                    onTap: () => getImage(),
-                    child: addImage(),
+              onPressed: () => postData()),
+        ],
+      ),
+      body: new Stack(
+        children: <Widget>[
+          new Form(
+              key: formKey,
+              child: new Column(children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.only(top: 16),
+                ),
+                new Align(
+                  alignment: Alignment.centerLeft,
+                  child: new Padding(
+                    padding: EdgeInsets.only(left: 16),
+                    child: GestureDetector(
+                      onTap: () => getImage(),
+                      child: addImage(),
+                    ),
                   ),
                 ),
-              ),
-              new Container(
-                // color: UIData.darkest,
-                child: ListTile(
-                  // leading: new Text(
-                  //   "Biography \n",
-                  //   style: TextStyle(color: UIData.blackOrWhite, fontWeight: FontWeight.bold, letterSpacing: 0.5),
-                  // ),
-                  title: new TextFormField(
-                    style: TextStyle(color: UIData.blackOrWhite),
-                    initialValue: "${widget.user.bio}",
-                    maxLines: 2,
-                    maxLength: 160,
-                    decoration: InputDecoration(
-                        border: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        // UnderlineInputBorder(
-                        //     borderSide: BorderSide(color: UIData.blackOrWhite)),
-                        labelText: "Add a biography to your profile",
-                        labelStyle: TextStyle(color: Colors.grey[600])),
-                    onSaved: (val) {
-                      if (val.isEmpty) {
-                        val = "";
-                      }
-                      widget.user.bio = val;
+                new Container(
+                  // color: UIData.darkest,
+                  child: ListTile(
+                    // leading: new Text(
+                    //   "Biography \n",
+                    //   style: TextStyle(color: UIData.blackOrWhite, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                    // ),
+                    title: new TextFormField(
+                      style: TextStyle(color: UIData.blackOrWhite),
+                      initialValue: "${widget.user.bio}",
+                      maxLines: 2,
+                      maxLength: 160,
+                      decoration: InputDecoration(
+                          border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          // UnderlineInputBorder(
+                          //     borderSide: BorderSide(color: UIData.blackOrWhite)),
+                          labelText: "Add a biography to your profile",
+                          labelStyle: TextStyle(color: Colors.grey[600])),
+                      onSaved: (val) {
+                        if (val.isEmpty) {
+                          val = "";
+                        }
+                        widget.user.bio = val;
+                      },
+                    ),
+                  ),
+                ),
+                // Padding(
+                //   padding: EdgeInsets.only(top: 16),
+                // ),
+                Padding(
+                  padding: EdgeInsets.only(left: 16, right: 16),
+                  child: Divider(
+                    height: 0.1,
+                    color: Colors.black,
+                  ),
+                ),
+                new ListTile(
+                  title: new Text(
+                    "Share Results",
+                    style: new TextStyle(
+                      color: UIData.blackOrWhite,
+                      fontSize: UIData.fontSize20,
+                    ),
+                  ),
+                  trailing: new Checkbox(
+                    materialTapTargetSize: MaterialTapTargetSize.padded,
+                    activeColor: UIData.green,
+                    value: widget.user.shareResults,
+                    onChanged: (bool val) {
+                      setState(() {
+                        widget.user.shareResults = val;
+                      });
                     },
                   ),
+                  onTap: null,
                 ),
-              ),
-              // Padding(
-              //   padding: EdgeInsets.only(top: 16),
-              // ),
-              Padding(
-                padding: EdgeInsets.only(left: 16, right: 16),
-                child: Divider(
-                  height: 0.1,
-                  color: Colors.black,
-                ),
-              ),
-              new ListTile(
-                title: new Text(
-                  "Share Results",
-                  style: new TextStyle(
-                    color: UIData.blackOrWhite,
-                    fontSize: UIData.fontSize20,
+                Padding(
+                  padding: EdgeInsets.only(left: 16, right: 16),
+                  child: Divider(
+                    height: 0.1,
+                    color: Colors.black,
                   ),
                 ),
-                trailing: new Checkbox(
-                  materialTapTargetSize: MaterialTapTargetSize.padded,
-                  activeColor: UIData.green,
-                  value: widget.user.shareResults,
-                  onChanged: (bool val) {
-                    setState(() {
-                      widget.user.shareResults = val;
-                    });
-                  },
-                ),
-                onTap: null,
-              ),
-              Padding(
-                padding: EdgeInsets.only(left: 16, right: 16),
-                child: Divider(
-                  height: 0.1,
-                  color: Colors.black,
-                ),
-              ),
-            ])),
-      );
-    } else {
-      return Essentials();
-    }
+              ])),
+          Essentials().loading(widget.loading)
+        ],
+      ),
+    );
   }
 
   void postData() async {
     if (validateAndSave()) {
       widget.setBGSize();
       if (_image != null) {
-        widget.user.profilePic = _image;
-        ProfilePicture().uploadFile(widget.user.id, widget.user.profilePic);
-        Firestore.instance.document("users/${widget.user.id}").updateData({
-          "hasprofilepic": true,
+        setState(() {
+          widget.loading = true;
+        });
+        if (widget.user.profilePicURL != null) {
+          await CachedNetworkImageProvider(
+            widget.user.profilePicURL,
+          ).evict().then<void>((bool success) {
+            if (success) debugPrint('removed image!');
+          });
+        }
+        widget.user.hasProfilePic =
+            await ProfilePicture().uploadFile(widget.user.id, _image);
+        var ref = await FirebaseStorage.instance
+            .ref()
+            .child(widget.user.id)
+            .getDownloadURL();
+        widget.user.profilePicURL = ref;
+        setState(() {
+          widget.loading = false;
         });
       }
       Navigator.pop(context);
@@ -204,26 +222,40 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
             .updateData({
           'shareresults': widget.user.shareResults,
           'bio': widget.user.bio,
+          "profilepicurl": widget.user.profilePicURL,
         });
       });
     }
   }
 
   Widget addImage() {
-    if (_image == null) {
+    if (_image != null) {
       return new CircleAvatar(
-        radius: 40,
-        child: Icon(Icons.add_a_photo),
-        backgroundColor: Colors.grey[600],
-      );
-    } else {
-      return new CircleAvatar(
-        radius: 40,
+        radius: 35,
         child: Icon(
           Icons.add_a_photo,
           color: Colors.white,
         ),
         backgroundImage: FileImage(_image),
+        backgroundColor: Colors.grey[600],
+      );
+    }
+    if (widget.user.profilePicURL == null) {
+      return new CircleAvatar(
+        radius: 35,
+        child: Icon(Icons.add_a_photo),
+        backgroundColor: Colors.grey[600],
+      );
+    } else {
+      return new CircleAvatar(
+        radius: 35,
+        child: Icon(
+          Icons.add_a_photo,
+          color: Colors.white,
+        ),
+        backgroundImage: CachedNetworkImageProvider(
+          widget.user.profilePicURL,
+        ),
         backgroundColor: Colors.grey[600],
       );
     }

@@ -136,16 +136,19 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
           "$currentUserName updated game. Name: ${widget.game.name}, Adress: ${widget.game.adress}, Date: ${widget.game.date}, Time: ${widget.game.time}, Maxplayers: ${widget.game.maxPlayers}, Buyin: ${widget.game.buyin} Rebuys: ${widget.game.rebuy}, Addon: ${widget.game.addon}, Starting chips: ${widget.game.startingChips}, Prize pool: ${widget.game.totalPrizePool} Gametype: ${widget.game.gameType}, Gameinfo: ${widget.game.info}",
           "$pathToTournament/log",
           "Update");
-
-      Scaffold.of(formKey.currentState.context).showSnackBar(new SnackBar(
-        backgroundColor: UIData.yellow,
-        content: new Text(
-          "Game has been updated",
-          textAlign: TextAlign.center,
-          style: new TextStyle(color: Colors.black),
-        ),
-      ));
+      showSnackBar("Game has been updated");
     }
+  }
+
+  void showSnackBar(String message) {
+    Scaffold.of(formKey.currentState.context).showSnackBar(new SnackBar(
+      backgroundColor: UIData.yellow,
+      content: new Text(
+        message,
+        textAlign: TextAlign.center,
+        style: new TextStyle(color: Colors.black),
+      ),
+    ));
   }
 
   Widget padded({Widget child}) {
@@ -498,15 +501,38 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
   }
 
   Widget markAsFinishedList() {
-    if (widget.history != true) {
+    if (widget.history != true && widget.game.isRunning == false) {
       return new ListTile(
         leading: new Icon(
-          Icons.check_circle,
+          Icons.play_circle_outline,
           size: 40.0,
           color: UIData.green,
         ),
         title: new Text(
-          "Finished",
+          "Start game",
+          style: new TextStyle(
+              color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
+        ),
+        onTap: () {
+          firestoreInstance.document(pathToTournament).updateData({
+            "isrunning": true,
+          });
+
+          setState(() {
+            widget.game.isRunning = true;
+          });
+          showSnackBar("Game has started!");
+        },
+      );
+    } else if (widget.history != true && widget.game.isRunning == true) {
+      return new ListTile(
+        leading: new Icon(
+          Icons.cancel,
+          size: 40.0,
+          color: UIData.green,
+        ),
+        title: new Text(
+          "End game",
           style: new TextStyle(
               color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
         ),
@@ -783,8 +809,10 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
 
         _gameDate = parts[0];
         date = _gameDate.replaceAll("-", "");
-        List parts2 = _gameDate.split("2018-");
-        _gameDate = parts2[1];
+
+        String parts2 = _gameDate.substring(5);
+        _gameDate = parts2;
+
         List parts3 = _gameDate.split("-");
         _gameDate = "${parts3[1]}/${parts3[0]}";
         widget.game.setDate(_gameDate);
@@ -799,8 +827,9 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
     );
 
     if (picked != null) {
-      String _gameTime;
+      print("Time selected ${_time.toString()}");
       setState(() {
+        String _gameTime;
         _time = picked;
         _gameTime = _time.toString();
         List parts = _gameTime.split("y");

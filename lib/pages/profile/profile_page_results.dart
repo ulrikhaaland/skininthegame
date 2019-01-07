@@ -4,9 +4,10 @@ import 'package:yadda/objects/user.dart';
 import 'package:yadda/utils/uidata.dart';
 
 class ProfilePageResults extends StatefulWidget {
-  ProfilePageResults({this.result, this.user});
+  ProfilePageResults({this.result, this.user, this.title});
   final Result result;
   final User user;
+  final String title;
   @override
   _ProfilePageResultsState createState() => _ProfilePageResultsState();
 }
@@ -17,10 +18,10 @@ class _ProfilePageResultsState extends State<ProfilePageResults> {
     return Scaffold(
       backgroundColor: UIData.dark,
       appBar: new AppBar(
-        title: new Text("Tournament",
+        title: new Text(widget.title,
             style: new TextStyle(
                 color: UIData.blackOrWhite, fontSize: UIData.fontSize24)),
-        backgroundColor: UIData.darkest,
+        backgroundColor: UIData.appBarColor,
       ),
       body: new Padding(
         padding: EdgeInsets.all(16.0),
@@ -43,7 +44,9 @@ class _ProfilePageResultsState extends State<ProfilePageResults> {
               color: UIData.blackOrWhite, fontSize: UIData.fontSize24),
         ),
       ));
-      list.add(new Container(height: 14,));
+      list.add(new Container(
+        height: 14,
+      ));
     }
     if (widget.result.groupName != null) {
       list.add(
@@ -199,9 +202,6 @@ class _ProfilePageResultsState extends State<ProfilePageResults> {
       );
     }
 
-    for(int i = 0; i < list.length; i++) {
-      list.insert(i+1, Container(height: 4,));
-    }
     return list;
   }
 }

@@ -91,7 +91,7 @@ class NewTournamentState extends State<NewTournament> {
     groupId = widget.group.id;
 
     game = new Game("", 0, null, "", "", "", "", 0, 0, "", "No Limit Hold'em",
-        18, 0, 0, 0, 0, "", "", false, "USD");
+        18, 0, 0, 0, 0, "", "", false, "USD", false);
   }
 
   bool validateAndSave() {
@@ -440,7 +440,7 @@ class NewTournamentState extends State<NewTournament> {
       context: context,
       initialDate: _date,
       firstDate: new DateTime(_date.year),
-      lastDate: new DateTime(_date.year+1),
+      lastDate: new DateTime(_date.year + 1),
     );
 
     if (picked != null) {

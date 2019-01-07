@@ -51,7 +51,7 @@ class NewCashGameState extends State<NewCashGame> {
     currentUserId = widget.user.id;
     groupId = widget.group.id;
     game = new Game("", 0, null, "", "", "", "", 0, 0, "", "No Limit Hold'em",
-        9, 0, 0, 0, 0, "", "", false, "USD");
+        9, 0, 0, 0, 0, "", "", false, "USD", false);
     game.setDate("Not set");
     game.setTime("Not set");
   }
@@ -425,7 +425,7 @@ class NewCashGameState extends State<NewCashGame> {
       context: context,
       initialDate: _date,
       firstDate: new DateTime(_date.year),
-      lastDate: new DateTime(_date.year+1),
+      lastDate: new DateTime(_date.year + 1),
     );
 
     if (picked != null) {
@@ -438,10 +438,11 @@ class NewCashGameState extends State<NewCashGame> {
 
         _gameDate = parts[0];
         date = _gameDate.replaceAll("-", "");
-        List parts2 = _gameDate.split("2018-");
-        _gameDate = parts2[1];
-        List parts3 = _gameDate.split("-");
 
+        String parts2 = _gameDate.substring(5);
+        _gameDate = parts2;
+
+        List parts3 = _gameDate.split("-");
         _gameDate = "${parts3[1]}/${parts3[0]}";
         game.setDate(_gameDate);
       });

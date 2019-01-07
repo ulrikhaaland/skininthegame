@@ -21,9 +21,11 @@ class Game {
       this.startingChips,
       this.time,
       this.calculatePayouts,
-      this.currency);
+      this.currency,
+      this.isRunning);
 
   bool calculatePayouts;
+  bool isRunning;
 
   int addon;
   int buyin;
@@ -66,7 +68,8 @@ class Game {
         "time": this.time,
         "totalprizepool": this.totalPrizePool,
         "calculatepayouts": this.calculatePayouts,
-        "currency": this.currency
+        "currency": this.currency,
+        "isrunning": this.isRunning,
       };
 
   pushGameToFirestore(String path, bool isUpdate) {

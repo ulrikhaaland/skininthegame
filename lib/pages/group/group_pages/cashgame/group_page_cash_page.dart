@@ -154,6 +154,12 @@ class GroupCashGamesState extends State<GroupCashGames>
 
   Widget _activeTournamentList(
       BuildContext context, DocumentSnapshot document) {
+         String isRunning = "${document.data["date"]} - ${document.data["time"]}";
+    Color color = UIData.blackOrWhite;
+    if (document.data["isrunning"] == true) {
+      isRunning = "Running";
+      color = UIData.red;
+    }
     return ListTile(
       contentPadding: EdgeInsets.all(3.0),
       leading: new Icon(
@@ -170,8 +176,8 @@ class GroupCashGamesState extends State<GroupCashGames>
             style: new TextStyle(color: UIData.blackOrWhite),
           ),
           new Text(
-            "${document.data["date"]} - ${document.data["time"]}",
-            style: new TextStyle(color: UIData.blackOrWhite),
+            isRunning,
+            style: new TextStyle(color: color),
           )
         ],
       ),

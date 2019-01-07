@@ -480,14 +480,7 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
           "$pathToCashGame/log",
           "Update");
     }
-    Scaffold.of(formKey.currentState.context).showSnackBar(new SnackBar(
-      backgroundColor: UIData.yellow,
-      content: new Text(
-        "Game has been updated",
-        textAlign: TextAlign.center,
-        style: new TextStyle(color: Colors.black),
-      ),
-    ));
+    showSnackBar("Game has been updated");
   }
 
   Widget padded({Widget child}) {
@@ -505,15 +498,38 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
   }
 
   Widget markAsFinishedList() {
-    if (widget.history != true) {
+    if (widget.history != true && !widget.game.isRunning) {
       return new ListTile(
         leading: new Icon(
-          Icons.check_circle,
+          Icons.play_circle_outline,
           size: 40.0,
           color: UIData.green,
         ),
         title: new Text(
-          "Finished",
+          "Start game",
+          style: new TextStyle(
+              color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
+        ),
+        onTap: () {
+          firestoreInstance.document(pathToCashGame).updateData({
+            "isrunning": true,
+          });
+
+          setState(() {
+            widget.game.isRunning = true;
+          });
+          showSnackBar("Game has started!");
+        },
+      );
+    } else if (widget.history != true && widget.game.isRunning) {
+      return new ListTile(
+        leading: new Icon(
+          Icons.cancel,
+          size: 40.0,
+          color: UIData.green,
+        ),
+        title: new Text(
+          "End game",
           style: new TextStyle(
               color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
         ),
@@ -551,11 +567,11 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
     }
   }
 
-  showSnackBarPayoutsComplete() {
+  showSnackBar(String message) {
     Scaffold.of(formKey.currentState.context).showSnackBar(new SnackBar(
       backgroundColor: UIData.yellow,
       content: new Text(
-        "Payouts has been updated",
+        message,
         textAlign: TextAlign.center,
         style: new TextStyle(color: Colors.black),
       ),
@@ -620,7 +636,9 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
             setState(() {
               isLoading = false;
             });
-            showSnackBarPayoutsComplete();
+            showSnackBar(
+              "Payouts has been updated",
+            );
           } else if (p == personList.length) {
             for (int i = 0; i < personList.length;) {
               await firestoreInstance
@@ -637,7 +655,9 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
             setState(() {
               isLoading = false;
             });
-            showSnackBarPayoutsComplete();
+            showSnackBar(
+              "Payouts has been updated",
+            );
           }
           if (personList.length != 0) {
             int i = random.nextInt(personList.length);
@@ -695,7 +715,9 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
                 setState(() {
                   isLoading = false;
                 });
-                showSnackBarPayoutsComplete();
+                showSnackBar(
+                  "Payouts has been updated",
+                );
               } else if (!fRes.isNegative) {
                 personPositive.setResult(fRes);
                 int abs = personNegative.result.abs();
@@ -725,11 +747,11 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
     }
   }
 
-  String calculateProfits(String payout, String buyin) {
+  String calculateProfits(String payout, int buyin) {
     int p = int.tryParse(payout);
     String finalProfit;
     if (p != null) {
-      p -= int.tryParse(buyin);
+      p -= buyin;
       finalProfit = p.toString();
     } else {
       finalProfit = payout;
@@ -758,6 +780,8 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
             "year": int.tryParse(string),
             "profit": calculateProfits(doc.data["payout"], doc.data["buyin"]),
             "currency": widget.game.currency,
+            "buyin": doc.data["buyin"],
+            "payout": doc.data["payout"],
             "bblind": widget.game.bBlind,
             "sblind": widget.game.sBlind,
             "orderbytime": widget.game.orderByTime,
@@ -971,8 +995,9 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
         _gameDate = parts[0];
         date = _gameDate.replaceAll("-", "");
 
-        List parts2 = _gameDate.split("2018-");
-        _gameDate = parts2[1];
+        String parts2 = _gameDate.substring(5);
+        _gameDate = parts2;
+
         List parts3 = _gameDate.split("-");
         _gameDate = "${parts3[1]}/${parts3[0]}";
         widget.game.setDate(_gameDate);
@@ -987,8 +1012,9 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
     );
 
     if (picked != null) {
-      String _gameTime;
+      print("Time selected ${_time.toString()}");
       setState(() {
+        String _gameTime;
         _time = picked;
         _gameTime = _time.toString();
         List parts = _gameTime.split("y");

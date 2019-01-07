@@ -359,7 +359,7 @@ class CashGamePageState extends State<CashGamePage>
                 .setData({
               'name': currentUserName,
               'id': currentUserId,
-              "buyin": '0',
+              "buyin": 0,
               "payout": '0',
             });
           });
@@ -436,6 +436,8 @@ class CashGamePageState extends State<CashGamePage>
           docSnap.data["time"],
           docSnap.data["calculatepayouts"],
           docSnap.data["currency"],
+          docSnap.data["isrunning"],
+
         );
 
         if (game.calculatePayouts == true && widget.history == true) {
@@ -538,7 +540,7 @@ class CashGamePageState extends State<CashGamePage>
     }
   }
 
-  pushPlayerPage(String id, String buyin, String payout, String name) {
+  pushPlayerPage(String id, int buyin, String payout, String name) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -578,7 +580,7 @@ class CashGamePageState extends State<CashGamePage>
                 "groups/$groupId/games/type/cashgameactive/${widget.gameId}/players/${document.documentID}")
             .get()
             .then((datasnapshot) {
-          String buyin = datasnapshot.data["buyin"];
+          int buyin = datasnapshot.data["buyin"];
           String payout = datasnapshot.data["payout"];
 
           setState(() {
@@ -695,7 +697,7 @@ class CashGamePageState extends State<CashGamePage>
           'name': name,
           'id': uid,
           'orderbytime': time.getOrderByTime(),
-          'buyin': "0",
+          'buyin': 0,
           'payout': "0",
         });
       }
@@ -773,8 +775,7 @@ class CashGamePageState extends State<CashGamePage>
 
     String i = document.data["payout"];
     int payout = int.tryParse(i);
-    String p = document.data["buyin"];
-    int buyin = int.tryParse(p);
+    int buyin = document.data["buyin"];
     print(payout - buyin);
     if (payout != null && buyin != null) {
       int r = payout - buyin;
@@ -808,7 +809,7 @@ class CashGamePageState extends State<CashGamePage>
             .document("$gamePath/players/${document.documentID}")
             .get()
             .then((datasnapshot) {
-          String playerBuyin = datasnapshot.data["buyin"];
+          int playerBuyin = datasnapshot.data["buyin"];
           String payout = datasnapshot.data["payout"];
 
           setState(() {

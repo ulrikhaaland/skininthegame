@@ -12,7 +12,7 @@ class User {
     this.following,
     this.followers,
     this.hasProfilePic,
-    this.profilePic,
+    this.profilePicURL,
   );
 
   final String userName;
@@ -20,12 +20,12 @@ class User {
   final String email;
   final String fcm;
   String bio;
+  String profilePicURL;
   bool nightMode;
   bool shareResults;
   int following;
   int followers;
   bool hasProfilePic;
-  File profilePic;
 
   String getToken() {
     return this.fcm;
@@ -53,6 +53,6 @@ class User {
         'shareresults': this.shareResults,
         'following': this.following,
         'followers': this.followers,
-        'hasprofilepic': this.hasProfilePic
+        'profilepicurl': this.profilePicURL
       };
 }

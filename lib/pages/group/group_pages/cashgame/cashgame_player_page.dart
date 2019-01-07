@@ -26,7 +26,7 @@ class CashGamePlayerPage extends StatefulWidget {
   final Group group;
   final String playerId;
   final String playerUserName;
-  final String buyinAmount;
+  final int buyinAmount;
   final String payout;
   final Game game;
   final bool history;
@@ -44,8 +44,8 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
   String currentUserName;
   bool userFound = false;
   bool isLoading = false;
-  String oldPlayerBuyinAmount;
-  String newPlayerBuyinAmount;
+  int oldPlayerBuyinAmount;
+  int newPlayerBuyinAmount;
   String oldPayout;
   String newPayout;
 
@@ -250,7 +250,7 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
                 labelStyle: new TextStyle(color: Colors.grey[600]),
                 labelText: "Total buyin amount",
               ),
-              onSaved: (val) => newPlayerBuyinAmount = val,
+              onSaved: (val) => newPlayerBuyinAmount = int.tryParse(val),
             ),
             onTap: null,
           ),

@@ -12,6 +12,7 @@ import 'package:yadda/utils/ProfilePic.dart';
 import 'package:yadda/pages/profile/profile_page_results.dart';
 import 'package:yadda/objects/game.dart';
 import 'package:yadda/objects/result.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ProfilePage extends StatefulWidget {
   ProfilePage(
@@ -81,9 +82,8 @@ class ProfilePageState extends State<ProfilePage>
           docSnap.data["shareresults"],
           docSnap.data["following"],
           docSnap.data["followers"],
-          docSnap.data["hasprofilepic"],
-          await ProfilePicture().downloadFile(
-              docSnap.data["id"], true, docSnap.data["hasprofilepic"]),
+          null,
+          await ProfilePicture().getDownloadUrl(docSnap.data["id"]),
         );
         setState(() {
           userFound = true;
@@ -277,17 +277,23 @@ class ProfilePageState extends State<ProfilePage>
   }
 
   Widget addImage() {
-    if (userProfile.profilePic == null) {
+    if (widget.user.profilePicURL == null) {
       return new CircleAvatar(
         radius: 35,
-        child: Icon(Icons.person_outline),
+        child: Icon(
+          Icons.person_outline,
+          color: UIData.blackOrWhite,
+          size: 40,
+        ),
         backgroundColor: Colors.grey[600],
       );
     } else {
       return new CircleAvatar(
         radius: 35,
-        backgroundImage: FileImage(userProfile.profilePic),
-        backgroundColor: Colors.grey[600],
+        backgroundImage: CachedNetworkImageProvider(
+          userProfile.profilePicURL,
+        ),
+        backgroundColor: UIData.darkest,
       );
     }
   }
@@ -390,7 +396,7 @@ class ProfilePageState extends State<ProfilePage>
           ),
         ],
       ),
-      onTap: null,
+      onTap: () => toResults(document.data, "Cash Game"),
     );
   }
 
@@ -398,7 +404,7 @@ class ProfilePageState extends State<ProfilePage>
     return StreamBuilder(
         stream: Firestore.instance
             .collection("users/${userProfile.id}/cashgameresults")
-            .orderBy("orderbytime", descending: false)
+            .orderBy("orderbytime", descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return new Text("...");
@@ -472,42 +478,48 @@ class ProfilePageState extends State<ProfilePage>
           ),
         ],
       ),
-      onTap: () {
-        Result result = new Result(
-            document.data["buyin"],
-            document.data["addon"],
-            null,
-            document.data["currency"],
-            document.data["date"],
-            document.data["gamename"],
-            document.data["gametype"],
-            document.data["groupname"],
-            document.data["orderbytime"],
-            document.data["payout"],
-            document.data["placing"],
-            document.data["playeramount"],
-            document.data["prizepool"],
-            document.data["profit"],
-            document.data["rebuy"],
-            null,
-            document.data["time"],
-            document.data["year"]);
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ProfilePageResults(
-                      user: widget.user,
-                      result: result,
-                    )));
-      },
+      onTap: () => toResults(document.data, "Tournament"),
     );
+  }
+
+  void toResults(
+    Map<String, dynamic> map,
+    String title,
+  ) {
+    Result result = new Result(
+        map["buyin"],
+        map["addon"],
+        map["bblind"],
+        map["currency"],
+        map["date"],
+        map["gamename"],
+        map["gametype"],
+        map["groupname"],
+        map["orderbytime"],
+        map["payout"],
+        map["placing"],
+        map["playeramount"],
+        map["prizepool"],
+        map["profit"],
+        map["rebuy"],
+        map["sblind"],
+        map["time"],
+        map["year"]);
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ProfilePageResults(
+                  user: widget.user,
+                  result: result,
+                  title: title,
+                )));
   }
 
   Widget tournamentStream() {
     return StreamBuilder(
         stream: Firestore.instance
             .collection("users/${userProfile.id}/tournamentresults")
-            .orderBy("orderbytime", descending: false)
+            .orderBy("orderbytime", descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return new Text("...");
