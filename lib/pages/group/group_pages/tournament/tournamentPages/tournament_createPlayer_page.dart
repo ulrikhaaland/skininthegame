@@ -167,7 +167,7 @@ class TournamentCreatePlayerPageState
               .setData({
             "name": playerName,
             "payout": '0',
-            'buyin': '0',
+            'buyin': 0,
           });
         });
         if (widget.history != true) {
@@ -177,7 +177,7 @@ class TournamentCreatePlayerPageState
                     "groups/$groupId/games/type/$activeOrHistory/${widget.game.id}/activeplayers/$playerName")
                 .setData({
               "name": playerName,
-              'buyin': '0',
+              'buyin': 0,
               'payout': '0',
             });
           });

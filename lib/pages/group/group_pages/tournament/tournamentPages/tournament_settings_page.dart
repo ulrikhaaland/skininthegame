@@ -590,7 +590,8 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
             "gamename": widget.game.name,
             "groupname": widget.group.name,
             "gametype": widget.game.gameType,
-            "date": widget.game.date,
+            "day": int.tryParse(widget.game.date.substring(0, 2)),
+            "month": int.tryParse(widget.game.date.substring(3)),
             "time": widget.game.time,
             "year": int.tryParse(string),
             "profit": calculateProfits(

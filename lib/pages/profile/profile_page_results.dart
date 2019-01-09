@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:yadda/objects/result.dart';
+import 'package:yadda/objects/resultgame.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/utils/uidata.dart';
 
 class ProfilePageResults extends StatefulWidget {
   ProfilePageResults({this.result, this.user, this.title});
-  final Result result;
+  final ResultGame result;
   final User user;
   final String title;
   @override
@@ -104,6 +104,20 @@ class _ProfilePageResultsState extends State<ProfilePageResults> {
       );
     }
 
+    if (widget.result.sBlind != null && widget.result.bBlind != null) {
+      list.add(
+        new Align(
+            alignment: Alignment.centerLeft,
+            child: new Text(
+              "Blinds: ${widget.result.sBlind}/${widget.result.bBlind}",
+              style: new TextStyle(
+                color: UIData.blackOrWhite,
+                fontSize: UIData.fontSize16,
+              ),
+            )),
+      );
+    }
+
     if (widget.result.buyin != null) {
       list.add(
         new Align(
@@ -188,12 +202,12 @@ class _ProfilePageResultsState extends State<ProfilePageResults> {
       );
     }
 
-    if (widget.result.date != null) {
+    if (widget.result.date.day != null && widget.result.date.month != null) {
       list.add(
         new Align(
             alignment: Alignment.centerLeft,
             child: new Text(
-              "Date: ${widget.result.date}/${widget.result.year} ${widget.result.time}",
+              "Date: ${widget.result.date.day}/${widget.result.date.month}/${widget.result.date.year} ${widget.result.time}",
               style: new TextStyle(
                 color: UIData.blackOrWhite,
                 fontSize: UIData.fontSize16,

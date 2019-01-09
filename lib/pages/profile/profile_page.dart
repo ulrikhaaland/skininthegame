@@ -11,7 +11,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:yadda/utils/ProfilePic.dart';
 import 'package:yadda/pages/profile/profile_page_results.dart';
 import 'package:yadda/objects/game.dart';
-import 'package:yadda/objects/result.dart';
+import 'package:yadda/objects/resultgame.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -375,7 +375,7 @@ class ProfilePageState extends State<ProfilePage>
             overflow: TextOverflow.ellipsis,
           ),
           new Text(
-            "${document.data["date"]} - ${document.data["time"]} - ${document.data["year"]}",
+            "${document.data["day"]}/${document.data["month"]}/${document.data["year"]} ${document.data["time"]}",
             style: new TextStyle(color: UIData.blackOrWhite),
             overflow: TextOverflow.ellipsis,
           )
@@ -457,7 +457,7 @@ class ProfilePageState extends State<ProfilePage>
             overflow: TextOverflow.ellipsis,
           ),
           new Text(
-            "${document.data["date"]}/${document.data["year"]} ${document.data["time"]}",
+            "${document.data["day"]}/${document.data["month"]}/${document.data["year"]} ${document.data["time"]}",
             style: new TextStyle(color: UIData.blackOrWhite),
             overflow: TextOverflow.ellipsis,
           )
@@ -486,25 +486,7 @@ class ProfilePageState extends State<ProfilePage>
     Map<String, dynamic> map,
     String title,
   ) {
-    Result result = new Result(
-        map["buyin"],
-        map["addon"],
-        map["bblind"],
-        map["currency"],
-        map["date"],
-        map["gamename"],
-        map["gametype"],
-        map["groupname"],
-        map["orderbytime"],
-        map["payout"],
-        map["placing"],
-        map["playeramount"],
-        map["prizepool"],
-        map["profit"],
-        map["rebuy"],
-        map["sblind"],
-        map["time"],
-        map["year"]);
+    ResultGame result = new ResultGame.fromMap(map);
     Navigator.push(
         context,
         MaterialPageRoute(

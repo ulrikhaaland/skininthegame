@@ -589,8 +589,8 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
         qSnap.documents.forEach((DocumentSnapshot doc) {
           String i = doc.data["payout"];
           int payout = int.tryParse(i);
-          String p = doc.data["buyin"];
-          int buyin = int.tryParse(p);
+           
+          int buyin = doc.data["buyin"];
           int result = payout - buyin;
           bool isNegative;
           if (result.isNegative) {
@@ -775,7 +775,8 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
             "gamename": widget.game.name,
             "groupname": widget.group.name,
             "gametype": widget.game.gameType,
-            "date": widget.game.date,
+            "day": int.tryParse(widget.game.date.substring(0, 2)),
+            "month": int.tryParse(widget.game.date.substring(3)),
             "time": widget.game.time,
             "year": int.tryParse(string),
             "profit": calculateProfits(doc.data["payout"], doc.data["buyin"]),

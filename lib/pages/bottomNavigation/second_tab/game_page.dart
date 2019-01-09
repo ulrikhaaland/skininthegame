@@ -11,6 +11,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:yadda/pages/profile/profile_page.dart';
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:yadda/pages/results/results_graph_page.dart';
+import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:yadda/pages/results/graph.dart';
 
 SearchBar searchBar;
 bool _fresh = false;
@@ -174,7 +177,16 @@ class GamePageState extends State<GamePage> {
                       color: UIData.blackOrWhite,
                     ),
                   ),
-                  onTap: () => widget.onSignOut(),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Blabla(
+                                user: widget.user,
+                              )),
+                    );
+                    // widget.onSignOut();
+                  },
                 ),
                 new ListTile(
                   leading: IconButton(

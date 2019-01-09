@@ -24,6 +24,8 @@ class Game {
       this.currency,
       this.isRunning);
 
+  
+
   bool calculatePayouts;
   bool isRunning;
 
@@ -71,6 +73,32 @@ class Game {
         "currency": this.currency,
         "isrunning": this.isRunning,
       };
+
+  Game fromMap(Map map) {
+    Game game = new Game(
+        map["prizepool"],
+        addon,
+        id,
+        info,
+        name,
+        fittedName,
+        adress,
+        bBlind,
+        buyin,
+        date,
+        gameType,
+        maxPlayers,
+        orderByTime,
+        rebuy,
+        registeredPlayers,
+        sBlind,
+        startingChips,
+        time,
+        calculatePayouts,
+        currency,
+        isRunning);
+    return game;
+  }
 
   pushGameToFirestore(String path, bool isUpdate) {
     DocumentReference docRef = Firestore.instance.document(path);
