@@ -45,6 +45,15 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
       ResultGame resultGame = ResultGame.fromMap(doc.data);
       cashgameResults.add(resultGame);
     });
+    ResultGameTotal resultGameTotal = new ResultGameTotal(0, 0, 0);
+    for (int i = 0; i < cashgameResults.length; i++) {
+      resultGameTotal.totalProfit += int.tryParse(cashgameResults[i].profit);
+      if (i == cashgameResults.length - 1) {
+        double s = resultGameTotal.totalProfit / cashgameResults.length;
+        resultGameTotal.totalProfit = s.round();
+      }
+    }
+
     cashgameResults.sort((a, b) => a.date.compareTo(b.date));
     cashgameData = charts.Series<ResultGame, DateTime>(
       colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,

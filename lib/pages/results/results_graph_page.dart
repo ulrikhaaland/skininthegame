@@ -84,6 +84,7 @@ class _SelectionCallbackState extends State<SelectionCallbackExample> {
   DateTime _time;
   Map<int, ResultGame> _measures;
   var color = charts.MaterialPalette.white;
+  bool untapped = true;
 
   @override
   void initState() {
@@ -117,6 +118,7 @@ class _SelectionCallbackState extends State<SelectionCallbackExample> {
 
     // Request a build.
     setState(() {
+      untapped = false;
       _time = time;
       _measures = measures;
     });
@@ -160,7 +162,6 @@ class _SelectionCallbackState extends State<SelectionCallbackExample> {
                 ],
               ))),
     ];
-
     _measures?.forEach((int, ResultGame game) {
       children.add(tournamentList(game));
     });

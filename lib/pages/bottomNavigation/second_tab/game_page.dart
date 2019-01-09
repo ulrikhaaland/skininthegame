@@ -156,16 +156,16 @@ class GamePageState extends State<GamePage> {
                       color: UIData.blackOrWhite,
                     ),
                   ),
-                  onTap: () =>
-                  widget.onSignOut(),
-                  //  Navigator.push(
-                  //       context,
-                  //       MaterialPageRoute(
-                  //           builder: (context) => ProfilePage(
-                  //                 user: widget.user,
-                  //                 profileId: widget.user.id,
-                  //               )),
-                  //     ),
+                  onTap: () => 
+                  // widget.onSignOut(),
+                   Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ProfilePage(
+                                  user: widget.user,
+                                  profileId: widget.user.id,
+                                )),
+                      ),
                 ),
                 new ListTile(
                   leading: IconButton(

@@ -68,8 +68,15 @@ class ResultGame {
         map["bblind"],
         map["sblind"],
         new DateTime(
-            map["year"], map["month"], map["day"], 
-            // int.tryParse(hour)
-            ));
+          map["year"], map["month"], map["day"],
+          // int.tryParse(hour)
+        ));
   }
+}
+
+class ResultGameTotal {
+  ResultGameTotal(this.gameCount, this.totalProfit, this.itm);
+  int gameCount;
+  int totalProfit;
+  double itm;
 }
