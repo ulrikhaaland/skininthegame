@@ -23,17 +23,22 @@ class SelectionCallbackExample extends StatefulWidget {
   final List<charts.Series> seriesList;
   final bool animate;
   final User user;
+  final bool isTournament;
 
-  SelectionCallbackExample(this.seriesList, {this.animate, this.user});
+  SelectionCallbackExample(this.seriesList,
+      {this.animate, this.user, this.isTournament});
 
   /// Creates a [charts.TimeSeriesChart] with sample data and no transition.
   factory SelectionCallbackExample.withSampleData(
-      charts.Series<ResultGame, DateTime> tournament, User user) {
+      charts.Series<ResultGame, DateTime> tournament,
+      User user,
+      bool isTournament) {
     return new SelectionCallbackExample(
       _createSampleData(tournament),
       // Disable animations for image tests.
       animate: true,
       user: user,
+      isTournament: isTournament,
     );
   }
 
@@ -168,7 +173,14 @@ class _SelectionCallbackState extends State<SelectionCallbackExample> {
     String name = game.groupName;
     String currency = game.currency;
     String profit = game.profit;
-
+    String tournamentOrCash = "Placing: ${game.placing}/${game.playerAmount}";
+    String title = "Tournament";
+    IconData tournamentOrCashIcon = Icons.whatshot;
+    if (widget.isTournament != true) {
+      tournamentOrCash = "Blinds: ${game.sBlind}/${game.bBlind}";
+      tournamentOrCashIcon = Icons.attach_money;
+      title = "Cash Game";
+    }
     if (int.tryParse(game.profit).isNegative) {
       color = Colors.red;
     } else {
@@ -189,7 +201,7 @@ class _SelectionCallbackState extends State<SelectionCallbackExample> {
     return ListTile(
       contentPadding: EdgeInsets.all(3.0),
       leading: new Icon(
-        Icons.whatshot,
+        tournamentOrCashIcon,
         color: color,
         size: 40.0,
       ),
@@ -213,7 +225,7 @@ class _SelectionCallbackState extends State<SelectionCallbackExample> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           new Text(
-            "Placing: ${game.placing}/${game.playerAmount}",
+            tournamentOrCash,
             textAlign: TextAlign.start,
             style: new TextStyle(color: UIData.blackOrWhite),
           ),
@@ -230,7 +242,7 @@ class _SelectionCallbackState extends State<SelectionCallbackExample> {
               builder: (context) => ProfilePageResults(
                     user: widget.user,
                     result: game,
-                    title: "Tournament",
+                    title: title,
                   ))),
     );
   }

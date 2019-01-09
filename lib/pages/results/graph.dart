@@ -7,10 +7,12 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:yadda/pages/results/results_graph_page.dart';
 import 'results.dart';
 import 'package:yadda/utils/uidata.dart';
+import 'package:yadda/utils/essentials.dart';
 
 class Blabla extends StatefulWidget {
   final User user;
-  Blabla({this.user});
+  bool isLoading;
+  Blabla({this.user, this.isLoading});
   @override
   _BlablaState createState() => _BlablaState();
 }
@@ -22,65 +24,53 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
   void initState() {
     // TODO: implement initState
     super.initState();
-    tournament = new List();
+    tournamentResults = new List();
+    cashgameResults = new List();
+
     _tabController = new TabController(vsync: this, length: 2);
 
     getData();
   }
 
-  charts.Series<ResultGame, DateTime> data;
-  List<ResultGame> tournament;
+  charts.Series<ResultGame, DateTime> tournamentData;
+  List<ResultGame> tournamentResults;
+  charts.Series<ResultGame, DateTime> cashgameData;
+  List<ResultGame> cashgameResults;
 
   void getData() async {
+    QuerySnapshot cSnap = await Firestore.instance
+        .collection("users/${widget.user.id}/cashgameresults")
+        .getDocuments();
+    cSnap.documents.forEach((DocumentSnapshot doc) {
+      ResultGame resultGame = ResultGame.fromMap(doc.data);
+      cashgameResults.add(resultGame);
+    });
+    cashgameResults.sort((a, b) => a.date.compareTo(b.date));
+    cashgameData = charts.Series<ResultGame, DateTime>(
+      colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+      id: 'Cashgame',
+      domainFn: (ResultGame game, _) => game.date,
+      measureFn: (ResultGame game, _) => int.tryParse(game.profit),
+      data: cashgameResults,
+    );
     QuerySnapshot qSnap = await Firestore.instance
         .collection("users/${widget.user.id}/tournamentresults")
         .getDocuments();
     qSnap.documents.forEach((DocumentSnapshot doc) {
       ResultGame resultGame = ResultGame.fromMap(doc.data);
-      tournament.add(resultGame);
+      tournamentResults.add(resultGame);
     });
-    tournament.sort((a, b) => a.date.compareTo(b.date));
-    data = charts.Series<ResultGame, DateTime>(
+    tournamentResults.sort((a, b) => a.date.compareTo(b.date));
+    tournamentData = charts.Series<ResultGame, DateTime>(
       colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-      id: 'US Sales',
+      id: 'Tournament',
       domainFn: (ResultGame game, _) => game.date,
       measureFn: (ResultGame game, _) => int.tryParse(game.profit),
-      data: tournament,
-
-      // fillColorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+      data: tournamentResults,
     );
 
-    for (int i = 0; i < tournament.length; i++) {
-      List<ResultGame> tournament1 = new List();
-      tournament1.addAll(tournament);
-      tournament1.removeAt(i);
-      String date1 = tournament[i].date.year.toString() +
-          tournament[i].date.month.toString() +
-          tournament[i].date.day.toString();
-      for (int e = 0; e < tournament1.length; e++) {
-        String date2 = tournament1[e].date.year.toString() +
-            tournament1[e].date.month.toString() +
-            tournament1[e].date.day.toString();
-        if (date1 == date2) {
-          print("true");
-        }
-      }
-    }
-    // QuerySnapshot qSnap2 = await Firestore.instance
-    //     .collection("users/${widget.user.id}/cashgameresults")
-    //     .getDocuments();
-    // qSnap2.documents.forEach((DocumentSnapshot doc) {
-    //   ResultGame resultGame = ResultGame.fromMap(doc.data);
-    //   cashgame.add(resultGame);
-    // });
-    // chart = new charts.Series<TimeSeriesSales, DateTime>(
-    //   id: 'UK Sales',
-    //   domainFn: (TimeSeriesSales sales, _) => data[0].time,
-    //   measureFn: (TimeSeriesSales sales, _) => 40,
-    //   data: data,
-    // );
     setState(() {
-      ready = true;
+      widget.isLoading = false;
     });
   }
 
@@ -88,7 +78,7 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
   var chart;
   @override
   Widget build(BuildContext context) {
-    if (ready)
+    if (!widget.isLoading)
       return Scaffold(
         appBar: AppBar(
           title: new Text(
@@ -102,13 +92,13 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
             tabs: [
               Tab(
                 child: Text(
-                  "Cash Games",
+                  "Tournaments",
                   style: new TextStyle(color: UIData.blackOrWhite),
                 ),
               ),
               Tab(
                 child: Text(
-                  "Tournaments",
+                  "Cash Games",
                   style: new TextStyle(color: UIData.blackOrWhite),
                 ),
               ),
@@ -125,18 +115,29 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
                   children: <Widget>[
                     Padding(
                       padding: EdgeInsets.only(top: 12),
-                      
                     ),
-                    SelectionCallbackExample.withSampleData(data, widget.user)
+                    SelectionCallbackExample.withSampleData(
+                        tournamentData, widget.user, true)
                   ],
                 ),
-              )
+              ),
+              SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(top: 12),
+                    ),
+                    SelectionCallbackExample.withSampleData(
+                        cashgameData, widget.user, false)
+                  ],
+                ),
+              ),
             ],
           ),
         ]),
         backgroundColor: UIData.dark,
       );
     else
-      return Scaffold(backgroundColor: UIData.dark, body: new Container());
+      return Essentials();
   }
 }
