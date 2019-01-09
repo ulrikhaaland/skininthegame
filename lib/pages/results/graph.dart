@@ -27,7 +27,6 @@ class _BlablaState extends State<Blabla> {
   List<ResultGame> tournament;
   List<ResultGame> cashgame;
 
-
   void getData() async {
     QuerySnapshot qSnap = await Firestore.instance
         .collection("users/${widget.user.id}/tournamentresults")
@@ -36,12 +35,28 @@ class _BlablaState extends State<Blabla> {
       ResultGame resultGame = ResultGame.fromMap(doc.data);
       tournament.add(resultGame);
     });
+    for (int i = 0; i < tournament.length; i++) {
+      List<ResultGame> tournament1 = new List();
+      tournament1.addAll(tournament);
+      tournament1.removeAt(i);
+      String date1 = tournament[i].date.year.toString() +
+          tournament[i].date.month.toString() +
+          tournament[i].date.day.toString();
+      for (int e = 0; e < tournament1.length; e++) {
+        String date2 = tournament1[e].date.year.toString() +
+            tournament1[e].date.month.toString() +
+            tournament1[e].date.day.toString();
+        if (date1 == date2) {
+          print("true");
+        }
+      }
+    }
     QuerySnapshot qSnap2 = await Firestore.instance
         .collection("users/${widget.user.id}/cashgameresults")
         .getDocuments();
-    qSnap.documents.forEach((DocumentSnapshot doc) {
+    qSnap2.documents.forEach((DocumentSnapshot doc) {
       ResultGame resultGame = ResultGame.fromMap(doc.data);
-      tournament.add(resultGame);
+      cashgame.add(resultGame);
     });
     // chart = new charts.Series<TimeSeriesSales, DateTime>(
     //   id: 'UK Sales',
@@ -63,7 +78,7 @@ class _BlablaState extends State<Blabla> {
         backgroundColor: Colors.white,
         body:
             // new Container()
-            SelectionCallbackExample.withSampleData(tournament, cashgame),
+            SelectionCallbackExample.withSampleData(tournament),
 
         // charts.Series<TimeSeriesSales, DateTime>(
         //   id: 'US Sales',

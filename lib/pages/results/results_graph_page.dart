@@ -24,12 +24,11 @@ class SelectionCallbackExample extends StatefulWidget {
   SelectionCallbackExample(this.seriesList, {this.animate});
 
   /// Creates a [charts.TimeSeriesChart] with sample data and no transition.
-  factory SelectionCallbackExample.withSampleData(
-      List<ResultGame> tournament, List<ResultGame> cashgame) {
+  factory SelectionCallbackExample.withSampleData(List<ResultGame> tournament) {
     return new SelectionCallbackExample(
-      _createSampleData(tournament, cashgame),
+      _createSampleData(tournament),
       // Disable animations for image tests.
-      animate: true,
+      animate: false,
     );
   }
 
@@ -40,7 +39,7 @@ class SelectionCallbackExample extends StatefulWidget {
 
   /// Create one series with sample hard coded data.
   static List<charts.Series<ResultGame, DateTime>> _createSampleData(
-      List<ResultGame> tournament, List<ResultGame> cashgame) {
+      List<ResultGame> tournament) {
     // final tournament = [
     //   new TimeSeriesSales(new DateTime(2017, 9, 19), 5),
     //   new TimeSeriesSales(new DateTime(2017, 9, 26), 25),
@@ -62,28 +61,28 @@ class SelectionCallbackExample extends StatefulWidget {
         measureFn: (ResultGame game, _) => int.tryParse(game.profit),
         data: tournament,
       ),
-      new charts.Series<ResultGame, DateTime>(
-        id: ' Sales',
-        domainFn: (ResultGame game, _) => game.date,
-        measureFn: (ResultGame game, _) => int.tryParse(game.profit),
-        data: cashgame,
-      ),
+      // new charts.Series<ResultGame, DateTime>(
+      //   id: ' Sales',
+      //   domainFn: (ResultGame game, _) => game.date,
+      //   measureFn: (ResultGame game, _) => int.tryParse(game.profit),
+      //   data: cashgame,
+      // ),
     ];
   }
 }
 
 class _SelectionCallbackState extends State<SelectionCallbackExample> {
   DateTime _time;
-  List<ResultGame> _measures;
+  Map<int, ResultGame> _measures;
 
-  // Listens to the underlying selection changes, and updates the information
+  // Mapens to the underlying selection changes, and updates the information
   // relevant to building the primitive legend like information under the
   // chart.
   _onSelectionChanged(charts.SelectionModel model) {
     final selectedDatum = model.selectedDatum;
 
     DateTime time;
-    final List<ResultGame> measures = new List();
+    final Map<int, ResultGame> measures = new Map();
 
     // We get the model that updated with a list of [SeriesDatum] which is
     // simply a pair of series & datum.
@@ -93,7 +92,7 @@ class _SelectionCallbackState extends State<SelectionCallbackExample> {
     if (selectedDatum.isNotEmpty) {
       time = selectedDatum.first.datum.date;
       selectedDatum.forEach((charts.SeriesDatum datumPair) {
-        measures.add(datumPair.datum);
+        measures[datumPair.index] = datumPair.datum;
       });
     }
 
@@ -113,6 +112,7 @@ class _SelectionCallbackState extends State<SelectionCallbackExample> {
           child: new charts.TimeSeriesChart(
             widget.seriesList,
             animate: widget.animate,
+            
             selectionModels: [
               new charts.SelectionModelConfig(
                 type: charts.SelectionModelType.info,
@@ -128,8 +128,8 @@ class _SelectionCallbackState extends State<SelectionCallbackExample> {
           padding: new EdgeInsets.only(top: 5.0),
           child: new Text(_time.toString())));
     }
-    _measures?.forEach((ResultGame game) {
-      children.add(new Text('${game.payout}: 20'));
+    _measures?.forEach((int, ResultGame game) {
+      children.add(new Text('${game.profit}: 20'));
     });
 
     return new Column(children: children);
