@@ -5,6 +5,7 @@ import 'package:yadda/utils/uidata.dart';
 import '../../new/new_post_page.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class FeedPage extends StatefulWidget {
   FeedPage({Key key, this.user, this.group}) : super(key: key);
@@ -15,11 +16,7 @@ class FeedPage extends StatefulWidget {
   FeedPageState createState() => FeedPageState();
 }
 
-enum FormType { normal, edit }
-
 class FeedPageState extends State<FeedPage> {
-  FormType _formType = FormType.normal;
-
   String groupName;
   String groupId;
   String currentUserId;
@@ -44,10 +41,9 @@ class FeedPageState extends State<FeedPage> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(color: UIData.blackOrWhite),
+          iconTheme: IconThemeData(color: UIData.blackOrWhite),
           backgroundColor: UIData.appBarColor,
           actions: <Widget>[
-            iconEdit(),
             iconAdd(),
           ],
           centerTitle: true,
@@ -64,7 +60,7 @@ class FeedPageState extends State<FeedPage> {
   }
 
   Widget iconAdd() {
-    if (widget.group.admin == true) {
+    if (widget.group.admin) {
       return new IconButton(
         icon: new Icon(Icons.add_circle_outline),
         iconSize: UIData.iconSizeAppBar,
@@ -81,98 +77,52 @@ class FeedPageState extends State<FeedPage> {
     }
   }
 
-  Widget iconEdit() {
-    if (widget.group.admin == true) {
-      return new IconButton(
-        icon: new Icon(Icons.edit),
-        iconSize: UIData.iconSizeAppBar,
-        onPressed: () {
-          if (_formType == FormType.normal) {
-            setState(() {
-              _formType = FormType.edit;
-            });
-          } else {
-            setState(() {
-              _formType = FormType.normal;
-            });
-          }
-        },
-      );
-    } else {
-      return new Text("");
-    }
-  }
-
   Widget _buildListItem(BuildContext context, DocumentSnapshot document) {
-    switch (_formType) {
-      case FormType.normal:
-        return new ListTile(
-          dense: true,
-          title: new Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              new Text(
-                "${document.data["name"]} ",
-                style: new TextStyle(color: UIData.blue, fontSize: 20.0),
-                overflow: TextOverflow.ellipsis,
-              ),
-              new Text(
-                "${document.data["dayofweek"]} ${document.data["time"]} ${document.data["date"]}",
-                overflow: TextOverflow.ellipsis,
-                style: new TextStyle(color: Colors.grey[600]),
-
-              )
-            ],
-          ),
-          contentPadding: EdgeInsets.all(10.0),
-          subtitle: new Text(
-            "${document.data["body"]}",
-            // overflow: TextOverflow.ellipsis,
-            style: new TextStyle(
-                color: UIData.blackOrWhite,
-                fontSize: UIData.fontSize16,
-                letterSpacing: .50),
-          ),
-        );
-
-      case FormType.edit:
-        return new ListTile(
-          trailing: new IconButton(
-              icon: new Icon(
-                Icons.delete,
-                size: 40.0,
-                color: UIData.red,
-              ),
-              onPressed: () {
-                Firestore.instance
-                    .document(
-                        "groups/${widget.group.id}/posts/${document.documentID}")
-                    .delete();
-              }),
-          dense: true,
-          title: new Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              new Text(
-                "${document.data["name"]}",
-                style: new TextStyle(color: UIData.blue, fontSize: 20.0),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-          contentPadding: EdgeInsets.all(10.0),
-          subtitle: new Text(
-            "${document.data["body"]}",
-            overflow: TextOverflow.ellipsis,
-            style: new TextStyle(
-                color: UIData.blackOrWhite,
-                fontSize: UIData.fontSize16,
-                letterSpacing: .50),
-          ),
-        );
-    }
+    return new Slidable(
+      enabled: widget.group.admin,
+      delegate: new SlidableDrawerDelegate(),
+      actionExtentRatio: 0.25,
+      child: new Container(
+          child: new ListTile(
+        dense: true,
+        title: new Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            new Text(
+              "${document.data["name"]} ",
+              style: new TextStyle(color: UIData.blue, fontSize: 20.0),
+              overflow: TextOverflow.ellipsis,
+            ),
+            new Text(
+              "${document.data["dayofweek"]} ${document.data["time"]} ${document.data["date"]}",
+              overflow: TextOverflow.ellipsis,
+              style: new TextStyle(color: Colors.grey[600]),
+            )
+          ],
+        ),
+        contentPadding: EdgeInsets.all(10.0),
+        subtitle: new Text(
+          "${document.data["body"]}",
+          // overflow: TextOverflow.ellipsis,
+          style: new TextStyle(
+              color: UIData.blackOrWhite,
+              fontSize: UIData.fontSize16,
+              letterSpacing: .50),
+        ),
+      )),
+      secondaryActions: <Widget>[
+        new IconSlideAction(
+          caption: 'Delete',
+          color: UIData.red,
+          icon: Icons.delete,
+          onTap: () => Firestore.instance
+              .document(
+                  "groups/${widget.group.id}/posts/${document.documentID}")
+              .delete(),
+        ),
+      ],
+    );
   }
 
   Widget streamOfPosts() {

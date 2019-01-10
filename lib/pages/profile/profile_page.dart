@@ -83,7 +83,7 @@ class ProfilePageState extends State<ProfilePage>
           docSnap.data["following"],
           docSnap.data["followers"],
           null,
-          await ProfilePicture().getDownloadUrl(docSnap.data["id"]),
+          docSnap.data["profilepicurl"],
         );
         setState(() {
           userFound = true;

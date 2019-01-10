@@ -75,8 +75,19 @@ class ResultGame {
 }
 
 class ResultGameTotal {
-  ResultGameTotal(this.gameCount, this.totalProfit, this.itm);
+  ResultGameTotal(
+      this.gameCount,
+      this.totalProfit,
+      this.itm,
+      this.winningSessions,
+      this.averageProfit,
+      this.winningSessionsPercentage,
+      this.averageBuyin);
   int gameCount;
-  int totalProfit;
+  double averageProfit;
+  double totalProfit;
   double itm;
+  int winningSessions;
+  double winningSessionsPercentage;
+  double averageBuyin;
 }

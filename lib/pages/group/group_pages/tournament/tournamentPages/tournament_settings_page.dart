@@ -724,17 +724,10 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
         new FlatButton(
           onPressed: () async {
             Navigator.pop(context);
-
             setState(() {
               isLoading = true;
             });
-
-            await Delete()
-                .deleteCollection("$pathToTournament/activeplayers", 5);
-            await Delete().deleteCollection("$pathToTournament/players", 5);
-            await Delete().deleteCollection("$pathToTournament/posts", 5);
-            await Delete().deleteCollection("$pathToTournament/log", 5);
-            await firestoreInstance.document(pathToTournament).delete();
+            await Delete().deleteGame(pathToTournament);
             Navigator.of(context)..pop()..pop();
           },
           child: new Text(

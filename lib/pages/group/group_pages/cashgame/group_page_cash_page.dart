@@ -9,6 +9,8 @@ import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/groupLeft.dart';
 import 'package:yadda/pages/inAppPurchase/consumeable.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:yadda/utils/delete.dart';
 
 class GroupCashGames extends StatefulWidget {
   const GroupCashGames({
@@ -154,59 +156,82 @@ class GroupCashGamesState extends State<GroupCashGames>
 
   Widget _activeTournamentList(
       BuildContext context, DocumentSnapshot document) {
-         String isRunning = "${document.data["date"]} - ${document.data["time"]}";
+    String isRunning = "${document.data["date"]} - ${document.data["time"]}";
     Color color = UIData.blackOrWhite;
     if (document.data["isrunning"] == true) {
       isRunning = "Running";
       color = UIData.red;
     }
-    return ListTile(
-      contentPadding: EdgeInsets.all(3.0),
-      leading: new Icon(
-        Icons.attach_money,
-        color: UIData.green,
-        size: 40.0,
-      ),
-      title: new Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          new Text(
-            "${document.data["fittedname"]}",
-            textAlign: TextAlign.start,
-            style: new TextStyle(color: UIData.blackOrWhite),
+    bool enabled = true;
+    return new Slidable(
+      enabled: widget.group.admin,
+      delegate: new SlidableDrawerDelegate(),
+      actionExtentRatio: 0.25,
+      child: new Container(
+        child: ListTile(
+          enabled: enabled,
+          contentPadding: EdgeInsets.all(3.0),
+          leading: new Icon(
+            Icons.attach_money,
+            color: UIData.green,
+            size: 40.0,
           ),
-          new Text(
-            isRunning,
-            style: new TextStyle(color: color),
-          )
-        ],
-      ),
-      subtitle: new Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          new Text(
-            "Blinds: ${document.data["sblind"]}/${document.data["bblind"]}",
-            textAlign: TextAlign.start,
-            style: new TextStyle(color: UIData.blackOrWhite),
+          title: new Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              new Text(
+                "${document.data["fittedname"]}",
+                textAlign: TextAlign.start,
+                style: new TextStyle(color: UIData.blackOrWhite),
+              ),
+              new Text(
+                isRunning,
+                style: new TextStyle(color: color),
+              )
+            ],
           ),
-          new Text(
-            "Players: ${document.data["registeredplayers"]}/${document.data["maxplayers"]}",
-            style: new TextStyle(color: UIData.blackOrWhite),
+          subtitle: new Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              new Text(
+                "Blinds: ${document.data["sblind"]}/${document.data["bblind"]}",
+                textAlign: TextAlign.start,
+                style: new TextStyle(color: UIData.blackOrWhite),
+              ),
+              new Text(
+                "Players: ${document.data["registeredplayers"]}/${document.data["maxplayers"]}",
+                style: new TextStyle(color: UIData.blackOrWhite),
+              ),
+            ],
           ),
-        ],
+          onTap: () {
+            gameId = document.documentID;
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => CashGamePage(
+                        user: widget.user,
+                        group: widget.group,
+                        gameId: gameId,
+                      )),
+            );
+          },
+        ),
       ),
-      onTap: () {
-        gameId = document.documentID;
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => CashGamePage(
-                    user: widget.user,
-                    group: widget.group,
-                    gameId: gameId,
-                  )),
-        );
-      },
+      secondaryActions: <Widget>[
+        new IconSlideAction(
+            caption: 'Delete',
+            color: UIData.red,
+            icon: Icons.delete,
+            onTap: () {
+              setState(() {
+                enabled = false;
+              });
+              Delete().deleteGame(
+                  "groups/${widget.group.id}/games/type/cashgameactive/${document.data["id"]}",
+                  true);
+            }),
+      ],
     );
   }
 
@@ -229,54 +254,77 @@ class GroupCashGamesState extends State<GroupCashGames>
 
   Widget _historyTournamentList(
       BuildContext context, DocumentSnapshot document) {
-    return ListTile(
-      contentPadding: EdgeInsets.all(3.0),
-      leading: new Icon(
-        Icons.attach_money,
-        color: UIData.green,
-        size: 40.0,
-      ),
-      title: new Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          new Text(
-            "${document.data["fittedname"]}",
-            textAlign: TextAlign.start,
-            style: new TextStyle(color: UIData.blackOrWhite),
+    bool enabled = true;
+    return new Slidable(
+      enabled: widget.group.admin,
+      delegate: new SlidableDrawerDelegate(),
+      actionExtentRatio: 0.25,
+      child: new Container(
+        child: ListTile(
+          enabled: enabled,
+          contentPadding: EdgeInsets.all(3.0),
+          leading: new Icon(
+            Icons.attach_money,
+            color: UIData.green,
+            size: 40.0,
           ),
-          new Text(
-            "${document.data["date"]} - ${document.data["time"]}",
-            style: new TextStyle(color: UIData.blackOrWhite),
-          )
-        ],
-      ),
-      subtitle: new Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          new Text(
-            "Buyin: ",
-            textAlign: TextAlign.start,
-            style: new TextStyle(color: UIData.blackOrWhite),
+          title: new Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              new Text(
+                "${document.data["fittedname"]}",
+                textAlign: TextAlign.start,
+                style: new TextStyle(color: UIData.blackOrWhite),
+              ),
+              new Text(
+                "${document.data["date"]} - ${document.data["time"]}",
+                style: new TextStyle(color: UIData.blackOrWhite),
+              )
+            ],
           ),
-          new Text(
-            "Players: ${document.data["registeredplayers"]}/${document.data["maxplayers"]}",
-            style: new TextStyle(color: UIData.blackOrWhite),
+          subtitle: new Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              new Text(
+                "Buyin: ",
+                textAlign: TextAlign.start,
+                style: new TextStyle(color: UIData.blackOrWhite),
+              ),
+              new Text(
+                "Players: ${document.data["registeredplayers"]}/${document.data["maxplayers"]}",
+                style: new TextStyle(color: UIData.blackOrWhite),
+              ),
+            ],
           ),
-        ],
+          onTap: () {
+            gameId = document.documentID;
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => CashGamePage(
+                        history: true,
+                        user: widget.user,
+                        group: widget.group,
+                        gameId: gameId,
+                      )),
+            );
+          },
+        ),
       ),
-      onTap: () {
-        gameId = document.documentID;
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => CashGamePage(
-                    history: true,
-                    user: widget.user,
-                    group: widget.group,
-                    gameId: gameId,
-                  )),
-        );
-      },
+      secondaryActions: <Widget>[
+        new IconSlideAction(
+            caption: 'Delete',
+            color: UIData.red,
+            icon: Icons.delete,
+            onTap: () {
+              setState(() {
+                enabled = false;
+              });
+              Delete().deleteGame(
+                  "groups/${widget.group.id}/games/type/cashgamehistory/${document.data["id"]}",
+                  true);
+            }),
+      ],
     );
   }
 

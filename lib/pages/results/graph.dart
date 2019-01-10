@@ -27,7 +27,7 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
     tournamentResults = new List();
     cashgameResults = new List();
 
-    _tabController = new TabController(vsync: this, length: 2);
+    _tabController = new TabController(vsync: this, length: 3);
 
     getData();
   }
@@ -36,6 +36,8 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
   List<ResultGame> tournamentResults;
   charts.Series<ResultGame, DateTime> cashgameData;
   List<ResultGame> cashgameResults;
+  ResultGameTotal cashResultGameTotal;
+  ResultGameTotal tournamentResultGameTotal;
 
   void getData() async {
     QuerySnapshot cSnap = await Firestore.instance
@@ -45,14 +47,26 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
       ResultGame resultGame = ResultGame.fromMap(doc.data);
       cashgameResults.add(resultGame);
     });
-    ResultGameTotal resultGameTotal = new ResultGameTotal(0, 0, 0);
+    cashResultGameTotal = new ResultGameTotal(0, 0, 0, 0, 0, 0, 0);
     for (int i = 0; i < cashgameResults.length; i++) {
-      resultGameTotal.totalProfit += int.tryParse(cashgameResults[i].profit);
+      if (!int.tryParse(cashgameResults[i].profit).isNegative) {
+        cashResultGameTotal.winningSessions += 1;
+      }
+
+      cashResultGameTotal.averageBuyin += cashgameResults[i].buyin.toDouble();
+
+      cashResultGameTotal.totalProfit +=
+          int.tryParse(cashgameResults[i].profit);
       if (i == cashgameResults.length - 1) {
-        double s = resultGameTotal.totalProfit / cashgameResults.length;
-        resultGameTotal.totalProfit = s.round();
+        cashResultGameTotal.averageProfit =
+            cashResultGameTotal.totalProfit / cashgameResults.length;
+        cashResultGameTotal.winningSessionsPercentage =
+            cashResultGameTotal.winningSessions / cashgameResults.length;
+        cashResultGameTotal.averageBuyin =
+            cashResultGameTotal.averageBuyin / cashgameResults.length;
       }
     }
+    cashResultGameTotal.gameCount = cashgameResults.length + 1;
 
     cashgameResults.sort((a, b) => a.date.compareTo(b.date));
     cashgameData = charts.Series<ResultGame, DateTime>(
@@ -69,6 +83,34 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
       ResultGame resultGame = ResultGame.fromMap(doc.data);
       tournamentResults.add(resultGame);
     });
+    tournamentResultGameTotal = new ResultGameTotal(0, 0, 0, 0, 0, 0, 0);
+    for (int i = 0; i < tournamentResults.length; i++) {
+      if (int.tryParse(tournamentResults[i].payout) > 0) {
+        tournamentResultGameTotal.itm += 1;
+      }
+      if (!int.tryParse(tournamentResults[i].profit).isNegative) {
+        tournamentResultGameTotal.winningSessions += 1;
+      }
+
+      tournamentResultGameTotal.averageBuyin +=
+          tournamentResults[i].buyin.toDouble();
+
+      tournamentResultGameTotal.totalProfit +=
+          int.tryParse(tournamentResults[i].profit);
+      if (i == tournamentResults.length - 1) {
+        tournamentResultGameTotal.averageProfit =
+            tournamentResultGameTotal.totalProfit / tournamentResults.length;
+        tournamentResultGameTotal.winningSessionsPercentage =
+            tournamentResultGameTotal.winningSessions /
+                tournamentResults.length;
+        tournamentResultGameTotal.itm =
+            tournamentResultGameTotal.itm / tournamentResults.length;
+        tournamentResultGameTotal.averageBuyin =
+            tournamentResultGameTotal.averageBuyin / tournamentResults.length;
+      }
+    }
+    tournamentResultGameTotal.gameCount = cashgameResults.length + 1;
+
     tournamentResults.sort((a, b) => a.date.compareTo(b.date));
     tournamentData = charts.Series<ResultGame, DateTime>(
       colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
@@ -111,6 +153,12 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
                   style: new TextStyle(color: UIData.blackOrWhite),
                 ),
               ),
+              Tab(
+                child: Text(
+                  "Statistics",
+                  style: new TextStyle(color: UIData.blackOrWhite),
+                ),
+              ),
             ],
           ),
         ),
@@ -141,6 +189,14 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
                   ],
                 ),
               ),
+              SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: new Column(
+                    children: data(),
+                  ),
+                ),
+              ),
             ],
           ),
         ]),
@@ -148,5 +204,241 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
       );
     else
       return Essentials();
+  }
+
+  List<Widget> data() {
+    List<Widget> list = new List<Widget>();
+
+    if (tournamentResults != null) {
+      list.add(new Align(
+        alignment: Alignment.center,
+        child: new Text(
+          "Tournaments",
+          style: new TextStyle(
+              color: UIData.blackOrWhite, fontSize: UIData.fontSize24),
+        ),
+      ));
+      list.add(new Container(
+        height: 14,
+      ));
+    }
+    if (tournamentResultGameTotal.gameCount != null) {
+      list.add(
+        new Align(
+            alignment: Alignment.centerLeft,
+            child: new Text(
+              "Count: ${tournamentResultGameTotal.gameCount}",
+              style: new TextStyle(
+                color: UIData.blackOrWhite,
+                fontSize: UIData.fontSize16,
+              ),
+            )),
+      );
+    }
+
+    if (tournamentResultGameTotal.itm != null) {
+      list.add(
+        new Align(
+            alignment: Alignment.centerLeft,
+            child: new Text(
+              "ITM: ${tournamentResultGameTotal.itm * 100}%",
+              style: new TextStyle(
+                color: UIData.blackOrWhite,
+                fontSize: UIData.fontSize16,
+              ),
+            )),
+      );
+    }
+
+    if (tournamentResultGameTotal.totalProfit != null) {
+      list.add(
+        new Align(
+            alignment: Alignment.centerLeft,
+            child: new Text(
+              "Total profit: ${tournamentResultGameTotal.totalProfit}",
+              style: new TextStyle(
+                color: UIData.blackOrWhite,
+                fontSize: UIData.fontSize16,
+              ),
+            )),
+      );
+    }
+
+    if (tournamentResultGameTotal.averageProfit != null) {
+      list.add(
+        new Align(
+            alignment: Alignment.centerLeft,
+            child: new Text(
+              "Average profit: ${tournamentResultGameTotal.averageProfit}",
+              style: new TextStyle(
+                color: UIData.blackOrWhite,
+                fontSize: UIData.fontSize16,
+              ),
+            )),
+      );
+    }
+
+    if (tournamentResultGameTotal.averageBuyin != null) {
+      list.add(
+        new Align(
+            alignment: Alignment.centerLeft,
+            child: new Text(
+              "Average buyin: ${tournamentResultGameTotal.averageBuyin}",
+              style: new TextStyle(
+                color: UIData.blackOrWhite,
+                fontSize: UIData.fontSize16,
+              ),
+            )),
+      );
+    }
+
+    if (tournamentResultGameTotal.winningSessions != null) {
+      list.add(
+        new Align(
+            alignment: Alignment.centerLeft,
+            child: new Text(
+              "Winning sessions: ${tournamentResultGameTotal.winningSessions}",
+              style: new TextStyle(
+                color: UIData.blackOrWhite,
+                fontSize: UIData.fontSize16,
+              ),
+            )),
+      );
+    }
+
+    if (tournamentResultGameTotal.winningSessions != null) {
+      int loosing = tournamentResultGameTotal.winningSessions -
+          tournamentResultGameTotal.gameCount;
+      list.add(
+        new Align(
+            alignment: Alignment.centerLeft,
+            child: new Text(
+              "Loosing sessions: ${loosing}",
+              style: new TextStyle(
+                color: UIData.blackOrWhite,
+                fontSize: UIData.fontSize16,
+              ),
+            )),
+      );
+    }
+
+    list.add(new Container(
+      height: 44,
+    ));
+
+    if (cashgameResults != null) {
+      list.add(new Align(
+        alignment: Alignment.center,
+        child: new Text(
+          "Cash Games",
+          style: new TextStyle(
+              color: UIData.blackOrWhite, fontSize: UIData.fontSize24),
+        ),
+      ));
+      list.add(new Container(
+        height: 14,
+      ));
+    }
+    if (cashResultGameTotal.gameCount != null) {
+      list.add(
+        new Align(
+            alignment: Alignment.centerLeft,
+            child: new Text(
+              "Count: ${cashResultGameTotal.gameCount}",
+              style: new TextStyle(
+                color: UIData.blackOrWhite,
+                fontSize: UIData.fontSize16,
+              ),
+            )),
+      );
+    }
+
+    if (cashResultGameTotal.winningSessionsPercentage != null) {
+      list.add(
+        new Align(
+            alignment: Alignment.centerLeft,
+            child: new Text(
+              "Win%: ${cashResultGameTotal.winningSessionsPercentage * 100}%",
+              style: new TextStyle(
+                color: UIData.blackOrWhite,
+                fontSize: UIData.fontSize16,
+              ),
+            )),
+      );
+    }
+
+    if (cashResultGameTotal.totalProfit != null) {
+      list.add(
+        new Align(
+            alignment: Alignment.centerLeft,
+            child: new Text(
+              "Total profit: ${cashResultGameTotal.totalProfit}",
+              style: new TextStyle(
+                color: UIData.blackOrWhite,
+                fontSize: UIData.fontSize16,
+              ),
+            )),
+      );
+    }
+
+    if (cashResultGameTotal.averageProfit != null) {
+      list.add(
+        new Align(
+            alignment: Alignment.centerLeft,
+            child: new Text(
+              "Average profit: ${cashResultGameTotal.averageProfit}",
+              style: new TextStyle(
+                color: UIData.blackOrWhite,
+                fontSize: UIData.fontSize16,
+              ),
+            )),
+      );
+    }
+
+    if (cashResultGameTotal.averageBuyin != null) {
+      list.add(
+        new Align(
+            alignment: Alignment.centerLeft,
+            child: new Text(
+              "Average buyin: ${cashResultGameTotal.averageBuyin}",
+              style: new TextStyle(
+                color: UIData.blackOrWhite,
+                fontSize: UIData.fontSize16,
+              ),
+            )),
+      );
+    }
+
+    if (cashResultGameTotal.winningSessions != null) {
+      list.add(
+        new Align(
+            alignment: Alignment.centerLeft,
+            child: new Text(
+              "Winning sessions: ${cashResultGameTotal.winningSessions}",
+              style: new TextStyle(
+                color: UIData.blackOrWhite,
+                fontSize: UIData.fontSize16,
+              ),
+            )),
+      );
+    }
+
+    if (cashResultGameTotal.winningSessions != null) {
+      int loosing =
+          cashResultGameTotal.gameCount - cashResultGameTotal.winningSessions;
+      list.add(
+        new Align(
+            alignment: Alignment.centerLeft,
+            child: new Text(
+              "Loosing sessions: $loosing",
+              style: new TextStyle(
+                color: UIData.blackOrWhite,
+                fontSize: UIData.fontSize16,
+              ),
+            )),
+      );
+    }
+
+    return list;
   }
 }

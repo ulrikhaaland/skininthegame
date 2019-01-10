@@ -9,7 +9,8 @@ import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/groupLeft.dart';
 import 'package:yadda/pages/inAppPurchase/consumeable.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:yadda/utils/delete.dart';
 
 class GroupTournaments extends StatefulWidget {
   const GroupTournaments({
@@ -121,7 +122,7 @@ class GroupTournamentsState extends State<GroupTournaments>
   }
 
   Widget plussButton() {
-    if (widget.group.admin == true) {
+    if (widget.group.admin) {
       return new IconButton(
           icon: new Icon(
             Icons.add_circle_outline,
@@ -131,7 +132,7 @@ class GroupTournamentsState extends State<GroupTournaments>
           onPressed: () async {
             var allowed = await GroupLeft()
                 .checkAmountLeft(widget.group.id, "tournamentsleft");
-            if (allowed == true) {
+            if (allowed) {
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -141,7 +142,7 @@ class GroupTournamentsState extends State<GroupTournaments>
                           fromTournamentGroupPage: fromTournamentGroupPage,
                         )),
               );
-            } else if (allowed == false) {
+            } else if (!allowed) {
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -172,54 +173,76 @@ class GroupTournamentsState extends State<GroupTournaments>
       isRunning = "Running";
       color = UIData.red;
     }
-    return ListTile(
-      contentPadding: EdgeInsets.all(3.0),
-      leading: new Icon(
-        Icons.whatshot,
-        color:
-            Color.lerp(Colors.green, Colors.red, document.data["buyin"] / 1000),
-        size: 40.0,
-      ),
-      title: new Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          new Text(
-            "${document.data["fittedname"]}",
-            textAlign: TextAlign.start,
-            style: new TextStyle(color: UIData.blackOrWhite),
+    bool enabled = true;
+    return new Slidable(
+      enabled: widget.group.admin,
+      delegate: new SlidableDrawerDelegate(),
+      actionExtentRatio: 0.25,
+      child: new Container(
+        child: ListTile(
+          enabled: enabled,
+          contentPadding: EdgeInsets.all(3.0),
+          leading: new Icon(
+            Icons.whatshot,
+            color: Color.lerp(
+                Colors.green, Colors.red, document.data["buyin"] / 1000),
+            size: 40.0,
           ),
-          new Text(
-            isRunning,
-            style: new TextStyle(color: color),
-          )
-        ],
-      ),
-      subtitle: new Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          new Text(
-            "Buyin: ${document.data["buyin"]}",
-            textAlign: TextAlign.start,
-            style: new TextStyle(color: UIData.blackOrWhite),
+          title: new Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              new Text(
+                "${document.data["fittedname"]}",
+                textAlign: TextAlign.start,
+                style: new TextStyle(color: UIData.blackOrWhite),
+              ),
+              new Text(
+                isRunning,
+                style: new TextStyle(color: color),
+              )
+            ],
           ),
-          new Text(
-            "Players: ${document.data["registeredplayers"]}/${document.data["maxplayers"]}",
-            style: new TextStyle(color: UIData.blackOrWhite),
+          subtitle: new Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              new Text(
+                "Buyin: ${document.data["buyin"]}",
+                textAlign: TextAlign.start,
+                style: new TextStyle(color: UIData.blackOrWhite),
+              ),
+              new Text(
+                "Players: ${document.data["registeredplayers"]}/${document.data["maxplayers"]}",
+                style: new TextStyle(color: UIData.blackOrWhite),
+              ),
+            ],
           ),
-        ],
+          onTap: () {
+            gameId = document.documentID;
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => TournamentPage(
+                        user: widget.user,
+                        group: widget.group,
+                        gameId: gameId,
+                      )),
+            );
+          },
+        ),
       ),
-      onTap: () {
-        gameId = document.documentID;
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => TournamentPage(
-                    user: widget.user,
-                    group: widget.group,
-                    gameId: gameId,
-                  )),
-        );
-      },
+      secondaryActions: <Widget>[
+        new IconSlideAction(
+            caption: 'Delete',
+            color: UIData.red,
+            icon: Icons.delete,
+            onTap: () {
+              setState(() {
+                enabled = false;
+              });
+              Delete().deleteGame(
+                  "groups/${widget.group.id}/games/type/tournamentactive/${document.data["id"]}");
+            }),
+      ],
     );
   }
 
@@ -242,55 +265,77 @@ class GroupTournamentsState extends State<GroupTournaments>
 
   Widget _historyTournamentList(
       BuildContext context, DocumentSnapshot document) {
-    return ListTile(
-      contentPadding: EdgeInsets.all(3.0),
-      leading: new Icon(
-        Icons.whatshot,
-        color:
-            Color.lerp(Colors.green, Colors.red, document.data["buyin"] / 1000),
-        size: 40.0,
-      ),
-      title: new Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          new Text(
-            "${document.data["fittedname"]}",
-            textAlign: TextAlign.start,
-            style: new TextStyle(color: UIData.blackOrWhite),
+    bool enabled = true;
+    return new Slidable(
+      enabled: widget.group.admin,
+      delegate: new SlidableDrawerDelegate(),
+      actionExtentRatio: 0.25,
+      child: new Container(
+        child: ListTile(
+          enabled: enabled,
+          contentPadding: EdgeInsets.all(3.0),
+          leading: new Icon(
+            Icons.whatshot,
+            color: Color.lerp(
+                Colors.green, Colors.red, document.data["buyin"] / 1000),
+            size: 40.0,
           ),
-          new Text(
-            "${document.data["date"]} - ${document.data["time"]}",
-            style: new TextStyle(color: UIData.blackOrWhite),
-          )
-        ],
-      ),
-      subtitle: new Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          new Text(
-            "Buyin: ${document.data["buyin"]}",
-            textAlign: TextAlign.start,
-            style: new TextStyle(color: UIData.blackOrWhite),
+          title: new Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              new Text(
+                "${document.data["fittedname"]}",
+                textAlign: TextAlign.start,
+                style: new TextStyle(color: UIData.blackOrWhite),
+              ),
+              new Text(
+                "${document.data["date"]} - ${document.data["time"]}",
+                style: new TextStyle(color: UIData.blackOrWhite),
+              )
+            ],
           ),
-          new Text(
-            "Players: ${document.data["registeredplayers"]}/${document.data["maxplayers"]}",
-            style: new TextStyle(color: UIData.blackOrWhite),
+          subtitle: new Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              new Text(
+                "Buyin: ${document.data["buyin"]}",
+                textAlign: TextAlign.start,
+                style: new TextStyle(color: UIData.blackOrWhite),
+              ),
+              new Text(
+                "Players: ${document.data["registeredplayers"]}/${document.data["maxplayers"]}",
+                style: new TextStyle(color: UIData.blackOrWhite),
+              ),
+            ],
           ),
-        ],
+          onTap: () {
+            gameId = document.documentID;
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => TournamentPage(
+                        history: true,
+                        user: widget.user,
+                        group: widget.group,
+                        gameId: gameId,
+                      )),
+            );
+          },
+        ),
       ),
-      onTap: () {
-        gameId = document.documentID;
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => TournamentPage(
-                    history: true,
-                    user: widget.user,
-                    group: widget.group,
-                    gameId: gameId,
-                  )),
-        );
-      },
+      secondaryActions: <Widget>[
+        new IconSlideAction(
+            caption: 'Delete',
+            color: UIData.red,
+            icon: Icons.delete,
+            onTap: () {
+              setState(() {
+                enabled = false;
+              });
+              Delete().deleteGame(
+                  "groups/${widget.group.id}/games/type/tournamenthistory/${document.data["id"]}");
+            }),
+      ],
     );
   }
 

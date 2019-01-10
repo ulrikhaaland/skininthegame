@@ -589,7 +589,7 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
         qSnap.documents.forEach((DocumentSnapshot doc) {
           String i = doc.data["payout"];
           int payout = int.tryParse(i);
-           
+
           int buyin = doc.data["buyin"];
           int result = payout - buyin;
           bool isNegative;
@@ -917,12 +917,7 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
             setState(() {
               isLoading = true;
             });
-            Delete().deleteCollection("$pathToCashGame/activeplayers", 5);
-            Delete().deleteCollection("$pathToCashGame/players", 5);
-            Delete().deleteCollection("$pathToCashGame/queue", 5);
-            Delete().deleteCollection("$pathToCashGame/posts", 5);
-            Delete().deleteCollection("$pathToCashGame/log", 5);
-            await firestoreInstance.document(pathToCashGame).delete();
+            Delete().deleteGame(pathToCashGame, true);
             Navigator.of(context)..pop()..pop();
           },
           child: new Text(

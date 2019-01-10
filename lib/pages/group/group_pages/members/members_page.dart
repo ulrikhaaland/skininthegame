@@ -5,7 +5,7 @@ import 'package:yadda/utils/uidata.dart';
 import 'package:yadda/pages/userSearch/search.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/pages/user_profile/profile_page_alt.dart';
-
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:yadda/pages/profile/profile_page.dart';
 import 'package:yadda/objects/group.dart';
 
@@ -147,37 +147,74 @@ class MembersPageState extends State<MembersPage> {
   }
 
   Widget _buildListItem(BuildContext context, DocumentSnapshot document) {
-    return new ListTile(
-      title: new Text(
-        document.data["username"],
-        style: new TextStyle(color: UIData.blackOrWhite),
-        overflow: TextOverflow.ellipsis,
+    bool isAdmin = document.data["admin"];
+    IconData adminIcon;
+    String adminString;
+    if (isAdmin) {
+      adminIcon = Icons.lock_open;
+      adminString = "Withdraw admin";
+    } else {
+      adminIcon = Icons.lock_outline;
+      adminString = "Make admin";
+    }
+    bool enabled;
+    if (document.documentID == widget.user.id) {
+      enabled = false;
+    } else {
+      enabled = widget.group.admin;
+    }
+    return new Slidable(
+      enabled: enabled,
+      delegate: new SlidableDrawerDelegate(),
+      actionExtentRatio: 0.25,
+      child: new Container(
+        child: new ListTile(
+          title: new Text(
+            document.data["username"],
+            style: new TextStyle(color: UIData.blackOrWhite),
+            overflow: TextOverflow.ellipsis,
+          ),
+          onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ProfilePage(
+                          user: widget.user,
+                          profileId: document.data["uid"],
+                        )),
+              ),
+        ),
       ),
-      onTap: () {
-        if (widget.group.admin == true &&
-            document.data["uid"] != widget.group.host) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ProfilePageAlt(
-                      user: widget.user,
-                      profileUserName: document.data["username"],
-                      profileUserId: document.data["uid"],
-                      profileUserIsAdmin: document.data["admin"],
-                      group: widget.group,
-                    )),
-          );
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ProfilePage(
-                      user: widget.user,
-                      profileId: document.data["uid"],
-                    )),
-          );
-        }
-      },
+      secondaryActions: <Widget>[
+        new IconSlideAction(
+            caption: adminString,
+            color: UIData.yellow,
+            icon: adminIcon,
+            onTap: () {
+              setState(() {
+                isAdmin = !isAdmin;
+              });
+              Firestore.instance
+                  .document(
+                      "groups/${widget.group.id}/members/${document.documentID}")
+                  .updateData({
+                "admin": isAdmin,
+              });
+            }),
+        new IconSlideAction(
+            caption: 'Remove',
+            color: UIData.red,
+            icon: Icons.delete,
+            onTap: () {
+              Firestore.instance
+                  .document(
+                      "groups/${widget.group.id}/members/${document.documentID}")
+                  .delete();
+              Firestore.instance
+                  .document(
+                      "users/${document.documentID}/groups/${widget.group.id}")
+                  .delete();
+            }),
+      ],
     );
   }
 
@@ -199,28 +236,74 @@ class MembersPageState extends State<MembersPage> {
   }
 
   Widget buildSearch(BuildContext context, DocumentSnapshot document) {
-    return new ListTile(
-      title: new Text(
-        document.data["username"],
-        style: new TextStyle(color: UIData.blackOrWhite),
-        overflow: TextOverflow.ellipsis,
+    bool isAdmin = document.data["admin"];
+    IconData adminIcon;
+    String adminString;
+    if (isAdmin) {
+      adminIcon = Icons.lock_open;
+      adminString = "Withdraw admin";
+    } else {
+      adminIcon = Icons.lock_outline;
+      adminString = "Make admin";
+    }
+    bool enabled;
+    if (document.documentID == widget.user.id) {
+      enabled = false;
+    } else {
+      enabled = widget.group.admin;
+    }
+    return new Slidable(
+      enabled: enabled,
+      delegate: new SlidableDrawerDelegate(),
+      actionExtentRatio: 0.25,
+      child: new Container(
+        child: new ListTile(
+          title: new Text(
+            document.data["username"],
+            style: new TextStyle(color: UIData.blackOrWhite),
+            overflow: TextOverflow.ellipsis,
+          ),
+          onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ProfilePage(
+                          user: widget.user,
+                          profileId: document.data["uid"],
+                        )),
+              ),
+        ),
       ),
-      onTap: () {
-        if (widget.group.admin == true &&
-            document.data["uid"] != widget.group.host) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ProfilePageAlt(
-                      user: widget.user,
-                      profileUserName: document.data["username"],
-                      profileUserId: document.data["uid"],
-                      profileUserIsAdmin: document.data["admin"],
-                      group: widget.group,
-                    )),
-          );
-        } else {}
-      },
+      secondaryActions: <Widget>[
+        new IconSlideAction(
+            caption: adminString,
+            color: UIData.yellow,
+            icon: adminIcon,
+            onTap: () {
+              setState(() {
+                isAdmin = !isAdmin;
+              });
+              Firestore.instance
+                  .document(
+                      "groups/${widget.group.id}/members/${document.documentID}")
+                  .updateData({
+                "admin": isAdmin,
+              });
+            }),
+        new IconSlideAction(
+            caption: 'Remove',
+            color: UIData.red,
+            icon: Icons.delete,
+            onTap: () {
+              Firestore.instance
+                  .document(
+                      "groups/${widget.group.id}/members/${document.documentID}")
+                  .delete();
+              Firestore.instance
+                  .document(
+                      "users/${document.documentID}/groups/${widget.group.id}")
+                  .delete();
+            }),
+      ],
     );
   }
 

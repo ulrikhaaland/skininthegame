@@ -40,6 +40,18 @@ class Delete {
     return true;
   }
 
+  Future<bool> deleteGame(String path, bool cash) async {
+    await deleteCollection("$path/activeplayers", 5);
+    await deleteCollection("$path/players", 5);
+    if (cash) {
+      deleteCollection("$path/queue", 5);
+    }
+    await deleteCollection("$path/posts", 5);
+    await deleteCollection("$path/log", 5);
+    await firestoreInstance.document(path).delete();
+    return true;
+  }
+
   deleteAllGroupGames(String groupId) async {
     for (int c = 0; c <= 3; c++) {
       String collectionType;

@@ -64,9 +64,9 @@ class LoginState extends State<Login> {
           title: new Text(
             "Skin In The Game",
             style: new TextStyle(
-                color: UIData.yellow, fontSize: UIData.fontSize24),
+                color: UIData.blackOrWhite, fontSize: UIData.fontSize24),
           ),
-          backgroundColor: UIData.darkest,
+          backgroundColor: UIData.appBarColor,
         ),
         backgroundColor: UIData.darkest,
         body: new Stack(
@@ -136,8 +136,8 @@ class LoginState extends State<Login> {
   }
 
   void saveUserData() {
-    User user = new User(
-        _email, uid, _username, widget.messagingToken, "", true, true, 0, 0, false, null);
+    User user = new User(_email, uid, _username, widget.messagingToken, "",
+        true, true, 0, 0, false, null);
     DocumentReference docRef = Firestore.instance.document("users/$uid");
     Firestore.instance.runTransaction((Transaction tx) async {
       await docRef.setData(user.toJson());
@@ -265,7 +265,6 @@ class LoginState extends State<Login> {
               onSaved: (val) => _email = val.trim().toLowerCase(),
             )),
           ),
-
           new ListTile(
             title: padded(
                 child: new TextFormField(
@@ -390,7 +389,9 @@ class LoginState extends State<Login> {
     switch (_formType) {
       case FormType.login:
         return [
-          padded(),
+          Padding(
+            padding: EdgeInsets.only(top: 8),
+          ),
           new PrimaryButton(
               key: new Key('login'),
               text: 'Login',
@@ -419,6 +420,9 @@ class LoginState extends State<Login> {
         ];
       case FormType.register:
         return [
+          Padding(
+            padding: EdgeInsets.only(top: 8),
+          ),
           new PrimaryButton(
             key: new Key('createaccount'),
             text: 'Create an account',
@@ -443,6 +447,9 @@ class LoginState extends State<Login> {
         ];
       case FormType.forgotPassword:
         return [
+          Padding(
+            padding: EdgeInsets.only(top: 8),
+          ),
           new PrimaryButton(
             key: new Key('reset'),
             text: 'Reset password',
