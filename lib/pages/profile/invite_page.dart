@@ -57,7 +57,6 @@ class UserPageInvitesState extends State<UserPageInvites> {
             contentPadding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
             leading:
                 new Icon(Icons.notifications, color: UIData.green, size: 40.0),
-                subtitle: new Text("blablalsdl alsd"),
             title: Text(
                 'You have recieved a new group invite from ${document.data["sendername"]} to join group "${document.data["groupname"]}".',
                 style: new TextStyle(color: UIData.blackOrWhite),

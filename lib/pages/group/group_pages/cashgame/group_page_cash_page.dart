@@ -244,7 +244,7 @@ class GroupCashGamesState extends State<GroupCashGames>
         builder: (context, snapshot) {
           if (!snapshot.hasData) return loading();
           return ListView.builder(
-            itemExtent: 50.0,
+            itemExtent: 60.0,
             itemCount: snapshot.data.documents.length,
             itemBuilder: (context, index) =>
                 _activeTournamentList(context, snapshot.data.documents[index]),
@@ -337,7 +337,7 @@ class GroupCashGamesState extends State<GroupCashGames>
         builder: (context, snapshot) {
           if (!snapshot.hasData) return loading();
           return ListView.builder(
-            itemExtent: 50.0,
+            itemExtent: 60.0,
             itemCount: snapshot.data.documents.length,
             itemBuilder: (context, index) =>
                 _historyTournamentList(context, snapshot.data.documents[index]),

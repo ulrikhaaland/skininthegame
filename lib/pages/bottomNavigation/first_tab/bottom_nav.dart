@@ -220,6 +220,7 @@ class PageOneState extends State<PageOne> {
     return Scaffold(
       backgroundColor: UIData.dark,
       appBar: new AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: UIData.appBarColor,
         title: new Text(
           "Find Group",

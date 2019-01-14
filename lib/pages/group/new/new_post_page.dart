@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yadda/utils/uidata.dart';
-import 'package:yadda/widgets/primary_button.dart';
 import 'package:yadda/utils/post.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
@@ -77,7 +74,6 @@ class NewPostPageState extends State<NewPostPage> {
     post.postToFirebase(path);
 
     String logpath;
-    int i = path.indexOf("posts");
     List<String> list = path.split("posts");
     print(list[0]);
     logpath = "${list[0]}log";

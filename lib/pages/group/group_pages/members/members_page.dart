@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:yadda/auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yadda/utils/uidata.dart';
 import 'package:yadda/pages/userSearch/search.dart';

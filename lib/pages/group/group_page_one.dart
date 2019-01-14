@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:yadda/widgets/login_background.dart';
 import 'package:yadda/utils/uidata.dart';
@@ -14,9 +13,7 @@ import '../group/group_pages/members/members_page.dart';
 import '../group/group_pages/feed/feed_page.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
-import 'package:yadda/utils/layout.dart';
 import 'package:yadda/utils/essentials.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class GroupDashboard extends StatefulWidget {
   const GroupDashboard(
@@ -131,7 +128,7 @@ class GroupDashboardState extends State<GroupDashboard> {
                       onPressed: () {
                         Navigator.canPop(context)
                             ? Navigator.pop(context)
-                            : null;
+                            : 
 
                         widget.onUpdate();
                       }),

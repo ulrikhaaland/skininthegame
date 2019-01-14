@@ -272,7 +272,7 @@ class NewTournamentState extends State<NewTournament> {
           Padding(
               padding: EdgeInsets.only(left: 18.0, right: 18.0),
               child: new TextFormField(
-                  keyboardType: TextInputType.numberWithOptions(),
+                  keyboardType: TextInputType.number,
                   maxLength: 6,
                   style: new TextStyle(color: UIData.blackOrWhite),
                   key: new Key('maximumplayers'),
@@ -301,7 +301,7 @@ class NewTournamentState extends State<NewTournament> {
             children: <Widget>[
               padded(
                   child: new TextFormField(
-                      keyboardType: TextInputType.numberWithOptions(),
+                      keyboardType: TextInputType.number,
                       maxLength: 10,
                       style: new TextStyle(color: UIData.blackOrWhite),
                       key: new Key('buyin'),
@@ -320,7 +320,7 @@ class NewTournamentState extends State<NewTournament> {
               new Container(
                 width: 120.0,
                 child: new TextFormField(
-                  keyboardType: TextInputType.numberWithOptions(),
+                  keyboardType: TextInputType.number,
                   keyboardAppearance: Brightness.dark,
                   style: new TextStyle(color: UIData.blackOrWhite),
                   key: new Key('rebuy'),
@@ -340,7 +340,7 @@ class NewTournamentState extends State<NewTournament> {
               new Container(
                 width: 120.0,
                 child: new TextFormField(
-                    keyboardType: TextInputType.numberWithOptions(),
+                    keyboardType: TextInputType.number,
                     keyboardAppearance: Brightness.dark,
                     style: new TextStyle(color: UIData.blackOrWhite),
                     key: new Key('addon'),
@@ -357,7 +357,7 @@ class NewTournamentState extends State<NewTournament> {
           ),
           padded(
               child: new TextFormField(
-            keyboardType: TextInputType.numberWithOptions(),
+            keyboardType: TextInputType.number,
             style: new TextStyle(color: UIData.blackOrWhite),
             key: new Key('startingchips'),
             decoration: new InputDecoration(

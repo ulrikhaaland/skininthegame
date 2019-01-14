@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:yadda/widgets/primary_button.dart';
 import 'package:yadda/utils/uidata.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/log.dart';
 import 'package:yadda/objects/game.dart';
-import 'package:yadda/utils/layout.dart';
 
 class CashGamePlayerPage extends StatefulWidget {
   CashGamePlayerPage(
@@ -27,7 +25,7 @@ class CashGamePlayerPage extends StatefulWidget {
   final String playerId;
   final String playerUserName;
   final int buyinAmount;
-  final String payout;
+  final int payout;
   final Game game;
   final bool history;
   final VoidCallback callBack;
@@ -46,8 +44,8 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
   bool isLoading = false;
   int oldPlayerBuyinAmount;
   int newPlayerBuyinAmount;
-  String oldPayout;
-  String newPayout;
+  int oldPayout;
+  int newPayout;
 
   String activeOrHistory = "cashgameactive";
   String gamePath;
@@ -90,14 +88,15 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          iconTheme: IconThemeData(color: UIData.blackOrWhite),
+            iconTheme: IconThemeData(color: UIData.blackOrWhite),
             actions: <Widget>[
               updateButton(),
             ],
             backgroundColor: UIData.appBarColor,
             title: new Text(
               "Cash Game Player",
-              style: new TextStyle(fontSize: UIData.fontSize24, color: UIData.blackOrWhite),
+              style: new TextStyle(
+                  fontSize: UIData.fontSize24, color: UIData.blackOrWhite),
             )),
         backgroundColor: UIData.dark,
         body: new Stack(
@@ -116,8 +115,8 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
       return new FlatButton(
           child: new Text(
             "Update",
-            style:
-                new TextStyle(fontSize: UIData.fontSize16, color: UIData.blackOrWhite),
+            style: new TextStyle(
+                fontSize: UIData.fontSize16, color: UIData.blackOrWhite),
             textAlign: TextAlign.center,
           ),
           onPressed: () {
@@ -130,8 +129,8 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
       return new FlatButton(
         child: new Text(
           "",
-          style:
-              new TextStyle(fontSize: UIData.fontSize16, color: UIData.blackOrWhite),
+          style: new TextStyle(
+              fontSize: UIData.fontSize16, color: UIData.blackOrWhite),
           textAlign: TextAlign.center,
         ),
         onPressed: null,
@@ -194,7 +193,7 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
               "${widget.playerUserName}",
               style: new TextStyle(
                   fontSize: UIData.fontSize20, color: UIData.blackOrWhite),
-                  overflow: TextOverflow.ellipsis,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           new Divider(
@@ -243,7 +242,7 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
               color: UIData.green,
             ),
             title: new TextFormField(
-              keyboardType: TextInputType.numberWithOptions(),
+              keyboardType: TextInputType.number,
               style: new TextStyle(color: UIData.blackOrWhite),
               initialValue: oldPlayerBuyinAmount.toString(),
               decoration: InputDecoration(
@@ -254,12 +253,11 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
             ),
             onTap: null,
           ),
-           new Text(
-              "This amount equals to how much money the player has bought in for",
-              style: new TextStyle(
-                  fontSize: UIData.fontSize12, color: Colors.grey[600]),
-              textAlign: TextAlign.center,
-            
+          new Text(
+            "This amount equals to how much money the player has bought in for",
+            style: new TextStyle(
+                fontSize: UIData.fontSize12, color: Colors.grey[600]),
+            textAlign: TextAlign.center,
           ),
           new ListTile(
             leading: new Icon(
@@ -268,24 +266,22 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
               color: UIData.green,
             ),
             title: new TextFormField(
-              keyboardType: TextInputType.numberWithOptions(),
+              keyboardType: TextInputType.number,
               style: new TextStyle(color: UIData.blackOrWhite),
               initialValue: oldPayout.toString(),
               decoration: InputDecoration(
                 labelStyle: new TextStyle(color: Colors.grey[600]),
                 labelText: "Payout",
               ),
-              onSaved: (val) => newPayout = val,
+              onSaved: (val) => newPayout = int.tryParse(val),
             ),
             onTap: null,
           ),
-          
-            new Text(
-              "This amount equals to how much money the player had when player left the game",
-              style: new TextStyle(
-                  fontSize: UIData.fontSize12, color: Colors.grey[600]),
-              textAlign: TextAlign.center,
-            
+          new Text(
+            "This amount equals to how much money the player had when player left the game",
+            style: new TextStyle(
+                fontSize: UIData.fontSize12, color: Colors.grey[600]),
+            textAlign: TextAlign.center,
           ),
         ],
       );
@@ -303,8 +299,7 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
               "${widget.playerUserName}",
               style: new TextStyle(
                   fontSize: UIData.fontSize20, color: UIData.blackOrWhite),
-                  overflow: TextOverflow.ellipsis,
-
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           new Divider(
@@ -341,7 +336,6 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
             ),
             onTap: null,
           ),
-          
         ],
       );
     }

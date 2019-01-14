@@ -67,7 +67,7 @@ class NewState extends State<New> {
       publicPrivateText = "Private groups can only be joined via an invite. \n";
     } else {
       publicPrivateText =
-          "Public groups can be found in search, anyone can see and join them.";
+          "Public groups can be found in search, anyone can see and join them.\n";
       publicIcon = Icons.visibility;
     }
     if (widget.newGroupOption == true) {

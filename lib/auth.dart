@@ -35,6 +35,6 @@ class Auth implements BaseAuth {
   }
 
   Future<String> resetPassword(String email) {
-    _firebaseAuth.sendPasswordResetEmail(email: email);
+   return _firebaseAuth.sendPasswordResetEmail(email: email);
   }
 }

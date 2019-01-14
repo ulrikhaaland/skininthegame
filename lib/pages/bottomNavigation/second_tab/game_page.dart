@@ -6,17 +6,13 @@ import 'package:yadda/pages/userSearch/search.dart';
 import 'package:yadda/pages/group/group_page_one.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/pages/group/new/newGroup.dart';
-import 'package:yadda/pages/inAppPurchase/consumeable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:yadda/pages/profile/profile_page.dart';
-import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:yadda/pages/results/graph.dart';
 import 'package:yadda/pages/profile/invite_page.dart';
-
+import 'package:yadda/pages/profile/profile_page.dart';
 
 SearchBar searchBar;
-bool _fresh = false;
 
 AppBar _buildAppBar(BuildContext context) {
   return new AppBar(
@@ -104,14 +100,6 @@ class GamePageState extends State<GamePage> {
     super.dispose();
   }
 
-  _handleDrawer() {
-    _key.currentState.openDrawer();
-
-    setState(() {
-      ///DO MY API CALLS
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -147,7 +135,7 @@ class GamePageState extends State<GamePage> {
                 new ListTile(
                   leading: IconButton(
                     icon: Icon(Icons.person, size: 30, color: Colors.grey),
-                    onPressed: () => print("userprofile"),
+                    onPressed: null,
                   ),
                   title: new Text(
                     "Profile",
@@ -156,16 +144,16 @@ class GamePageState extends State<GamePage> {
                       color: UIData.blackOrWhite,
                     ),
                   ),
-                  onTap: () => 
-                  widget.onSignOut(),
-                  //  Navigator.push(
-                  //       context,
-                  //       MaterialPageRoute(
-                  //           builder: (context) => ProfilePage(
-                  //                 user: widget.user,
-                  //                 profileId: widget.user.id,
-                  //               )),
-                  //     ),
+                  onTap: () =>
+                      // widget.onSignOut(),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ProfilePage(
+                                  user: widget.user,
+                                  profileId: widget.user.id,
+                                )),
+                      ),
                 ),
                 new ListTile(
                   leading: IconButton(
@@ -183,7 +171,7 @@ class GamePageState extends State<GamePage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => Blabla(
+                          builder: (context) => ResultPage(
                                 user: widget.user,
                                 isLoading: true,
                               )),
@@ -193,8 +181,9 @@ class GamePageState extends State<GamePage> {
                 ),
                 new ListTile(
                   leading: IconButton(
-                    icon: Icon(Icons.mail_outline, size: 30, color: Colors.grey),
-                    onPressed: () => print("userprofile"),
+                    icon:
+                        Icon(Icons.mail_outline, size: 30, color: Colors.grey),
+                    onPressed: null,
                   ),
                   title: new Text(
                     "Invites",
@@ -203,9 +192,9 @@ class GamePageState extends State<GamePage> {
                       color: UIData.blackOrWhite,
                     ),
                   ),
-                  onTap: () => 
-                  // widget.onSignOut(),
-                   Navigator.push(
+                  onTap: () =>
+                      // widget.onSignOut(),
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => UserPageInvites(

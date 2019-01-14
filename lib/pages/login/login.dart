@@ -42,7 +42,6 @@ class LoginState extends State<Login> {
   String _email;
   String _resetEmail;
   String _password;
-  String _doubleCheckPassword;
   FormType _formType = FormType.login;
   String _authHint = '';
 
@@ -61,6 +60,7 @@ class LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
+          automaticallyImplyLeading: false,
           title: new Text(
             "Skin In The Game",
             style: new TextStyle(
@@ -137,7 +137,7 @@ class LoginState extends State<Login> {
 
   void saveUserData() {
     User user = new User(_email, uid, _username, widget.messagingToken, "",
-        true, true, 0, 0, false, null);
+        true, true, 0, 0, false, null, "EURO");
     DocumentReference docRef = Firestore.instance.document("users/$uid");
     Firestore.instance.runTransaction((Transaction tx) async {
       await docRef.setData(user.toJson());

@@ -4,14 +4,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import 'dart:math';
 import 'package:yadda/utils/uidata.dart';
-import 'package:yadda/widgets/primary_button.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/pages/group/group_pages/tournament/tournamentPages/tournament_createplayer_page.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/log.dart';
 import 'package:yadda/objects/game.dart';
 import 'package:yadda/utils/delete.dart';
-import 'package:yadda/pages/bottomNavigation/first_tab/bottom_nav.dart';
 import 'package:yadda/auth.dart';
 import 'package:yadda/utils/layout.dart';
 
@@ -747,16 +745,11 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
     }
   }
 
-  String calculateProfits(String payout, int buyin) {
-    int p = int.tryParse(payout);
-    String finalProfit;
-    if (p != null) {
-      p -= buyin;
-      finalProfit = p.toString();
-    } else {
-      finalProfit = payout;
+  int calculateProfits(int payout, int buyin) {
+    if (payout != null) {
+      payout -= buyin;
     }
-    return finalProfit;
+    return payout;
   }
 
   Future<Null> saveResults() async {

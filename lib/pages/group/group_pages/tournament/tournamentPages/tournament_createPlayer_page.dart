@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:yadda/widgets/primary_button.dart';
 import 'package:yadda/utils/uidata.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/objects/game.dart';
 import 'package:yadda/utils/log.dart';
-import 'package:yadda/utils/layout.dart';
 
 class TournamentCreatePlayerPage extends StatefulWidget {
   TournamentCreatePlayerPage(

@@ -1,37 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'dart:async';
 import 'package:yadda/objects/resultgame.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:yadda/pages/results/results_graph_page.dart';
-import 'results.dart';
 import 'package:yadda/utils/uidata.dart';
 import 'package:yadda/utils/essentials.dart';
+import 'results_settings.dart';
+import 'package:yadda/objects/currency.dart';
 
-class Blabla extends StatefulWidget {
+class ResultPage extends StatefulWidget {
   final User user;
   bool isLoading;
-  Blabla({this.user, this.isLoading});
+  ResultPage({this.user, this.isLoading});
   @override
-  _BlablaState createState() => _BlablaState();
+  _ResultPageState createState() => _ResultPageState();
 }
 
-class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
+class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
   TabController _tabController;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    tournamentResults = new List();
-    cashgameResults = new List();
-
-    _tabController = new TabController(vsync: this, length: 3);
-
-    getData();
-  }
-
+  Currency currency = new Currency();
   charts.Series<ResultGame, DateTime> tournamentData;
   List<ResultGame> tournamentResults;
   charts.Series<ResultGame, DateTime> cashgameData;
@@ -39,7 +27,114 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
   ResultGameTotal cashResultGameTotal;
   ResultGameTotal tournamentResultGameTotal;
 
+  @override
+  void initState() {
+    super.initState();
+    tournamentResults = new List();
+    cashgameResults = new List();
+
+    _tabController = new TabController(vsync: this, length: 3);
+    widget.isLoading = false;
+
+    getData();
+  }
+
+  ResultGame exchange(ResultGame resultGame) {
+    double rate = 0;
+    switch (widget.user.currency) {
+      case ("NOK"):
+        {
+          switch (resultGame.currency) {
+            case ("USD"):
+              rate = currency.usd.nok;
+              break;
+            case ("EURO"):
+              rate = currency.euro.nok;
+              break;
+            case ("GBP"):
+              rate = currency.gbp.nok;
+              break;
+          }
+        }
+        break;
+      case ("USD"):
+        {
+          switch (resultGame.currency) {
+            case ("NOK"):
+              rate = currency.nok.usd;
+              break;
+            case ("EURO"):
+              rate = currency.euro.usd;
+              break;
+            case ("GBP"):
+              rate = currency.gbp.usd;
+              break;
+          }
+        }
+        break;
+      case ("EURO"):
+        {
+          switch (resultGame.currency) {
+            case ("USD"):
+              rate = currency.usd.euro;
+              break;
+            case ("NOK"):
+              rate = currency.nok.euro;
+              break;
+            case ("GBP"):
+              rate = currency.gbp.euro;
+              break;
+          }
+        }
+        break;
+      case ("GBP"):
+        {
+          switch (resultGame.currency) {
+            case ("USD"):
+              rate = currency.usd.gbp;
+              break;
+            case ("EURO"):
+              rate = currency.euro.gbp;
+              break;
+            case ("NOK"):
+              rate = currency.nok.gbp;
+              break;
+          }
+        }
+        break;
+    }
+    print(rate);
+    double buyin = resultGame.buyin * rate;
+    double payout = resultGame.payout * rate;
+    double profit = resultGame.profit * rate;
+    double bBlind = resultGame.bBlind * rate;
+    double sBlind = resultGame.sBlind * rate;
+
+    resultGame = new ResultGame(
+        resultGame.addon,
+        buyin.round(),
+        widget.user.currency,
+        resultGame.gameName,
+        resultGame.gameType,
+        resultGame.gameType,
+        resultGame.orderByTime,
+        payout.round(),
+        resultGame.placing,
+        resultGame.playerAmount,
+        resultGame.prizePool,
+        profit.round(),
+        resultGame.rebuy,
+        resultGame.time,
+        bBlind.round(),
+        sBlind.round(),
+        resultGame.date);
+    return resultGame;
+  }
+
   void getData() async {
+    cashgameResults.removeRange(0, cashgameResults.length);
+    tournamentResults.removeRange(0, tournamentResults.length);
+    currency.classes();
     QuerySnapshot cSnap = await Firestore.instance
         .collection("users/${widget.user.id}/cashgameresults")
         .getDocuments();
@@ -49,14 +144,16 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
     });
     cashResultGameTotal = new ResultGameTotal(0, 0, 0, 0, 0, 0, 0);
     for (int i = 0; i < cashgameResults.length; i++) {
-      if (!int.tryParse(cashgameResults[i].profit).isNegative) {
+      if (cashgameResults[i].currency != widget.user.currency) {
+        cashgameResults[i] = exchange(cashgameResults[i]);
+      }
+      if (!cashgameResults[i].profit.isNegative) {
         cashResultGameTotal.winningSessions += 1;
       }
 
       cashResultGameTotal.averageBuyin += cashgameResults[i].buyin.toDouble();
 
-      cashResultGameTotal.totalProfit +=
-          int.tryParse(cashgameResults[i].profit);
+      cashResultGameTotal.totalProfit += cashgameResults[i].profit;
       if (i == cashgameResults.length - 1) {
         cashResultGameTotal.averageProfit =
             cashResultGameTotal.totalProfit / cashgameResults.length;
@@ -73,7 +170,7 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
       colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
       id: 'Cashgame',
       domainFn: (ResultGame game, _) => game.date,
-      measureFn: (ResultGame game, _) => int.tryParse(game.profit),
+      measureFn: (ResultGame game, _) => game.profit,
       data: cashgameResults,
     );
     QuerySnapshot qSnap = await Firestore.instance
@@ -85,18 +182,17 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
     });
     tournamentResultGameTotal = new ResultGameTotal(0, 0, 0, 0, 0, 0, 0);
     for (int i = 0; i < tournamentResults.length; i++) {
-      if (int.tryParse(tournamentResults[i].payout) > 0) {
+      if (tournamentResults[i].payout > 0) {
         tournamentResultGameTotal.itm += 1;
       }
-      if (!int.tryParse(tournamentResults[i].profit).isNegative) {
+      if (!tournamentResults[i].profit.isNegative) {
         tournamentResultGameTotal.winningSessions += 1;
       }
 
       tournamentResultGameTotal.averageBuyin +=
           tournamentResults[i].buyin.toDouble();
 
-      tournamentResultGameTotal.totalProfit +=
-          int.tryParse(tournamentResults[i].profit);
+      tournamentResultGameTotal.totalProfit += tournamentResults[i].profit;
       if (i == tournamentResults.length - 1) {
         tournamentResultGameTotal.averageProfit =
             tournamentResultGameTotal.totalProfit / tournamentResults.length;
@@ -116,7 +212,7 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
       colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
       id: 'Tournament',
       domainFn: (ResultGame game, _) => game.date,
-      measureFn: (ResultGame game, _) => int.tryParse(game.profit),
+      measureFn: (ResultGame game, _) => game.profit,
       data: tournamentResults,
     );
 
@@ -129,87 +225,119 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
   var chart;
   @override
   Widget build(BuildContext context) {
-    if (!widget.isLoading)
-      return Scaffold(
-        appBar: AppBar(
-          title: new Text(
-            "Results",
-            style: new TextStyle(
-                color: UIData.blackOrWhite, fontSize: UIData.fontSize24),
-          ),
-          backgroundColor: UIData.appBarColor,
-          bottom: TabBar(
-            controller: _tabController,
-            tabs: [
-              Tab(
-                child: Text(
-                  "Tournaments",
-                  style: new TextStyle(color: UIData.blackOrWhite),
-                ),
-              ),
-              Tab(
-                child: Text(
-                  "Cash Games",
-                  style: new TextStyle(color: UIData.blackOrWhite),
-                ),
-              ),
-              Tab(
-                child: Text(
-                  "Statistics",
-                  style: new TextStyle(color: UIData.blackOrWhite),
-                ),
-              ),
-            ],
-          ),
-        ),
-        body: new Stack(children: <Widget>[
-          new TabBarView(
-            physics: ScrollPhysics(),
-            controller: _tabController,
-            children: [
-              SingleChildScrollView(
-                child: Column(
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.only(top: 12),
-                    ),
-                    SelectionCallbackExample.withSampleData(
-                        tournamentData, widget.user, true)
-                  ],
-                ),
-              ),
-              SingleChildScrollView(
-                child: Column(
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.only(top: 12),
-                    ),
-                    SelectionCallbackExample.withSampleData(
-                        cashgameData, widget.user, false)
-                  ],
-                ),
-              ),
-              SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: new Column(
-                    children: data(),
+    // if (!widget.isLoading)
+    return Scaffold(
+      appBar: AppBar(
+        actions: <Widget>[
+          Theme(
+            data: Theme.of(context).copyWith(canvasColor: UIData.yellow),
+            child: new Container(
+                color: UIData.appBarColor,
+                child: new DropdownButton<String>(
+                  style: TextStyle(color: UIData.blackOrWhite),
+                  hint: new Text(
+                    widget.user.currency,
+                    style: new TextStyle(color: UIData.blackOrWhite),
                   ),
+                  items:
+                      <String>['USD', 'EURO', 'NOK', 'GBP'].map((String value) {
+                    return new DropdownMenuItem<String>(
+                      value: value,
+                      child: new Text(
+                        value,
+                        style: new TextStyle(color: UIData.blackOrWhite),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (_) {
+                    if (widget.user.currency != _) {
+                      setState(() {
+                        widget.isLoading = true;
+                        getData();
+                        widget.user.currency = _;
+                      });
+                    }
+                  },
+                )),
+          ),
+        ],
+        title: new Text(
+          "Results",
+          style: new TextStyle(
+              color: UIData.blackOrWhite, fontSize: UIData.fontSize24),
+        ),
+        backgroundColor: UIData.appBarColor,
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(
+              child: Text(
+                "Tournaments",
+                style: new TextStyle(color: UIData.blackOrWhite),
+              ),
+            ),
+            Tab(
+              child: Text(
+                "Cash Games",
+                style: new TextStyle(color: UIData.blackOrWhite),
+              ),
+            ),
+            Tab(
+              child: Text(
+                "Statistics",
+                style: new TextStyle(color: UIData.blackOrWhite),
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: new Stack(children: <Widget>[
+        new TabBarView(
+          physics: ScrollPhysics(),
+          controller: _tabController,
+          children: [
+            SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(top: 12),
+                  ),
+                  SelectionCallbackExample.withSampleData(
+                      tournamentData, widget.user, true)
+                ],
+              ),
+            ),
+            SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(top: 12),
+                  ),
+                  SelectionCallbackExample.withSampleData(
+                      cashgameData, widget.user, false)
+                ],
+              ),
+            ),
+            SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: new Column(
+                  children: data(),
                 ),
               ),
-            ],
-          ),
-        ]),
-        backgroundColor: UIData.dark,
-      );
-    else
-      return Essentials();
+            ),
+          ],
+        ),
+      ]),
+      backgroundColor: UIData.dark,
+    );
+    // else
+    //   return Essentials();
   }
 
   List<Widget> data() {
     List<Widget> list = new List<Widget>();
-
-    if (tournamentResults != null) {
+    if (tournamentResults.isNotEmpty) {
       list.add(new Align(
         alignment: Alignment.center,
         child: new Text(
@@ -221,105 +349,106 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
       list.add(new Container(
         height: 14,
       ));
-    }
-    if (tournamentResultGameTotal.gameCount != null) {
-      list.add(
-        new Align(
-            alignment: Alignment.centerLeft,
-            child: new Text(
-              "Count: ${tournamentResultGameTotal.gameCount}",
-              style: new TextStyle(
-                color: UIData.blackOrWhite,
-                fontSize: UIData.fontSize16,
-              ),
-            )),
-      );
-    }
 
-    if (tournamentResultGameTotal.itm != null) {
-      list.add(
-        new Align(
-            alignment: Alignment.centerLeft,
-            child: new Text(
-              "ITM: ${tournamentResultGameTotal.itm * 100}%",
-              style: new TextStyle(
-                color: UIData.blackOrWhite,
-                fontSize: UIData.fontSize16,
-              ),
-            )),
-      );
-    }
+      if (tournamentResultGameTotal.gameCount != null) {
+        list.add(
+          new Align(
+              alignment: Alignment.centerLeft,
+              child: new Text(
+                "Count: ${tournamentResultGameTotal.gameCount}",
+                style: new TextStyle(
+                  color: UIData.blackOrWhite,
+                  fontSize: UIData.fontSize16,
+                ),
+              )),
+        );
+      }
 
-    if (tournamentResultGameTotal.totalProfit != null) {
-      list.add(
-        new Align(
-            alignment: Alignment.centerLeft,
-            child: new Text(
-              "Total profit: ${tournamentResultGameTotal.totalProfit}",
-              style: new TextStyle(
-                color: UIData.blackOrWhite,
-                fontSize: UIData.fontSize16,
-              ),
-            )),
-      );
-    }
+      if (tournamentResultGameTotal.itm != null) {
+        list.add(
+          new Align(
+              alignment: Alignment.centerLeft,
+              child: new Text(
+                "ITM: ${tournamentResultGameTotal.itm * 100}%",
+                style: new TextStyle(
+                  color: UIData.blackOrWhite,
+                  fontSize: UIData.fontSize16,
+                ),
+              )),
+        );
+      }
 
-    if (tournamentResultGameTotal.averageProfit != null) {
-      list.add(
-        new Align(
-            alignment: Alignment.centerLeft,
-            child: new Text(
-              "Average profit: ${tournamentResultGameTotal.averageProfit}",
-              style: new TextStyle(
-                color: UIData.blackOrWhite,
-                fontSize: UIData.fontSize16,
-              ),
-            )),
-      );
-    }
+      if (tournamentResultGameTotal.totalProfit != null) {
+        list.add(
+          new Align(
+              alignment: Alignment.centerLeft,
+              child: new Text(
+                "Total profit: ${tournamentResultGameTotal.totalProfit.round()}",
+                style: new TextStyle(
+                  color: UIData.blackOrWhite,
+                  fontSize: UIData.fontSize16,
+                ),
+              )),
+        );
+      }
 
-    if (tournamentResultGameTotal.averageBuyin != null) {
-      list.add(
-        new Align(
-            alignment: Alignment.centerLeft,
-            child: new Text(
-              "Average buyin: ${tournamentResultGameTotal.averageBuyin}",
-              style: new TextStyle(
-                color: UIData.blackOrWhite,
-                fontSize: UIData.fontSize16,
-              ),
-            )),
-      );
-    }
+      if (tournamentResultGameTotal.averageProfit != null) {
+        list.add(
+          new Align(
+              alignment: Alignment.centerLeft,
+              child: new Text(
+                "Average profit: ${tournamentResultGameTotal.averageProfit.round()}",
+                style: new TextStyle(
+                  color: UIData.blackOrWhite,
+                  fontSize: UIData.fontSize16,
+                ),
+              )),
+        );
+      }
 
-    if (tournamentResultGameTotal.winningSessions != null) {
-      list.add(
-        new Align(
-            alignment: Alignment.centerLeft,
-            child: new Text(
-              "Winning sessions: ${tournamentResultGameTotal.winningSessions}",
-              style: new TextStyle(
-                color: UIData.blackOrWhite,
-                fontSize: UIData.fontSize16,
-              ),
-            )),
-      );
-    }
+      if (tournamentResultGameTotal.averageBuyin != null) {
+        list.add(
+          new Align(
+              alignment: Alignment.centerLeft,
+              child: new Text(
+                "Average buyin: ${tournamentResultGameTotal.averageBuyin.round()}",
+                style: new TextStyle(
+                  color: UIData.blackOrWhite,
+                  fontSize: UIData.fontSize16,
+                ),
+              )),
+        );
+      }
 
-    if (tournamentResultGameTotal.winningSessions != null) {
-      int loosing = tournamentResultGameTotal.winningSessions -
-          tournamentResultGameTotal.gameCount;
-      list.add(
-        new Align(
-            alignment: Alignment.centerLeft,
-            child: new Text(
-              "Loosing sessions: ${loosing}",
-              style: new TextStyle(
-                color: UIData.blackOrWhite,
-                fontSize: UIData.fontSize16,
-              ),
-            )),
-      );
+      if (tournamentResultGameTotal.winningSessions != null) {
+        list.add(
+          new Align(
+              alignment: Alignment.centerLeft,
+              child: new Text(
+                "Winning sessions: ${tournamentResultGameTotal.winningSessions}",
+                style: new TextStyle(
+                  color: UIData.blackOrWhite,
+                  fontSize: UIData.fontSize16,
+                ),
+              )),
+        );
+      }
+
+      if (tournamentResultGameTotal.winningSessions != null) {
+        int loosing = tournamentResultGameTotal.gameCount -
+            tournamentResultGameTotal.winningSessions;
+        list.add(
+          new Align(
+              alignment: Alignment.centerLeft,
+              child: new Text(
+                "Loosing sessions: $loosing",
+                style: new TextStyle(
+                  color: UIData.blackOrWhite,
+                  fontSize: UIData.fontSize16,
+                ),
+              )),
+        );
+      }
     }
 
     list.add(new Container(
@@ -372,7 +501,7 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
         new Align(
             alignment: Alignment.centerLeft,
             child: new Text(
-              "Total profit: ${cashResultGameTotal.totalProfit}",
+              "Total profit: ${cashResultGameTotal.totalProfit.round()}",
               style: new TextStyle(
                 color: UIData.blackOrWhite,
                 fontSize: UIData.fontSize16,
@@ -386,7 +515,7 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
         new Align(
             alignment: Alignment.centerLeft,
             child: new Text(
-              "Average profit: ${cashResultGameTotal.averageProfit}",
+              "Average profit: ${cashResultGameTotal.averageProfit.round()}",
               style: new TextStyle(
                 color: UIData.blackOrWhite,
                 fontSize: UIData.fontSize16,
@@ -400,7 +529,7 @@ class _BlablaState extends State<Blabla> with TickerProviderStateMixin {
         new Align(
             alignment: Alignment.centerLeft,
             child: new Text(
-              "Average buyin: ${cashResultGameTotal.averageBuyin}",
+              "Average buyin: ${cashResultGameTotal.averageBuyin.round()}",
               style: new TextStyle(
                 color: UIData.blackOrWhite,
                 fontSize: UIData.fontSize16,

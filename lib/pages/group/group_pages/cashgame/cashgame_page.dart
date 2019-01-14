@@ -360,7 +360,7 @@ class CashGamePageState extends State<CashGamePage>
               'name': currentUserName,
               'id': currentUserId,
               "buyin": 0,
-              "payout": '0',
+              "payout": 0,
             });
           });
         }
@@ -437,7 +437,6 @@ class CashGamePageState extends State<CashGamePage>
           docSnap.data["calculatepayouts"],
           docSnap.data["currency"],
           docSnap.data["isrunning"],
-
         );
 
         if (game.calculatePayouts == true && widget.history == true) {
@@ -477,6 +476,7 @@ class CashGamePageState extends State<CashGamePage>
           Icons.settings,
           color: UIData.appBarColor,
         ),
+        onPressed: null,
       );
     }
   }
@@ -509,6 +509,7 @@ class CashGamePageState extends State<CashGamePage>
           Icons.settings,
           color: UIData.appBarColor,
         ),
+        onPressed: null,
       );
     }
   }
@@ -540,7 +541,7 @@ class CashGamePageState extends State<CashGamePage>
     }
   }
 
-  pushPlayerPage(String id, int buyin, String payout, String name) {
+  pushPlayerPage(String id, int buyin, int payout, String name) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -581,7 +582,7 @@ class CashGamePageState extends State<CashGamePage>
             .get()
             .then((datasnapshot) {
           int buyin = datasnapshot.data["buyin"];
-          String payout = datasnapshot.data["payout"];
+          int payout = datasnapshot.data["payout"];
 
           setState(() {
             isLoading = false;
@@ -773,8 +774,7 @@ class CashGamePageState extends State<CashGamePage>
     String result;
     Color color;
 
-    String i = document.data["payout"];
-    int payout = int.tryParse(i);
+    int payout = document.data["payout"];
     int buyin = document.data["buyin"];
     print(payout - buyin);
     if (payout != null && buyin != null) {
@@ -810,7 +810,7 @@ class CashGamePageState extends State<CashGamePage>
             .get()
             .then((datasnapshot) {
           int playerBuyin = datasnapshot.data["buyin"];
-          String payout = datasnapshot.data["payout"];
+          int payout = datasnapshot.data["payout"];
 
           setState(() {
             isLoading = false;
@@ -826,7 +826,7 @@ class CashGamePageState extends State<CashGamePage>
     return StreamBuilder(
         stream: firestoreInstance
             .collection("$gamePath/players")
-            // .orderBy("payout")
+            .orderBy("payout")
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return loading();

@@ -1,19 +1,17 @@
-import 'dart:io';
-
 class User {
   User(
-    this.email,
-    this.id,
-    this.userName,
-    this.fcm,
-    this.bio,
-    this.nightMode,
-    this.shareResults,
-    this.following,
-    this.followers,
-    this.hasProfilePic,
-    this.profilePicURL,
-  );
+      this.email,
+      this.id,
+      this.userName,
+      this.fcm,
+      this.bio,
+      this.nightMode,
+      this.shareResults,
+      this.following,
+      this.followers,
+      this.hasProfilePic,
+      this.profilePicURL,
+      this.currency);
 
   final String userName;
   final String id;
@@ -21,6 +19,7 @@ class User {
   final String fcm;
   String bio;
   String profilePicURL;
+  String currency;
   bool nightMode;
   bool shareResults;
   int following;
@@ -53,6 +52,7 @@ class User {
         'shareresults': this.shareResults,
         'following': this.following,
         'followers': this.followers,
-        'profilepicurl': this.profilePicURL
+        'profilepicurl': this.profilePicURL,
+        'currency': this.currency,
       };
 }

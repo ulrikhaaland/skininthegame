@@ -161,6 +161,7 @@ class GroupTournamentsState extends State<GroupTournaments>
           Icons.settings,
           color: UIData.appBarColor,
         ),
+        onPressed: null,
       );
     }
   }
@@ -240,7 +241,8 @@ class GroupTournamentsState extends State<GroupTournaments>
                 enabled = false;
               });
               Delete().deleteGame(
-                  "groups/${widget.group.id}/games/type/tournamentactive/${document.data["id"]}");
+                  "groups/${widget.group.id}/games/type/tournamentactive/${document.data["id"]}",
+                  false);
             }),
       ],
     );
@@ -255,7 +257,7 @@ class GroupTournamentsState extends State<GroupTournaments>
         builder: (context, snapshot) {
           if (!snapshot.hasData) return loading();
           return ListView.builder(
-            itemExtent: 50.0,
+            itemExtent: 60.0,
             itemCount: snapshot.data.documents.length,
             itemBuilder: (context, index) =>
                 _activeTournamentList(context, snapshot.data.documents[index]),
@@ -272,6 +274,7 @@ class GroupTournamentsState extends State<GroupTournaments>
       actionExtentRatio: 0.25,
       child: new Container(
         child: ListTile(
+          // dense: true,
           enabled: enabled,
           contentPadding: EdgeInsets.all(3.0),
           leading: new Icon(
@@ -333,7 +336,8 @@ class GroupTournamentsState extends State<GroupTournaments>
                 enabled = false;
               });
               Delete().deleteGame(
-                  "groups/${widget.group.id}/games/type/tournamenthistory/${document.data["id"]}");
+                  "groups/${widget.group.id}/games/type/tournamenthistory/${document.data["id"]}",
+                  false);
             }),
       ],
     );
@@ -348,7 +352,7 @@ class GroupTournamentsState extends State<GroupTournaments>
         builder: (context, snapshot) {
           if (!snapshot.hasData) return loading();
           return ListView.builder(
-            itemExtent: 50.0,
+            itemExtent: 60.0,
             itemCount: snapshot.data.documents.length,
             itemBuilder: (context, index) =>
                 _historyTournamentList(context, snapshot.data.documents[index]),

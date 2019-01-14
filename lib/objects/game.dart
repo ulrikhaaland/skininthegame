@@ -24,8 +24,6 @@ class Game {
       this.currency,
       this.isRunning);
 
-  
-
   bool calculatePayouts;
   bool isRunning;
 
@@ -195,10 +193,8 @@ class Game {
   }
 
   int setRegisteredPlayers(int registeredPlayers) {
-    try {
-      this.registeredPlayers = registeredPlayers;
-      return this.registeredPlayers;
-    } catch (e) {}
+    this.registeredPlayers = registeredPlayers;
+    return this.registeredPlayers;
   }
 
   int getBBlind() {

@@ -39,9 +39,9 @@ class ResultGame {
   final String gameName;
   final String gameType;
   final String groupName;
-  final String payout;
+  final int payout;
   final String prizePool;
-  final String profit;
+  final int profit;
   final String time;
 
   factory ResultGame.fromMap(Map map) {

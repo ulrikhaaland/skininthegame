@@ -11,17 +11,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:yadda/utils/util.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/uidata.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'utils/ProfilePic.dart';
-import 'dart:io';
-import 'package:cached_network_image/cached_network_image.dart';
-
-import 'package:firebase_storage/firebase_storage.dart';
-
-import 'dart:math';
-
-import 'dart:typed_data';
-import 'dart:io';
 import 'dart:async';
 
 class RootPage extends StatefulWidget {
@@ -44,8 +33,6 @@ class RootPageState extends State<RootPage> {
   String userEmail;
   String messagingToken;
   User user;
-
-  File _cachedFile;
 
   UIData uiData = new UIData();
 
@@ -150,38 +137,24 @@ class RootPageState extends State<RootPage> {
     return currentUser;
   }
 
-  Future<Null> downloadFile(String uid) async {
-    final String fileName = uid;
-    final Directory tempDir = Directory.systemTemp;
-    final File file = File('${tempDir.path}/$fileName');
-
-    final StorageReference ref = FirebaseStorage.instance.ref().child(fileName);
-    final StorageFileDownloadTask downloadTask = ref.writeToFile(file);
-
-    final int byteNumber = (await downloadTask.future).totalByteCount;
-
-    print(byteNumber);
-    setState(() => _cachedFile = file);
-  }
-
   Future<Null> getUserInfo() async {
     Firestore.instance.runTransaction((Transaction tx) async {
       DocumentSnapshot docSnap =
           await Firestore.instance.document("users/$currentUser").get();
       if (docSnap.exists) {
         user = new User(
-          docSnap.data["email"],
-          docSnap.data["id"],
-          docSnap.data["name"],
-          await updateFcmToken(),
-          docSnap.data["bio"],
-          docSnap.data["nightmode"],
-          docSnap.data["shareresults"],
-          docSnap.data["following"],
-          docSnap.data["followers"],
-          docSnap.data["hasprofilepic"],
-          docSnap.data["profilepicurl"]
-        );
+            docSnap.data["email"],
+            docSnap.data["id"],
+            docSnap.data["name"],
+            await updateFcmToken(),
+            docSnap.data["bio"],
+            docSnap.data["nightmode"],
+            docSnap.data["shareresults"],
+            docSnap.data["following"],
+            docSnap.data["followers"],
+            docSnap.data["hasprofilepic"],
+            docSnap.data["profilepicurl"],
+            docSnap.data["currency"],);
         setState(() {
           authStatus = currentUser != null
               ? AuthStatus.signedIn

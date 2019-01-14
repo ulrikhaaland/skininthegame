@@ -211,7 +211,7 @@ class TournamentPageState extends State<TournamentPage>
             'name': currentUserName,
             'id': currentUserId,
             "placing": game.maxPlayers,
-            'payout': "0",
+            'payout': 0,
             'rebuy': 0,
             'addon': 0,
           });
@@ -296,6 +296,7 @@ class TournamentPageState extends State<TournamentPage>
           color: UIData.appBarColor,
           size: 0,
         ),
+        onPressed: null,
       );
     }
   }
@@ -329,6 +330,7 @@ class TournamentPageState extends State<TournamentPage>
           color: UIData.appBarColor,
           size: 0,
         ),
+        onPressed: null,
       );
     }
   }
@@ -512,7 +514,7 @@ class TournamentPageState extends State<TournamentPage>
     }
   }
 
-  pushPlayerPage(String id, int placing, int addon, int rebuy, String payout,
+  pushPlayerPage(String id, int placing, int addon, int rebuy, int payout,
       String name) {
     Navigator.push(
       context,
@@ -560,7 +562,7 @@ class TournamentPageState extends State<TournamentPage>
           int playerAddon = datasnapshot.data["addon"];
           int playerRebuy = datasnapshot.data["rebuy"];
           int playerPlacing = datasnapshot.data["placing"];
-          String playerPayout = datasnapshot.data["payout"];
+          int playerPayout = datasnapshot.data["payout"];
           setState(() {
             isLoading = false;
           });
@@ -616,7 +618,7 @@ class TournamentPageState extends State<TournamentPage>
           int playerAddon = datasnapshot.data["addon"];
           int playerRebuy = datasnapshot.data["rebuy"];
           int playerPlacing = datasnapshot.data["placing"];
-          String playerPayout = datasnapshot.data["payout"];
+          int playerPayout = datasnapshot.data["payout"];
           setState(() {
             isLoading = false;
           });

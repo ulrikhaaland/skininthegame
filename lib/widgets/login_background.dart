@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:yadda/tools/arc_clipper.dart';
 import 'package:yadda/utils/uidata.dart';
 
 class LoginBackground extends StatelessWidget {
@@ -8,7 +7,6 @@ class LoginBackground extends StatelessWidget {
   LoginBackground({this.showIcon = true, this.image});
 
   Widget topHalf(BuildContext context) {
-    var deviceSize = MediaQuery.of(context).size;
     return new Flexible(
       flex: 10000,
       child: new Container(

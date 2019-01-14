@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:yadda/widgets/primary_button.dart';
 import 'package:yadda/utils/uidata.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yadda/objects/user.dart';
-import 'package:yadda/utils/time.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/log.dart';
@@ -32,7 +30,7 @@ class TournamentPlayerPage extends StatefulWidget {
   final int oldAddon;
   final int oldRebuy;
   final int oldPlacing;
-  final String oldPayout;
+  final int oldPayout;
   final String gameId;
   final bool history;
   final VoidCallback callback;
@@ -58,14 +56,14 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
   int newAddon;
   int newRebuy;
   int newPlacing;
-  String newPayout;
+  int newPayout;
 
   String logPath;
 
   int oldAddon;
   int oldRebuy;
   int oldPlacing;
-  String oldPayout;
+  int oldPayout;
 
   String activeOrHistory = "tournamentactive";
 
@@ -101,7 +99,7 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
       oldPlacing = widget.oldPlacing;
     }
     if (widget.oldPayout == null) {
-      oldPayout = "0";
+      oldPayout = 0;
     } else {
       oldPayout = widget.oldPayout;
     }
@@ -316,7 +314,7 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
               color: Colors.yellow[700],
             ),
             title: new TextFormField(
-                keyboardType: TextInputType.numberWithOptions(),
+                keyboardType: TextInputType.number,
                 style: new TextStyle(color: UIData.blackOrWhite),
                 initialValue: oldPlacing.toString(),
                 decoration: InputDecoration(
@@ -338,6 +336,7 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
               color: UIData.green,
             ),
             title: new TextFormField(
+                keyboardType: TextInputType.number,
                 style: new TextStyle(color: UIData.blackOrWhite),
                 initialValue: oldPayout.toString(),
                 decoration: InputDecoration(
@@ -345,10 +344,10 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
                   labelText: "Payout",
                 ),
                 onSaved: (val) {
-                  if ((val) == widget.oldPayout) {
+                  if ((val) == widget.oldPayout.toString()) {
                     newPayout = widget.oldPayout;
                   } else {
-                    newPayout = (val);
+                    newPayout = (int.tryParse(val));
                   }
                 }),
           ),
@@ -359,7 +358,7 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
               color: UIData.blackOrWhite,
             ),
             title: new TextFormField(
-                keyboardType: TextInputType.numberWithOptions(),
+                keyboardType: TextInputType.number,
                 style: new TextStyle(color: UIData.blackOrWhite),
                 initialValue: oldRebuy.toString(),
                 decoration: InputDecoration(
@@ -381,7 +380,7 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
               color: Colors.grey[600],
             ),
             title: new TextFormField(
-                keyboardType: TextInputType.numberWithOptions(),
+                keyboardType: TextInputType.number,
                 style: new TextStyle(color: UIData.blackOrWhite),
                 initialValue: oldAddon.toString(),
                 decoration: InputDecoration(

@@ -1,19 +1,5 @@
-/// Timeseries chart with example of updating external state based on selection.
-///
-/// A SelectionModelConfig can be provided for each of the different
-/// [SelectionModel] (currently info and action).
-///
-/// [SelectionModelType.info] is the default selection chart exploration type
-/// initiated by some tap event. This is a different model from
-/// [SelectionModelType.action] which is typically used to select some value as
-/// an input to some other UI component. This allows dual state of exploring
-/// and selecting data via different touch events.
-///
-/// See [SelectNearest] behavior on setting the different ways of triggering
-/// [SelectionModel] updates from hover & click events.
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/resultgame.dart';
 import 'package:yadda/utils/uidata.dart';
@@ -28,55 +14,25 @@ class SelectionCallbackExample extends StatefulWidget {
   SelectionCallbackExample(this.seriesList,
       {this.animate, this.user, this.isTournament});
 
-  /// Creates a [charts.TimeSeriesChart] with sample data and no transition.
   factory SelectionCallbackExample.withSampleData(
       charts.Series<ResultGame, DateTime> tournament,
       User user,
       bool isTournament) {
     return new SelectionCallbackExample(
       _createSampleData(tournament),
-      // Disable animations for image tests.
       animate: true,
       user: user,
       isTournament: isTournament,
     );
   }
 
-  // We need a Stateful widget to build the selection details with the current
-  // selection as the state.
   @override
   State<StatefulWidget> createState() => new _SelectionCallbackState();
 
   /// Create one series with sample hard coded data.
   static List<charts.Series<ResultGame, DateTime>> _createSampleData(
       charts.Series<ResultGame, DateTime> tournament) {
-    // final tournament = [
-    //   tournament1.data[0].date,
-    //   tournament1.data[0],
-    // ];
-
-    // final cashgame = [
-    //   new TimeSeriesSales(new DateTime(2017, 9, 19), 15),
-    //   new TimeSeriesSales(new DateTime(2017, 9, 26), 33),
-    //   new TimeSeriesSales(new DateTime(2017, 10, 3), 68),
-    //   new TimeSeriesSales(new DateTime(2017, 10, 10), 48),
-    // ];
-
-    return [
-      tournament
-      // new charts.Series<ResultGame, DateTime>(
-      //   id: 'US Sales',
-      //   domainFn: (ResultGame game, _) => game.date,
-      //   measureFn: (ResultGame game, _) => int.tryParse(game.profit),
-      //   data: tournament,
-      // ),
-      // new charts.Series<ResultGame, DateTime>(
-      //   id: ' Sales',
-      //   domainFn: (ResultGame game, _) => game.date,
-      //   measureFn: (ResultGame game, _) => int.tryParse(game.profit),
-      //   data: cashgame,
-      // ),
-    ];
+    return [tournament];
   }
 }
 
@@ -88,7 +44,6 @@ class _SelectionCallbackState extends State<SelectionCallbackExample> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     if (widget.user.nightMode != true) {
       color = charts.MaterialPalette.black;
@@ -104,11 +59,6 @@ class _SelectionCallbackState extends State<SelectionCallbackExample> {
     DateTime time;
     final Map<int, ResultGame> measures = new Map();
 
-    // We get the model that updated with a list of [SeriesDatum] which is
-    // simply a pair of series & datum.
-    //
-    // Walk the selection updating the measures map, storing off the sales and
-    // series name for each selection point.
     if (selectedDatum.isNotEmpty) {
       time = selectedDatum.first.datum.date;
       selectedDatum.forEach((charts.SeriesDatum datumPair) {
@@ -116,7 +66,6 @@ class _SelectionCallbackState extends State<SelectionCallbackExample> {
       });
     }
 
-    // Request a build.
     setState(() {
       untapped = false;
       _time = time;
@@ -173,7 +122,7 @@ class _SelectionCallbackState extends State<SelectionCallbackExample> {
     Color color;
     String name = game.groupName;
     String currency = game.currency;
-    String profit = game.profit;
+    int profit = game.profit.round();
     String tournamentOrCash = "Placing: ${game.placing}/${game.playerAmount}";
     String title = "Tournament";
     IconData tournamentOrCashIcon = Icons.whatshot;
@@ -182,7 +131,7 @@ class _SelectionCallbackState extends State<SelectionCallbackExample> {
       tournamentOrCashIcon = Icons.attach_money;
       title = "Cash Game";
     }
-    if (int.tryParse(game.profit).isNegative) {
+    if (game.profit.isNegative) {
       color = Colors.red;
     } else {
       color = Colors.green;
@@ -195,9 +144,10 @@ class _SelectionCallbackState extends State<SelectionCallbackExample> {
       currency = currency.substring(0, 3);
       currency = currency + "...";
     }
-    if (profit.length >= 11) {
-      profit = profit.substring(0, 9);
-      profit = profit + "...";
+    String prft = profit.toString();
+    if (prft.length >= 11) {
+      prft = prft.substring(0, 9);
+      prft = prft + "...";
     }
     return ListTile(
       contentPadding: EdgeInsets.all(3.0),
@@ -231,7 +181,7 @@ class _SelectionCallbackState extends State<SelectionCallbackExample> {
             style: new TextStyle(color: UIData.blackOrWhite),
           ),
           new Text(
-            "Profit: $profit$currency",
+            "Profit: $prft${widget.user.currency}",
             style: new TextStyle(color: UIData.blackOrWhite),
             overflow: TextOverflow.ellipsis,
           ),

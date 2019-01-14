@@ -275,7 +275,7 @@ class NewCashGameState extends State<NewCashGame> {
           ),
           Layout().padded(
               child: new TextFormField(
-                  keyboardType: TextInputType.numberWithOptions(),
+                  keyboardType: TextInputType.number,
                   maxLength: 6,
                   style: new TextStyle(color: UIData.blackOrWhite),
                   key: new Key('maximumplayers'),
@@ -308,7 +308,7 @@ class NewCashGameState extends State<NewCashGame> {
                   width: 120.0,
                   child: new TextFormField(
                     maxLength: 4,
-                    keyboardType: TextInputType.numberWithOptions(),
+                    keyboardType: TextInputType.number,
                     textCapitalization: TextCapitalization.sentences,
                     keyboardAppearance: Brightness.dark,
                     style: new TextStyle(color: UIData.blackOrWhite),
@@ -329,7 +329,7 @@ class NewCashGameState extends State<NewCashGame> {
                   width: 120.0,
                   child: new TextFormField(
                       maxLength: 4,
-                      keyboardType: TextInputType.numberWithOptions(),
+                      keyboardType: TextInputType.number,
                       keyboardAppearance: Brightness.dark,
                       style: new TextStyle(color: UIData.blackOrWhite),
                       key: new Key('bblind'),

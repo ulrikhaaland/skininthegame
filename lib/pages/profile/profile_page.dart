@@ -2,17 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:yadda/auth.dart';
 import 'package:yadda/utils/uidata.dart';
-import 'invite_page.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/pages/profile/profile_page_settings.dart';
 import 'package:yadda/utils/essentials.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:yadda/utils/ProfilePic.dart';
 import 'package:yadda/pages/profile/profile_page_results.dart';
-import 'package:yadda/objects/game.dart';
 import 'package:yadda/objects/resultgame.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:yadda/pages/results/graph.dart';
 
 class ProfilePage extends StatefulWidget {
   ProfilePage(
@@ -57,7 +54,7 @@ class ProfilePageState extends State<ProfilePage>
       followOrEdit = "Edit";
       ownProfile = true;
     } else {
-      followOrEdit = "Follow";
+      followOrEdit = "Results";
     }
     getUserInfo();
   }
@@ -84,6 +81,7 @@ class ProfilePageState extends State<ProfilePage>
           docSnap.data["followers"],
           null,
           docSnap.data["profilepicurl"],
+          null,
         );
         setState(() {
           userFound = true;
@@ -141,7 +139,7 @@ class ProfilePageState extends State<ProfilePage>
                                     color: Colors.black, fontSize: 16.0)),
                             shape: new RoundedRectangleBorder(
                                 borderRadius:
-                                    BorderRadius.all(Radius.circular(50.0))),
+                                    BorderRadius.all(Radius.circular(20.0))),
                             color: UIData.yellowOrWhite,
                             textColor: Colors.black,
                             elevation: 8.0,
@@ -154,6 +152,14 @@ class ProfilePageState extends State<ProfilePage>
                                             ProfileSettingsPage(
                                               user: widget.user,
                                               setBGSize: () => setBGSize(),
+                                            )));
+                              } else if (userProfile.shareResults) {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => ResultPage(
+                                              user: userProfile,
+                                              isLoading: true,
                                             )));
                               }
                             }),
