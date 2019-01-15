@@ -128,9 +128,7 @@ class GroupDashboardState extends State<GroupDashboard> {
                       onPressed: () {
                         Navigator.canPop(context)
                             ? Navigator.pop(context)
-                            : 
-
-                        widget.onUpdate();
+                            : widget.onUpdate();
                       }),
                   Text(
                     group.getName(),
@@ -195,6 +193,7 @@ class GroupDashboardState extends State<GroupDashboard> {
       "admin": false,
       "notification": true,
       "fcm": widget.user.fcm,
+      "profilepicurl": widget.user.profilePicURL,
     });
     fireStoreInstance.document("users/$currentUserId/groups/$groupId").setData({
       "id": group.id,

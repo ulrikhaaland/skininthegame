@@ -98,14 +98,16 @@ class TournamentCreatePlayerPageState
                   child: new Text(
                     "Create",
                     style: new TextStyle(
-                        fontSize: UIData.fontSize16, color: UIData.blackOrWhite),
+                        fontSize: UIData.fontSize16,
+                        color: UIData.blackOrWhite),
                     textAlign: TextAlign.center,
                   ),
                   onPressed: () => addPlayer()),
             ],
             title: new Text(
               "Create Player",
-              style: new TextStyle(fontSize: UIData.fontSize24, color: UIData.blackOrWhite),
+              style: new TextStyle(
+                  fontSize: UIData.fontSize24, color: UIData.blackOrWhite),
             )),
         backgroundColor: UIData.dark,
         body: new Stack(
@@ -141,7 +143,7 @@ class TournamentCreatePlayerPageState
               .setData({
             "name": playerName,
             "placing": widget.game.maxPlayers,
-            "payout": '0',
+            "payout": 0,
             "rebuy": 0,
             "addon": 0,
           });
@@ -164,7 +166,7 @@ class TournamentCreatePlayerPageState
                   "groups/$groupId/games/type/$activeOrHistory/${widget.game.id}/players/$playerName")
               .setData({
             "name": playerName,
-            "payout": '0',
+            "payout": 0,
             'buyin': 0,
           });
         });
@@ -176,7 +178,7 @@ class TournamentCreatePlayerPageState
                 .setData({
               "name": playerName,
               'buyin': 0,
-              'payout': '0',
+              'payout': 0,
             });
           });
         }

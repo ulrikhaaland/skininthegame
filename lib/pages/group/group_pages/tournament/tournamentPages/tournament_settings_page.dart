@@ -551,7 +551,7 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
     }
   }
 
-  String calculateProfits(String payout, int rebuy, int addon) {
+  int calculateProfits(int payout, int rebuy, int addon) {
     int profit = -widget.game.buyin;
     for (int i = 0; i < rebuy; i++) {
       profit -= widget.game.buyin;
@@ -559,11 +559,10 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
     for (int i = 0; i < addon; i++) {
       profit -= widget.game.buyin;
     }
-    int p = int.tryParse(payout);
-    String finalProfit;
-    if (p != null) {
-      profit += p;
-      finalProfit = profit.toString();
+    int finalProfit;
+    if (payout != null) {
+      profit += payout;
+      finalProfit = profit;
     } else {
       finalProfit = payout;
     }

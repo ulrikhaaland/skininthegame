@@ -81,7 +81,7 @@ class ProfilePageState extends State<ProfilePage>
           docSnap.data["followers"],
           null,
           docSnap.data["profilepicurl"],
-          null,
+          docSnap.data["currency"],
         );
         setState(() {
           userFound = true;
@@ -169,6 +169,7 @@ class ProfilePageState extends State<ProfilePage>
                                     MaterialPageRoute(
                                         builder: (context) => ResultPage(
                                               user: userProfile,
+                                              currentUser: widget.user,
                                               isLoading: true,
                                             )));
                               }
@@ -283,7 +284,7 @@ class ProfilePageState extends State<ProfilePage>
   }
 
   Widget addImage() {
-    if (widget.user.profilePicURL == null) {
+    if (userProfile.profilePicURL == null) {
       return new CircleAvatar(
         radius: 35,
         child: Icon(

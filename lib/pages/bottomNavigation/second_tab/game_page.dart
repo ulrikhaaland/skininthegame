@@ -48,8 +48,6 @@ class GamePageState extends State<GamePage> {
   final Firestore firestoreInstance = Firestore.instance;
   final BaseAuth auth = Auth();
 
-  UIData uiData = new UIData();
-
   bool userFound = false;
   bool registeredGames = true;
   bool getStatus = false;
@@ -173,6 +171,7 @@ class GamePageState extends State<GamePage> {
                       MaterialPageRoute(
                           builder: (context) => ResultPage(
                                 user: widget.user,
+                                currentUser: widget.user,
                                 isLoading: true,
                               )),
                     );
@@ -208,7 +207,7 @@ class GamePageState extends State<GamePage> {
                     onPressed: null,
                   ),
                   onTap: () {
-                    uiData.nightMode(!widget.user.nightMode, widget.user.id);
+                    UIData().nightMode(!widget.user.nightMode, widget.user.id);
                     widget.user.nightMode = !widget.user.nightMode;
                     widget.changeColor();
                     if (widget.user.nightMode) {
@@ -299,7 +298,7 @@ class GamePageState extends State<GamePage> {
         radius: 35,
         child: Icon(
           Icons.person_outline,
-          color: UIData.blackOrWhite,
+          color: Colors.white,
           size: 40,
         ),
         backgroundColor: Colors.grey[600],

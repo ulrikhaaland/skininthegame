@@ -7,6 +7,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/log.dart';
 import 'package:yadda/pages/profile/profile_page.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class TournamentPlayerPage extends StatefulWidget {
   TournamentPlayerPage(
@@ -20,6 +21,7 @@ class TournamentPlayerPage extends StatefulWidget {
       this.oldRebuy,
       this.history,
       this.group,
+      this.url,
       this.callback,
       this.gameId})
       : super(key: key);
@@ -27,6 +29,7 @@ class TournamentPlayerPage extends StatefulWidget {
   final Group group;
   final String playerId;
   final String playerUserName;
+  final String url;
   final int oldAddon;
   final int oldRebuy;
   final int oldPlacing;
@@ -243,17 +246,33 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
     Navigator.pop(context);
   }
 
+  Widget addImage(String url) {
+    if (url != null) {
+      return new CircleAvatar(
+        radius: 20,
+        backgroundImage: CachedNetworkImageProvider(url),
+        backgroundColor: Colors.grey[600],
+      );
+    } else {
+      return new CircleAvatar(
+        radius: 20,
+        child: Icon(
+          Icons.person_outline,
+          color: Colors.white,
+          size: 30,
+        ),
+        backgroundColor: Colors.grey[600],
+      );
+    }
+  }
+
   Widget page() {
     if (widget.group.admin == true) {
       return ListView(
         padding: EdgeInsets.all(16),
         children: <Widget>[
           new ListTile(
-            leading: new Icon(
-              Icons.person,
-              size: 40.0,
-              color: Colors.blue,
-            ),
+            leading: addImage(widget.url),
             title: new Text(
               "${widget.playerUserName}",
               overflow: TextOverflow.ellipsis,
@@ -269,44 +288,44 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
                           )),
                 ),
           ),
-          new Divider(
-            height: 10.0,
-            color: Colors.black,
-          ),
-          new ListTile(
-            leading: new Icon(
-              Icons.delete,
-              size: 40.0,
-              color: UIData.red,
-            ),
-            title: new Text(
-              "Remove Player",
-              style: new TextStyle(
-                  color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
-            ),
-            onTap: () {
-              widget.callback();
-              String players = "activeplayers";
+          // new Divider(
+          //   height: 10.0,
+          //   color: Colors.black,
+          // ),
+          // new ListTile(
+          //   leading: new Icon(
+          //     Icons.delete,
+          //     size: 40.0,
+          //     color: UIData.red,
+          //   ),
+          //   // title: new Text(
+          //   //   "Remove Player",
+          //   //   style: new TextStyle(
+          //   //       color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
+          //   // ),
+          //   // onTap: () {
+          //   //   widget.callback();
+          //   //   String players = "activeplayers";
 
-              if (widget.history == true) {
-                players = "players";
-              }
-              firestoreInstance
-                  .document(
-                      "groups/$groupId/games/type/$activeOrHistory/${widget.gameId}/$players/${widget.playerId}")
-                  .delete();
-              Log().postLogToCollection(
-                  "$currentUserName removed ${widget.playerUserName} from game",
-                  logPath,
-                  "Remove");
+          //   //   if (widget.history == true) {
+          //   //     players = "players";
+          //   //   }
+          //   //   firestoreInstance
+          //   //       .document(
+          //   //           "groups/$groupId/games/type/$activeOrHistory/${widget.gameId}/$players/${widget.playerId}")
+          //   //       .delete();
+          //   //   Log().postLogToCollection(
+          //   //       "$currentUserName removed ${widget.playerUserName} from game",
+          //   //       logPath,
+          //   //       "Remove");
 
-              Navigator.pop(context);
-            },
-          ),
-          new Divider(
-            height: 10.0,
-            color: Colors.black,
-          ),
+          //   //   Navigator.pop(context);
+          //   // },
+          // ),
+          // new Divider(
+          //   height: 10.0,
+          //   color: Colors.black,
+          // ),
           new ListTile(
             leading: new Icon(
               FontAwesomeIcons.award,
@@ -402,11 +421,7 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
         padding: EdgeInsets.all(16),
         children: <Widget>[
           new ListTile(
-            leading: new Icon(
-              Icons.person,
-              size: 40.0,
-              color: Colors.blue,
-            ),
+            leading: addImage(widget.url),
             title: new Text(
               "${widget.playerUserName}",
               style: new TextStyle(

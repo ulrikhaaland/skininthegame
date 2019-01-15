@@ -37,6 +37,8 @@ class UserPageInvitesState extends State<UserPageInvites> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+            iconTheme: IconThemeData(color: UIData.blackOrWhite),
+          
           backgroundColor: UIData.appBarColor,
           title: new Text(
             "Invites",

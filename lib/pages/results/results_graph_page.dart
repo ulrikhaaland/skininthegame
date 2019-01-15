@@ -181,7 +181,7 @@ class _SelectionCallbackState extends State<SelectionCallbackExample> {
             style: new TextStyle(color: UIData.blackOrWhite),
           ),
           new Text(
-            "Profit: $prft${widget.user.currency}",
+            "Profit: $prft",
             style: new TextStyle(color: UIData.blackOrWhite),
             overflow: TextOverflow.ellipsis,
           ),

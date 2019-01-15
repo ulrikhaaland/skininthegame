@@ -6,6 +6,7 @@ import 'package:yadda/objects/user.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:yadda/pages/profile/profile_page.dart';
 import 'package:yadda/objects/group.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 SearchBar searchBar;
 bool _fresh = false;
@@ -144,6 +145,26 @@ class MembersPageState extends State<MembersPage> {
     }
   }
 
+  Widget addImage(String url) {
+    if (url != null) {
+      return new CircleAvatar(
+        radius: 20,
+        backgroundImage: CachedNetworkImageProvider(url),
+        backgroundColor: Colors.grey[600],
+      );
+    } else {
+      return new CircleAvatar(
+        radius: 20,
+        child: Icon(
+          Icons.person_outline,
+          color: Colors.white,
+          size: 30,
+        ),
+        backgroundColor: Colors.grey[600],
+      );
+    }
+  }
+
   Widget _buildListItem(BuildContext context, DocumentSnapshot document) {
     bool isAdmin = document.data["admin"];
     IconData adminIcon;
@@ -167,6 +188,7 @@ class MembersPageState extends State<MembersPage> {
       actionExtentRatio: 0.25,
       child: new Container(
         child: new ListTile(
+          leading: addImage(document.data["profilepicurl"]),
           title: new Text(
             document.data["username"],
             style: new TextStyle(color: UIData.blackOrWhite),

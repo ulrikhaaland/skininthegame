@@ -11,6 +11,7 @@ import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/log.dart';
 import 'package:yadda/objects/game.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class TournamentPage extends StatefulWidget {
   TournamentPage({
@@ -196,6 +197,7 @@ class TournamentPageState extends State<TournamentPage>
         'name': currentUserName,
         'id': currentUserId,
         "placing": game.maxPlayers,
+        "profilepicurl": widget.user.profilePicURL,
       });
       checkIfFull();
     });
@@ -214,6 +216,7 @@ class TournamentPageState extends State<TournamentPage>
             'payout': 0,
             'rebuy': 0,
             'addon': 0,
+            "profilepicurl": widget.user.profilePicURL,
           });
         });
       }
@@ -264,7 +267,6 @@ class TournamentPageState extends State<TournamentPage>
           docSnap.data["calculatepayouts"],
           docSnap.data["currency"],
           docSnap.data["isrunning"],
-
         );
         checkIfFull();
         userFound = true;
@@ -340,8 +342,9 @@ class TournamentPageState extends State<TournamentPage>
         floatingActionButton: floatingActionButton(),
         backgroundColor: UIData.dark,
         appBar: AppBar(
-            // centerTitle: true,
             iconTheme: IconThemeData(color: UIData.blackOrWhite),
+
+            // centerTitle: true,
             actions: <Widget>[
               newPostButton(),
               settingsButton(),
@@ -515,11 +518,12 @@ class TournamentPageState extends State<TournamentPage>
   }
 
   pushPlayerPage(String id, int placing, int addon, int rebuy, int payout,
-      String name) {
+      String name, String url) {
     Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => TournamentPlayerPage(
+                url: url,
                 user: widget.user,
                 playerId: id,
                 playerUserName: name,
@@ -534,42 +538,86 @@ class TournamentPageState extends State<TournamentPage>
     );
   }
 
-  Widget addImage(String uid) {
-    return new CircleAvatar(
-      radius: 25,
-      backgroundImage: CachedNetworkImageProvider(
-          "https://firebasestorage.googleapis.com/v0/b/login-5a8c9.appspot.com/o/$uid?alt=media&token=73c1e4f4-a080-402e-adea-4aeabcdeb823"),
-      backgroundColor: Colors.grey[600],
-    );
+  Widget addImage(String url) {
+    if (url != null) {
+      return new CircleAvatar(
+        radius: 25,
+        backgroundImage: CachedNetworkImageProvider(url),
+        backgroundColor: Colors.grey[600],
+      );
+    } else {
+      return new CircleAvatar(
+        radius: 25,
+        child: Icon(
+          Icons.person_outline,
+          color: Colors.white,
+          size: 35,
+        ),
+        backgroundColor: Colors.grey[600],
+      );
+    }
   }
 
   Widget _playerListItems(BuildContext context, DocumentSnapshot document) {
-    return ListTile(
-      leading: addImage(document.documentID),
-      title: new Text(
-        document.data["name"],
-        style: new TextStyle(fontSize: 25.0),
-        overflow: TextOverflow.ellipsis,
+    return new Slidable(
+      delegate: new SlidableDrawerDelegate(),
+      actionExtentRatio: 0.25,
+      child: new Container(
+        child: new ListTile(
+          leading: addImage(document.data["profilepicurl"]),
+          title: new Text(
+            document.data["name"],
+            style: new TextStyle(fontSize: 25.0),
+            overflow: TextOverflow.ellipsis,
+          ),
+          onTap: () {
+            setState(() {
+              isLoading = true;
+            });
+            firestoreInstance
+                .document("$gamePath/players/${document.documentID}")
+                .get()
+                .then((datasnapshot) {
+              int playerAddon = datasnapshot.data["addon"];
+              int playerRebuy = datasnapshot.data["rebuy"];
+              int playerPlacing = datasnapshot.data["placing"];
+              int playerPayout = datasnapshot.data["payout"];
+              setState(() {
+                isLoading = false;
+              });
+              pushPlayerPage(
+                  document.documentID,
+                  playerPlacing,
+                  playerAddon,
+                  playerRebuy,
+                  playerPayout,
+                  document.data["name"],
+                  document.data["profilepicurl"]);
+            });
+          },
+        ),
       ),
-      onTap: () {
-        setState(() {
-          isLoading = true;
-        });
-        firestoreInstance
-            .document("$gamePath/players/${document.documentID}")
-            .get()
-            .then((datasnapshot) {
-          int playerAddon = datasnapshot.data["addon"];
-          int playerRebuy = datasnapshot.data["rebuy"];
-          int playerPlacing = datasnapshot.data["placing"];
-          int playerPayout = datasnapshot.data["payout"];
-          setState(() {
-            isLoading = false;
-          });
-          pushPlayerPage(document.documentID, playerPlacing, playerAddon,
-              playerRebuy, playerPayout, document.data["name"]);
-        });
-      },
+      secondaryActions: <Widget>[
+        new IconSlideAction(
+            caption: 'Remove',
+            color: UIData.red,
+            icon: Icons.delete,
+            onTap: () {
+              getGroup();
+              String players = "activeplayers";
+
+              if (widget.history == true) {
+                players = "players";
+              }
+              firestoreInstance
+                  .document("$gamePath/$players/${document.documentID}")
+                  .delete();
+              Log().postLogToCollection(
+                  "$currentUserName removed ${document.data["name"]} from the game",
+                  logPath,
+                  "Remove");
+            }),
+      ],
     );
   }
 
@@ -622,8 +670,14 @@ class TournamentPageState extends State<TournamentPage>
           setState(() {
             isLoading = false;
           });
-          pushPlayerPage(document.documentID, playerPlacing, playerAddon,
-              playerRebuy, playerPayout, document.data["name"]);
+          pushPlayerPage(
+              document.documentID,
+              playerPlacing,
+              playerAddon,
+              playerRebuy,
+              playerPayout,
+              document.data["name"],
+              document.data["profilepicurl"]);
         });
       },
     );

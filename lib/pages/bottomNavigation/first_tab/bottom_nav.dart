@@ -359,7 +359,8 @@ class PageOneState extends State<PageOne> {
           "username": widget.user.userName,
           "admin": admin,
           "notification": true,
-          "fcm": widget.user.fcm
+          "fcm": widget.user.fcm,
+          "profilepicurl": widget.user.profilePicURL,
         });
         firestoreInstance
             .document("users/${widget.user.id}/groups/$groupId")

@@ -11,6 +11,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/log.dart';
 import 'package:yadda/objects/game.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CashGamePage extends StatefulWidget {
   CashGamePage(
@@ -345,6 +346,7 @@ class CashGamePageState extends State<CashGamePage>
             .setData({
           'name': currentUserName,
           'id': currentUserId,
+          "profilepicurl": widget.user.profilePicURL,
         });
         checkIfFull();
       });
@@ -361,6 +363,7 @@ class CashGamePageState extends State<CashGamePage>
               'id': currentUserId,
               "buyin": 0,
               "payout": 0,
+              "profilepicurl": widget.user.profilePicURL,
             });
           });
         }
@@ -378,6 +381,7 @@ class CashGamePageState extends State<CashGamePage>
           'name': currentUserName,
           'id': currentUserId,
           'orderbytime': time.getOrderByTime(),
+          "profilepicurl": widget.user.profilePicURL,
         });
         checkIfFull();
       });
@@ -541,11 +545,12 @@ class CashGamePageState extends State<CashGamePage>
     }
   }
 
-  pushPlayerPage(String id, int buyin, int payout, String name) {
+  pushPlayerPage(String id, int buyin, int payout, String name, String url) {
     Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => CashGamePlayerPage(
+                url: url,
                 user: widget.user,
                 playerId: id,
                 playerUserName: name,
@@ -559,13 +564,29 @@ class CashGamePageState extends State<CashGamePage>
     );
   }
 
+  Widget addImage(String url) {
+    if (url != null) {
+      return new CircleAvatar(
+        radius: 25,
+        backgroundImage: CachedNetworkImageProvider(url),
+        backgroundColor: Colors.grey[600],
+      );
+    } else {
+      return new CircleAvatar(
+        radius: 25,
+        child: Icon(
+          Icons.person_outline,
+          color: Colors.white,
+          size: 35,
+        ),
+        backgroundColor: Colors.grey[600],
+      );
+    }
+  }
+
   Widget _registeredList(BuildContext context, DocumentSnapshot document) {
     return ListTile(
-      leading: new Icon(
-        Icons.person,
-        color: UIData.blue,
-        size: 40.0,
-      ),
+      leading: addImage(document.data["profilepicurl"]),
       title: new Text(
         document.data["name"],
         style: new TextStyle(fontSize: 25.0, color: UIData.blackOrWhite),
@@ -587,8 +608,8 @@ class CashGamePageState extends State<CashGamePage>
           setState(() {
             isLoading = false;
           });
-          pushPlayerPage(
-              document.documentID, buyin, payout, document.data["name"]);
+          pushPlayerPage(document.documentID, buyin, payout,
+              document.data["name"], document.data["profilepicurl"]);
         });
       },
     );
@@ -604,7 +625,7 @@ class CashGamePageState extends State<CashGamePage>
         builder: (context, snapshot) {
           if (!snapshot.hasData) return loading();
           return ListView.builder(
-            itemExtent: 50.0,
+            itemExtent: 60.0,
             itemCount: snapshot.data.documents.length,
             itemBuilder: (context, index) =>
                 _registeredList(context, snapshot.data.documents[index]),
@@ -682,7 +703,7 @@ class CashGamePageState extends State<CashGamePage>
         });
   }
 
-  addPlayerFromQueue(String name, String uid) {
+  addPlayerFromQueue(String name, String uid, String url) {
     Time time = new Time();
     firestoreInstance
         .document(
@@ -699,7 +720,8 @@ class CashGamePageState extends State<CashGamePage>
           'id': uid,
           'orderbytime': time.getOrderByTime(),
           'buyin': 0,
-          'payout': "0",
+          'payout': 0,
+          "profilepicurl": url,
         });
       }
     });
@@ -710,6 +732,7 @@ class CashGamePageState extends State<CashGamePage>
       'name': name,
       'id': uid,
       'orderbytime': time.getOrderByTime(),
+      "profilepicurl": url,
     });
     Log().postLogToCollection(
         "$currentUserName moved $name from queue to game",
@@ -724,11 +747,7 @@ class CashGamePageState extends State<CashGamePage>
 
   Widget _queueList(BuildContext context, DocumentSnapshot document) {
     return ListTile(
-        leading: new Icon(
-          Icons.person,
-          color: UIData.blue,
-          size: 40.0,
-        ),
+        leading: addImage(document.data["profilepicurl"]),
         title: new Text(
           document.data["name"],
           style: new TextStyle(fontSize: 25.0),
@@ -737,7 +756,8 @@ class CashGamePageState extends State<CashGamePage>
         trailing: tapToAdd(),
         onTap: () {
           if (isAdmin == true) {
-            addPlayerFromQueue(document.data["name"], document.data["id"]);
+            addPlayerFromQueue(document.data["name"], document.data["id"],
+                document.data["profilepicurl"]);
           }
         });
   }
@@ -815,8 +835,8 @@ class CashGamePageState extends State<CashGamePage>
           setState(() {
             isLoading = false;
           });
-          pushPlayerPage(
-              document.documentID, playerBuyin, payout, document.data["name"]);
+          pushPlayerPage(document.documentID, playerBuyin, payout,
+              document.data["name"], document.data["profilepicurl"]);
         });
       },
     );

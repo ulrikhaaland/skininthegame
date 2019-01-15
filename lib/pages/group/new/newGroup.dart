@@ -165,6 +165,7 @@ class NewGroupState extends State<NewGroup> {
       "admin": true,
       "notifications": true,
       "fcm": widget.user.fcm,
+      "profilepicurl": widget.user.profilePicURL,
     });
     Firestore.instance.document("codes/$groupId").setData({
       "groupid": groupId,

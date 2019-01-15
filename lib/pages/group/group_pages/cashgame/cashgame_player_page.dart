@@ -5,6 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/log.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
 import 'package:yadda/objects/game.dart';
 
 class CashGamePlayerPage extends StatefulWidget {
@@ -18,12 +20,14 @@ class CashGamePlayerPage extends StatefulWidget {
       this.history,
       this.callBack,
       this.payout,
-      this.game})
+      this.game,
+      this.url})
       : super(key: key);
   final User user;
   final Group group;
   final String playerId;
   final String playerUserName;
+  final String url;
   final int buyinAmount;
   final int payout;
   final Game game;
@@ -184,11 +188,7 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
         padding: EdgeInsets.all(16.0),
         children: <Widget>[
           new ListTile(
-            leading: new Icon(
-              Icons.person,
-              size: 40.0,
-              color: Colors.blue,
-            ),
+            leading: addImage(widget.url),
             title: new Text(
               "${widget.playerUserName}",
               style: new TextStyle(
@@ -196,45 +196,45 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          new Divider(
-            height: .0,
-            color: Colors.black,
-          ),
-          new ListTile(
-            leading: new Icon(
-              Icons.delete,
-              size: 40.0,
-              color: UIData.red,
-            ),
-            title: new Text(
-              "Remove Player",
-              style: new TextStyle(
-                  color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
-            ),
-            onTap: () {
-              if (widget.history == true) {
-                firestoreInstance.runTransaction((Transaction tx) async {
-                  await firestoreInstance
-                      .document("$gamePath/players/${widget.playerId}")
-                      .delete();
-                });
-              }
-              firestoreInstance
-                  .document("$gamePath/activeplayers/${widget.playerId}")
-                  .delete();
-              widget.callBack();
-              Log().postLogToCollection(
-                  "$currentUserName removed ${widget.playerUserName} from game",
-                  "$gamePath/log",
-                  "Remove");
+          // new Divider(
+          //   height: .0,
+          //   color: Colors.black,
+          // ),
+          // new ListTile(
+          //   leading: new Icon(
+          //     Icons.delete,
+          //     size: 40.0,
+          //     color: UIData.red,
+          //   ),
+          //   title: new Text(
+          //     "Remove Player",
+          //     style: new TextStyle(
+          //         color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
+          //   ),
+          //   onTap: () {
+          //     if (widget.history == true) {
+          //       firestoreInstance.runTransaction((Transaction tx) async {
+          //         await firestoreInstance
+          //             .document("$gamePath/players/${widget.playerId}")
+          //             .delete();
+          //       });
+          //     }
+          //     firestoreInstance
+          //         .document("$gamePath/activeplayers/${widget.playerId}")
+          //         .delete();
+          //     widget.callBack();
+          //     Log().postLogToCollection(
+          //         "$currentUserName removed ${widget.playerUserName} from game",
+          //         "$gamePath/log",
+          //         "Remove");
 
-              Navigator.pop(context);
-            },
-          ),
-          new Divider(
-            height: .0,
-            color: Colors.black,
-          ),
+          //     Navigator.pop(context);
+          //   },
+          // ),
+          // new Divider(
+          //   height: .0,
+          //   color: Colors.black,
+          // ),
           new ListTile(
             leading: new Icon(
               Icons.attach_money,
@@ -290,11 +290,7 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
         padding: EdgeInsets.all(16),
         children: <Widget>[
           new ListTile(
-            leading: new Icon(
-              Icons.person,
-              size: 40.0,
-              color: Colors.blue,
-            ),
+            leading: addImage(widget.url),
             title: new Text(
               "${widget.playerUserName}",
               style: new TextStyle(
@@ -337,6 +333,26 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
             onTap: null,
           ),
         ],
+      );
+    }
+  }
+
+  Widget addImage(String url) {
+    if (url != null) {
+      return new CircleAvatar(
+        radius: 20,
+        backgroundImage: CachedNetworkImageProvider(url),
+        backgroundColor: Colors.grey[600],
+      );
+    } else {
+      return new CircleAvatar(
+        radius: 20,
+        child: Icon(
+          Icons.person_outline,
+          color: Colors.white,
+          size: 30,
+        ),
+        backgroundColor: Colors.grey[600],
       );
     }
   }

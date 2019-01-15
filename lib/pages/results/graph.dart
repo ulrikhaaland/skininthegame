@@ -13,9 +13,9 @@ import 'package:yadda/objects/currency.dart';
 
 class ResultPage extends StatefulWidget {
   final User user;
-  final String currentUserResults;
+  final User currentUser;
   bool isLoading;
-  ResultPage({this.user, this.isLoading, this.currentUserResults});
+  ResultPage({this.user, this.isLoading, this.currentUser});
   @override
   _ResultPageState createState() => _ResultPageState();
 }
@@ -67,7 +67,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
                     child: new DropdownButton<String>(
                       style: TextStyle(color: UIData.blackOrWhite),
                       hint: new Text(
-                        widget.user.currency,
+                        widget.currentUser.currency,
                         style: new TextStyle(
                             color: UIData.blackOrWhite,
                             fontWeight: FontWeight.bold),
@@ -84,11 +84,11 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
                       }).toList(),
                       onChanged: (_) {
                         widget.isLoading = true;
-                        if (widget.user.currency != _) {
+                        if (widget.currentUser.currency != _) {
                           setState(() {
                             widget.isLoading = true;
                             getData();
-                            widget.user.currency = _;
+                            widget.currentUser.currency = _;
                           });
                         }
                       },
@@ -164,7 +164,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
 
   ResultGame exchange(ResultGame resultGame) {
     double rate = 0;
-    switch (widget.user.currency) {
+    switch (widget.currentUser.currency) {
       case ("NOK"):
         {
           switch (resultGame.currency) {
@@ -236,7 +236,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
     resultGame = new ResultGame(
         resultGame.addon,
         buyin.round(),
-        widget.user.currency,
+        widget.currentUser.currency,
         resultGame.gameName,
         resultGame.gameType,
         resultGame.groupName,
@@ -269,7 +269,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
     });
     cashResultGameTotal = new ResultGameTotal(0, 0, 0, 0, 0, 0, 0);
     for (int i = 0; i < cashgameResults.length; i++) {
-      if (cashgameResults[i].currency != widget.user.currency) {
+      if (cashgameResults[i].currency != widget.currentUser.currency) {
         if (cashgameResults[i].currency == "NOK" ||
             cashgameResults[i].currency == "USD" ||
             cashgameResults[i].currency == "EURO" ||
@@ -316,7 +316,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
     });
     tournamentResultGameTotal = new ResultGameTotal(0, 0, 0, 0, 0, 0, 0);
     for (int i = 0; i < tournamentResults.length; i++) {
-      if (tournamentResults[i].currency != widget.user.currency) {
+      if (tournamentResults[i].currency != widget.currentUser.currency) {
         if (cashgameResults[i].currency == "NOK" ||
             cashgameResults[i].currency == "USD" ||
             cashgameResults[i].currency == "EURO" ||
@@ -378,7 +378,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
   Widget hasCashGames() {
     if (cashgameResults.isNotEmpty) {
       return SelectionCallbackExample.withSampleData(
-          cashgameData, widget.user, false);
+          cashgameData, widget.currentUser, false);
     } else {
       return notSharing("cash game");
     }
@@ -527,7 +527,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
       ));
     }
 
-    if (cashgameResults != null) {
+    if (cashgameResults.isNotEmpty) {
       list.add(new Align(
         alignment: Alignment.center,
         child: new Text(
@@ -539,107 +539,107 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
       list.add(new Container(
         height: 14,
       ));
-    }
-    if (cashResultGameTotal.gameCount != null) {
-      list.add(
-        new Align(
-            alignment: Alignment.centerLeft,
-            child: new Text(
-              "Count: ${cashResultGameTotal.gameCount}",
-              style: new TextStyle(
-                color: UIData.blackOrWhite,
-                fontSize: UIData.fontSize16,
-              ),
-            )),
-      );
-    }
 
-    if (cashResultGameTotal.winningSessionsPercentage != null) {
-      list.add(
-        new Align(
-            alignment: Alignment.centerLeft,
-            child: new Text(
-              "Win%: ${cashResultGameTotal.winningSessionsPercentage * 100}%",
-              style: new TextStyle(
-                color: UIData.blackOrWhite,
-                fontSize: UIData.fontSize16,
-              ),
-            )),
-      );
-    }
+      if (cashResultGameTotal.gameCount != null) {
+        list.add(
+          new Align(
+              alignment: Alignment.centerLeft,
+              child: new Text(
+                "Count: ${cashResultGameTotal.gameCount}",
+                style: new TextStyle(
+                  color: UIData.blackOrWhite,
+                  fontSize: UIData.fontSize16,
+                ),
+              )),
+        );
+      }
 
-    if (cashResultGameTotal.totalProfit != null) {
-      list.add(
-        new Align(
-            alignment: Alignment.centerLeft,
-            child: new Text(
-              "Total profit: ${cashResultGameTotal.totalProfit.round()}",
-              style: new TextStyle(
-                color: UIData.blackOrWhite,
-                fontSize: UIData.fontSize16,
-              ),
-            )),
-      );
-    }
+      if (cashResultGameTotal.winningSessionsPercentage != null) {
+        list.add(
+          new Align(
+              alignment: Alignment.centerLeft,
+              child: new Text(
+                "Win%: ${cashResultGameTotal.winningSessionsPercentage * 100}%",
+                style: new TextStyle(
+                  color: UIData.blackOrWhite,
+                  fontSize: UIData.fontSize16,
+                ),
+              )),
+        );
+      }
 
-    if (cashResultGameTotal.averageProfit != null) {
-      list.add(
-        new Align(
-            alignment: Alignment.centerLeft,
-            child: new Text(
-              "Average profit: ${cashResultGameTotal.averageProfit.round()}",
-              style: new TextStyle(
-                color: UIData.blackOrWhite,
-                fontSize: UIData.fontSize16,
-              ),
-            )),
-      );
-    }
+      if (cashResultGameTotal.totalProfit != null) {
+        list.add(
+          new Align(
+              alignment: Alignment.centerLeft,
+              child: new Text(
+                "Total profit: ${cashResultGameTotal.totalProfit.round()}",
+                style: new TextStyle(
+                  color: UIData.blackOrWhite,
+                  fontSize: UIData.fontSize16,
+                ),
+              )),
+        );
+      }
 
-    if (cashResultGameTotal.averageBuyin != null) {
-      list.add(
-        new Align(
-            alignment: Alignment.centerLeft,
-            child: new Text(
-              "Average buyin: ${cashResultGameTotal.averageBuyin.round()}",
-              style: new TextStyle(
-                color: UIData.blackOrWhite,
-                fontSize: UIData.fontSize16,
-              ),
-            )),
-      );
-    }
+      if (cashResultGameTotal.averageProfit != null) {
+        list.add(
+          new Align(
+              alignment: Alignment.centerLeft,
+              child: new Text(
+                "Average profit: ${cashResultGameTotal.averageProfit.round()}",
+                style: new TextStyle(
+                  color: UIData.blackOrWhite,
+                  fontSize: UIData.fontSize16,
+                ),
+              )),
+        );
+      }
 
-    if (cashResultGameTotal.winningSessions != null) {
-      list.add(
-        new Align(
-            alignment: Alignment.centerLeft,
-            child: new Text(
-              "Winning sessions: ${cashResultGameTotal.winningSessions}",
-              style: new TextStyle(
-                color: UIData.blackOrWhite,
-                fontSize: UIData.fontSize16,
-              ),
-            )),
-      );
-    }
+      if (cashResultGameTotal.averageBuyin != null) {
+        list.add(
+          new Align(
+              alignment: Alignment.centerLeft,
+              child: new Text(
+                "Average buyin: ${cashResultGameTotal.averageBuyin.round()}",
+                style: new TextStyle(
+                  color: UIData.blackOrWhite,
+                  fontSize: UIData.fontSize16,
+                ),
+              )),
+        );
+      }
 
-    if (cashResultGameTotal.winningSessions != null) {
-      int loosing =
-          cashResultGameTotal.gameCount - cashResultGameTotal.winningSessions;
-      list.add(
-        new Align(
-            alignment: Alignment.centerLeft,
-            child: new Text(
-              "Loosing sessions: $loosing",
-              style: new TextStyle(
-                color: UIData.blackOrWhite,
-                fontSize: UIData.fontSize16,
-              ),
-            )),
-      );
-    }
+      if (cashResultGameTotal.winningSessions != null) {
+        list.add(
+          new Align(
+              alignment: Alignment.centerLeft,
+              child: new Text(
+                "Winning sessions: ${cashResultGameTotal.winningSessions}",
+                style: new TextStyle(
+                  color: UIData.blackOrWhite,
+                  fontSize: UIData.fontSize16,
+                ),
+              )),
+        );
+      }
 
+      if (cashResultGameTotal.winningSessions != null) {
+        int loosing =
+            cashResultGameTotal.gameCount - cashResultGameTotal.winningSessions;
+        list.add(
+          new Align(
+              alignment: Alignment.centerLeft,
+              child: new Text(
+                "Loosing sessions: $loosing",
+                style: new TextStyle(
+                  color: UIData.blackOrWhite,
+                  fontSize: UIData.fontSize16,
+                ),
+              )),
+        );
+      }
+    }
     return list;
   }
 }
