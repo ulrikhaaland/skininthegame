@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+
 import 'package:yadda/objects/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yadda/objects/resultgame.dart';
@@ -34,9 +36,127 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
     cashgameResults = new List();
 
     _tabController = new TabController(vsync: this, length: 3);
-    widget.isLoading = false;
 
     getData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.isLoading)
+      return Scaffold(
+        appBar: AppBar(
+          leading: new IconButton(
+            icon: new Icon(
+              defaultTargetPlatform == TargetPlatform.android
+                  ? Icons.arrow_back
+                  : Icons.arrow_back_ios,
+              color: UIData.blackOrWhite,
+            ),
+            onPressed: () =>
+                Navigator.canPop(context) ? Navigator.pop(context) : null,
+          ),
+          actions: <Widget>[
+            new Padding(
+              padding: EdgeInsets.only(right: 10),
+              child: Theme(
+                data:
+                    Theme.of(context).copyWith(canvasColor: UIData.appBarColor),
+                child: new Container(
+                    color: UIData.appBarColor,
+                    child: new DropdownButton<String>(
+                      style: TextStyle(color: UIData.blackOrWhite),
+                      hint: new Text(
+                        widget.user.currency,
+                        style: new TextStyle(color: UIData.blackOrWhite, fontWeight: FontWeight.bold),
+                      ),
+                      items: <String>['USD', 'EURO', 'NOK', 'GBP']
+                          .map((String value) {
+                        return new DropdownMenuItem<String>(
+                          value: value,
+                          child: new Text(
+                            value,
+                            style: new TextStyle(color: UIData.blackOrWhite),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (_) {
+                        widget.isLoading = true;
+                        if (widget.user.currency != _) {
+                          setState(() {
+                            widget.isLoading = true;
+                            getData();
+                            widget.user.currency = _;
+                          });
+                        }
+                      },
+                    )),
+              ),
+            ),
+          ],
+          title: new Text(
+            "Results",
+            style: new TextStyle(
+                color: UIData.blackOrWhite, fontSize: UIData.fontSize24),
+          ),
+          backgroundColor: UIData.appBarColor,
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: [
+              Tab(
+                child: Text(
+                  "Tournaments",
+                  style: new TextStyle(color: UIData.blackOrWhite),
+                ),
+              ),
+              Tab(
+                child: Text(
+                  "Cash Games",
+                  style: new TextStyle(color: UIData.blackOrWhite),
+                ),
+              ),
+              Tab(
+                child: Text(
+                  "Statistics",
+                  style: new TextStyle(color: UIData.blackOrWhite),
+                ),
+              ),
+            ],
+          ),
+        ),
+        body: new Stack(children: <Widget>[
+          new TabBarView(
+            physics: ScrollPhysics(),
+            controller: _tabController,
+            children: [
+              SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    hasTournaments(),
+                  ],
+                ),
+              ),
+              SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    hasCashGames(),
+                  ],
+                ),
+              ),
+              SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: new Column(
+                    children: data(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ]),
+        backgroundColor: UIData.dark,
+      );
+    else
+      return Essentials();
   }
 
   ResultGame exchange(ResultGame resultGame) {
@@ -116,7 +236,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
         widget.user.currency,
         resultGame.gameName,
         resultGame.gameType,
-        resultGame.gameType,
+        resultGame.groupName,
         resultGame.orderByTime,
         payout.round(),
         resultGame.placing,
@@ -163,7 +283,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
             cashResultGameTotal.averageBuyin / cashgameResults.length;
       }
     }
-    cashResultGameTotal.gameCount = cashgameResults.length + 1;
+    cashResultGameTotal.gameCount = cashgameResults.length;
 
     cashgameResults.sort((a, b) => a.date.compareTo(b.date));
     cashgameData = charts.Series<ResultGame, DateTime>(
@@ -205,7 +325,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
             tournamentResultGameTotal.averageBuyin / tournamentResults.length;
       }
     }
-    tournamentResultGameTotal.gameCount = cashgameResults.length + 1;
+    tournamentResultGameTotal.gameCount = tournamentResults.length;
 
     tournamentResults.sort((a, b) => a.date.compareTo(b.date));
     tournamentData = charts.Series<ResultGame, DateTime>(
@@ -221,118 +341,43 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
     });
   }
 
-  bool ready = false;
-  var chart;
-  @override
-  Widget build(BuildContext context) {
-    // if (!widget.isLoading)
-    return Scaffold(
-      appBar: AppBar(
-        actions: <Widget>[
-          Theme(
-            data: Theme.of(context).copyWith(canvasColor: UIData.yellow),
-            child: new Container(
-                color: UIData.appBarColor,
-                child: new DropdownButton<String>(
-                  style: TextStyle(color: UIData.blackOrWhite),
-                  hint: new Text(
-                    widget.user.currency,
-                    style: new TextStyle(color: UIData.blackOrWhite),
-                  ),
-                  items:
-                      <String>['USD', 'EURO', 'NOK', 'GBP'].map((String value) {
-                    return new DropdownMenuItem<String>(
-                      value: value,
-                      child: new Text(
-                        value,
-                        style: new TextStyle(color: UIData.blackOrWhite),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (_) {
-                    if (widget.user.currency != _) {
-                      setState(() {
-                        widget.isLoading = true;
-                        getData();
-                        widget.user.currency = _;
-                      });
-                    }
-                  },
+  Widget hasTournaments() {
+    if (tournamentResults.isNotEmpty) {
+      return SelectionCallbackExample.withSampleData(
+          tournamentData, widget.user, true);
+    } else {
+      return notSharing("tournament");
+    }
+  }
+
+  Widget hasCashGames() {
+    if (cashgameResults.isNotEmpty) {
+      return SelectionCallbackExample.withSampleData(
+          cashgameData, widget.user, false);
+    } else {
+      return notSharing("cash game");
+    }
+  }
+
+  Widget notSharing(String type) {
+    return new Padding(
+        padding: EdgeInsets.all(12.0),
+        child: new Align(
+          alignment: Alignment.topCenter,
+          child: new Container(
+            decoration: new BoxDecoration(
+                color: UIData.listColor,
+                border: Border.all(color: UIData.darkest),
+                borderRadius: new BorderRadius.all(const Radius.circular(8.0))),
+            child: new Padding(
+                padding: EdgeInsets.all(12.0),
+                child: new Text(
+                  "${widget.user.userName} has no $type results to share",
+                  style:
+                      new TextStyle(fontSize: 25.0, color: UIData.blackOrWhite),
                 )),
           ),
-        ],
-        title: new Text(
-          "Results",
-          style: new TextStyle(
-              color: UIData.blackOrWhite, fontSize: UIData.fontSize24),
-        ),
-        backgroundColor: UIData.appBarColor,
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(
-              child: Text(
-                "Tournaments",
-                style: new TextStyle(color: UIData.blackOrWhite),
-              ),
-            ),
-            Tab(
-              child: Text(
-                "Cash Games",
-                style: new TextStyle(color: UIData.blackOrWhite),
-              ),
-            ),
-            Tab(
-              child: Text(
-                "Statistics",
-                style: new TextStyle(color: UIData.blackOrWhite),
-              ),
-            ),
-          ],
-        ),
-      ),
-      body: new Stack(children: <Widget>[
-        new TabBarView(
-          physics: ScrollPhysics(),
-          controller: _tabController,
-          children: [
-            SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(top: 12),
-                  ),
-                  SelectionCallbackExample.withSampleData(
-                      tournamentData, widget.user, true)
-                ],
-              ),
-            ),
-            SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(top: 12),
-                  ),
-                  SelectionCallbackExample.withSampleData(
-                      cashgameData, widget.user, false)
-                ],
-              ),
-            ),
-            SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: new Column(
-                  children: data(),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ]),
-      backgroundColor: UIData.dark,
-    );
-    // else
-    //   return Essentials();
+        ));
   }
 
   List<Widget> data() {
@@ -451,9 +496,11 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
       }
     }
 
-    list.add(new Container(
-      height: 44,
-    ));
+    if (tournamentResults.isNotEmpty) {
+      list.add(new Container(
+        height: 44,
+      ));
+    }
 
     if (cashgameResults != null) {
       list.add(new Align(

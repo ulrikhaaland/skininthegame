@@ -779,6 +779,7 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
             "bblind": widget.game.bBlind,
             "sblind": widget.game.sBlind,
             "orderbytime": widget.game.orderByTime,
+            "public": widget.group.shareResults,
           });
         }
       });

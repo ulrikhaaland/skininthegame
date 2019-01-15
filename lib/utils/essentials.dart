@@ -24,6 +24,10 @@ class Essentials extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: new AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: UIData.appBarColor,
+      ),
       backgroundColor: UIData.dark,
       body: loading(true),
     );
