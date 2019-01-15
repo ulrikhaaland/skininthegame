@@ -9,9 +9,11 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:yadda/utils/essentials.dart';
 
 class UserPageInvites extends StatefulWidget {
-  UserPageInvites({Key key, this.auth, this.user}) : super(key: key);
+  UserPageInvites({Key key, this.auth, this.user, this.updateState})
+      : super(key: key);
   final User user;
   final BaseAuth auth;
+  final VoidCallback updateState;
 
   @override
   UserPageInvitesState createState() => UserPageInvitesState();
@@ -37,8 +39,7 @@ class UserPageInvitesState extends State<UserPageInvites> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-            iconTheme: IconThemeData(color: UIData.blackOrWhite),
-          
+          iconTheme: IconThemeData(color: UIData.blackOrWhite),
           backgroundColor: UIData.appBarColor,
           title: new Text(
             "Invites",
@@ -68,6 +69,7 @@ class UserPageInvitesState extends State<UserPageInvites> {
                   builder: (context) => GroupDashboard(
                         groupId: document.data["groupid"],
                         user: widget.user,
+                        updateState: () => widget.updateState(),
                       )));
             }),
       ),

@@ -25,10 +25,12 @@ class GroupDashboard extends StatefulWidget {
       this.groupType,
       this.onUpdate,
       this.groupName,
-      this.group})
+      this.group,
+      this.updateState})
       : super(key: key);
   final BaseAuth auth;
   final VoidCallback onSignOut;
+  final VoidCallback updateState;
   final String groupId;
   final String groupType;
   final String groupName;
@@ -206,6 +208,7 @@ class GroupDashboardState extends State<GroupDashboard> {
         .document("users/$currentUserId/grouprequests/$groupId")
         .delete();
     isMember = true;
+    widget.updateState();
     setState(() {});
   }
 

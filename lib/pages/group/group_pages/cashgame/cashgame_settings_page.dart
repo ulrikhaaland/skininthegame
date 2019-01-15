@@ -22,12 +22,15 @@ class CashGameSettingsPage extends StatefulWidget {
     this.history,
     this.auth,
     this.game,
+    this.updateState,
   }) : super(key: key);
   final BaseAuth auth;
   final Group group;
   final User user;
   final Game game;
   final VoidCallback callBack;
+  final VoidCallback updateState;
+
   final bool history;
   @override
   CashGameSettingsPageState createState() => CashGameSettingsPageState();
@@ -577,6 +580,10 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
   }
 
   void calculatePayouts(bool calculate, bool moveGame) async {
+    firestoreInstance.document(pathToCashGame).updateData({
+      "calculatepayouts": true,
+    });
+    widget.game.calculatePayouts = true;
     if (calculate == true) {
       List<Person> personList = new List();
       firestoreInstance.runTransaction((Transaction tx) async {
@@ -585,8 +592,7 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
             .getDocuments();
         int q = 0;
         qSnap.documents.forEach((DocumentSnapshot doc) {
-          String i = doc.data["payout"];
-          int payout = int.tryParse(i);
+          int payout = doc.data["payout"];
 
           int buyin = doc.data["buyin"];
           int result = payout - buyin;

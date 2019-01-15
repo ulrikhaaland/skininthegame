@@ -198,6 +198,7 @@ class GamePageState extends State<GamePage> {
                         MaterialPageRoute(
                             builder: (context) => UserPageInvites(
                                   user: widget.user,
+                                  updateState: () => updateState(),
                                 )),
                       ),
                 ),
@@ -276,7 +277,7 @@ class GamePageState extends State<GamePage> {
                 } else if (value == "") {
                   setState(() {
                     screen = 0;
-
+                    _registeredGames();
                     setScreen();
                   });
                 } else if (screen == 1) {
@@ -290,6 +291,12 @@ class GamePageState extends State<GamePage> {
           // backgroundColor: UIData.darkest,
         ),
         body: setScreen());
+  }
+
+  void updateState() {
+    setState(() {
+      noGroups = false;
+    });
   }
 
   Widget addImage() {
@@ -498,6 +505,7 @@ class GamePageState extends State<GamePage> {
               builder: (context) => GroupDashboard(
                     user: widget.user,
                     groupId: groupId,
+                    updateState: () => updateState(),
                     // groupType: type,
                     onUpdate: () => _registeredGames(),
                   )),
@@ -574,6 +582,8 @@ class GamePageState extends State<GamePage> {
               builder: (context) => GroupDashboard(
                     user: widget.user,
                     groupId: groupId,
+                    updateState: () => updateState(),
+
                     // groupType: type,
                     onUpdate: () => _registeredGames(),
                   )),

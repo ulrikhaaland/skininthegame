@@ -12,6 +12,7 @@ import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/log.dart';
 import 'package:yadda/objects/game.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class CashGamePage extends StatefulWidget {
   CashGamePage(
@@ -501,6 +502,7 @@ class CashGamePageState extends State<CashGamePage>
                       user: widget.user,
                       group: widget.group,
                       game: game,
+                      updateState: () => updateState(),
                       callBack: () => checkIfFull(),
                       history: widget.history,
                     )),
@@ -585,33 +587,62 @@ class CashGamePageState extends State<CashGamePage>
   }
 
   Widget _registeredList(BuildContext context, DocumentSnapshot document) {
-    return ListTile(
-      leading: addImage(document.data["profilepicurl"]),
-      title: new Text(
-        document.data["name"],
-        style: new TextStyle(fontSize: 25.0, color: UIData.blackOrWhite),
-        overflow: TextOverflow.ellipsis,
-      ),
-      // trailing: iconButtonDelete(document.documentID),
-      onTap: () {
-        setState(() {
-          isLoading = true;
-        });
-        firestoreInstance
-            .document(
-                "groups/$groupId/games/type/cashgameactive/${widget.gameId}/players/${document.documentID}")
-            .get()
-            .then((datasnapshot) {
-          int buyin = datasnapshot.data["buyin"];
-          int payout = datasnapshot.data["payout"];
+    return new Slidable(
+      delegate: new SlidableDrawerDelegate(),
+      actionExtentRatio: 0.25,
+      child: new Container(
+        child: new ListTile(
+          leading: addImage(document.data["profilepicurl"]),
+          title: new Text(
+            document.data["name"],
+            style: new TextStyle(fontSize: 25.0, color: UIData.blackOrWhite),
+            overflow: TextOverflow.ellipsis,
+          ),
+          // trailing: iconButtonDelete(document.documentID),
+          onTap: () {
+            setState(() {
+              isLoading = true;
+            });
+            firestoreInstance
+                .document(
+                    "groups/$groupId/games/type/cashgameactive/${widget.gameId}/players/${document.documentID}")
+                .get()
+                .then((datasnapshot) {
+              int buyin = datasnapshot.data["buyin"];
+              int payout = datasnapshot.data["payout"];
 
-          setState(() {
-            isLoading = false;
-          });
-          pushPlayerPage(document.documentID, buyin, payout,
-              document.data["name"], document.data["profilepicurl"]);
-        });
-      },
+              setState(() {
+                isLoading = false;
+              });
+              pushPlayerPage(document.documentID, buyin, payout,
+                  document.data["name"], document.data["profilepicurl"]);
+            });
+          },
+        ),
+      ),
+      secondaryActions: <Widget>[
+        new IconSlideAction(
+            caption: 'Remove',
+            color: UIData.red,
+            icon: Icons.delete,
+            onTap: () {
+              if (widget.history == true) {
+                firestoreInstance.runTransaction((Transaction tx) async {
+                  await firestoreInstance
+                      .document("$gamePath/players/${document.documentID}")
+                      .delete();
+                });
+              }
+              firestoreInstance
+                  .document("$gamePath/activeplayers/${document.documentID}")
+                  .delete();
+              checkIfFull();
+              Log().postLogToCollection(
+                  "$currentUserName removed ${widget.user.userName} from the game",
+                  "$gamePath/log",
+                  "Remove");
+            }),
+      ],
     );
   }
 
@@ -695,7 +726,7 @@ class CashGamePageState extends State<CashGamePage>
         builder: (context, snapshot) {
           if (!snapshot.hasData) return loading();
           return ListView.builder(
-            itemExtent: 50.0,
+            itemExtent: 60.0,
             itemCount: snapshot.data.documents.length,
             itemBuilder: (context, index) =>
                 _queueList(context, snapshot.data.documents[index]),
@@ -746,20 +777,42 @@ class CashGamePageState extends State<CashGamePage>
   }
 
   Widget _queueList(BuildContext context, DocumentSnapshot document) {
-    return ListTile(
-        leading: addImage(document.data["profilepicurl"]),
-        title: new Text(
-          document.data["name"],
-          style: new TextStyle(fontSize: 25.0),
-          overflow: TextOverflow.ellipsis,
-        ),
-        trailing: tapToAdd(),
-        onTap: () {
-          if (isAdmin == true) {
-            addPlayerFromQueue(document.data["name"], document.data["id"],
-                document.data["profilepicurl"]);
-          }
-        });
+    return new Slidable(
+      delegate: new SlidableDrawerDelegate(),
+      actionExtentRatio: 0.25,
+      child: new Container(
+        child: new ListTile(
+            leading: addImage(document.data["profilepicurl"]),
+            title: new Text(
+              document.data["name"],
+              style: new TextStyle(fontSize: 25.0),
+              overflow: TextOverflow.ellipsis,
+            ),
+            trailing: tapToAdd(),
+            onTap: () {
+              if (isAdmin == true) {
+                addPlayerFromQueue(document.data["name"], document.data["id"],
+                    document.data["profilepicurl"]);
+              }
+            }),
+      ),
+      secondaryActions: <Widget>[
+        new IconSlideAction(
+            caption: 'Remove',
+            color: UIData.red,
+            icon: Icons.delete,
+            onTap: () {
+              firestoreInstance
+                  .document("$gamePath/queue/${document.documentID}")
+                  .delete();
+              checkIfFull();
+              Log().postLogToCollection(
+                  "$currentUserName removed ${widget.user.userName} from the queue",
+                  "$gamePath/log",
+                  "Remove");
+            }),
+      ],
+    );
   }
 
   Widget tapToAdd() {
@@ -810,36 +863,61 @@ class CashGamePageState extends State<CashGamePage>
     } else {
       result = document.data["payout"];
     }
-    return ListTile(
-      title: new Text(
-        "${document.data["name"]} ",
-        style: new TextStyle(fontSize: 24.0, color: UIData.blackOrWhite),
-        overflow: TextOverflow.ellipsis,
-      ),
-      trailing: new Text(
-        "$result",
-        style: new TextStyle(fontSize: 18.0, color: color),
-        overflow: TextOverflow.ellipsis,
-      ),
-      onTap: () {
-        setState(() {
-          isLoading = true;
-        });
-        firestoreInstance
-            .document("$gamePath/players/${document.documentID}")
-            .get()
-            .then((datasnapshot) {
-          int playerBuyin = datasnapshot.data["buyin"];
-          int payout = datasnapshot.data["payout"];
+    return new Slidable(
+      delegate: new SlidableDrawerDelegate(),
+      actionExtentRatio: 0.25,
+      child: new Container(
+        child: new ListTile(
+          title: new Text(
+            "${document.data["name"]} ",
+            style: new TextStyle(fontSize: 24.0, color: UIData.blackOrWhite),
+            overflow: TextOverflow.ellipsis,
+          ),
+          trailing: new Text(
+            "$result",
+            style: new TextStyle(fontSize: 18.0, color: color),
+            overflow: TextOverflow.ellipsis,
+          ),
+          onTap: () {
+            setState(() {
+              isLoading = true;
+            });
+            firestoreInstance
+                .document("$gamePath/players/${document.documentID}")
+                .get()
+                .then((datasnapshot) {
+              int playerBuyin = datasnapshot.data["buyin"];
+              int payout = datasnapshot.data["payout"];
 
-          setState(() {
-            isLoading = false;
-          });
-          pushPlayerPage(document.documentID, playerBuyin, payout,
-              document.data["name"], document.data["profilepicurl"]);
-        });
-      },
+              setState(() {
+                isLoading = false;
+              });
+              pushPlayerPage(document.documentID, playerBuyin, payout,
+                  document.data["name"], document.data["profilepicurl"]);
+            });
+          },
+        ),
+      ),
+      secondaryActions: <Widget>[
+        new IconSlideAction(
+            caption: 'Remove',
+            color: UIData.red,
+            icon: Icons.delete,
+            onTap: () {
+              firestoreInstance
+                  .document("$gamePath/players/${document.documentID}")
+                  .delete();
+              Log().postLogToCollection(
+                  "$currentUserName removed ${widget.user.userName} from the results",
+                  "$gamePath/log",
+                  "Remove");
+            }),
+      ],
     );
+  }
+
+  void updateState() {
+    setState(() {});
   }
 
   Widget resultStream() {
