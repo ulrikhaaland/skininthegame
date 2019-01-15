@@ -146,6 +146,16 @@ class NewTournamentState extends State<NewTournament> {
       if (game.getOrderByTime() == null) {
         game.setOrderByTime(0);
       }
+      if (game.date == "") {
+        game.date = DateTime.now().day.toString() +
+            "/" +
+            DateTime.now().month.toString();
+      }
+      if (game.time == "") {
+        game.time = DateTime.now().hour.toString() +
+            ":" +
+            DateTime.now().minute.toString();
+      }
       game.setId(gameId);
       game.pushGameToFirestore(
           "groups/$groupId/games/type/tournamentactive/$gameId", false);

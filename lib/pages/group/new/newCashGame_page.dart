@@ -152,6 +152,16 @@ class NewCashGameState extends State<NewCashGame> {
     if (validateAndSave()) {
       String orderByTime = "$date$time";
       game.setOrderByTime(int.tryParse(orderByTime));
+      if (game.date == "Not set") {
+        game.date = DateTime.now().day.toString() +
+            "/" +
+            DateTime.now().month.toString();
+      }
+      if (game.time == "Not set") {
+        game.time = DateTime.now().hour.toString() +
+            ":" +
+            DateTime.now().minute.toString();
+      }
       game.setId(gameId);
       game.pushGameToFirestore(
           "groups/$groupId/games/type/cashgameactive/$gameId", false);
