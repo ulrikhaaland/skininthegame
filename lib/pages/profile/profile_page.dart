@@ -95,13 +95,13 @@ class ProfilePageState extends State<ProfilePage>
   void setBGSize() {
     setState(() {
       if (userProfile.bio.length <= 42) {
-        profileBGSize = 230;
+        profileBGSize = 180;
       } else if (userProfile.bio.length <= 87) {
-        profileBGSize = 250;
+        profileBGSize = 210;
       } else if (userProfile.bio.length <= 131) {
-        profileBGSize = 270;
+        profileBGSize = 230;
       } else {
-        profileBGSize = 280;
+        profileBGSize = 240;
       }
     });
   }
@@ -113,6 +113,16 @@ class ProfilePageState extends State<ProfilePage>
         appBar: AppBar(
           backgroundColor: UIData.appBarColor,
           iconTheme: IconThemeData(color: UIData.appBarColor),
+          leading: new IconButton(
+            icon: new Icon(
+              defaultTargetPlatform == TargetPlatform.android
+                  ? Icons.arrow_back
+                  : Icons.arrow_back_ios,
+              color: UIData.blackOrWhite,
+            ),
+            onPressed: () =>
+                Navigator.canPop(context) ? Navigator.pop(context) : null,
+          ),
           bottom: PreferredSize(
             preferredSize: Size(0, profileBGSize),
             child: new Column(
@@ -194,44 +204,44 @@ class ProfilePageState extends State<ProfilePage>
                     ),
                   ),
                 ),
-                new Row(
-                  children: <Widget>[
-                    RaisedButton(
-                      elevation: 0,
-                      color: UIData.appBarColor,
-                      child: new Row(
-                        children: <Widget>[
-                          new Text(
-                            "Following",
-                            style: new TextStyle(color: Colors.grey[600]),
-                          ),
-                          new Text(
-                            " ${userProfile.following}",
-                            style: new TextStyle(color: UIData.blackOrWhite),
-                          ),
-                        ],
-                      ),
-                      onPressed: () => print(""),
-                    ),
-                    RaisedButton(
-                      elevation: 0,
-                      color: UIData.appBarColor,
-                      child: new Row(
-                        children: <Widget>[
-                          new Text(
-                            "Followers",
-                            style: new TextStyle(color: Colors.grey[600]),
-                          ),
-                          new Text(
-                            " ${userProfile.followers}",
-                            style: new TextStyle(color: UIData.blackOrWhite),
-                          ),
-                        ],
-                      ),
-                      onPressed: () => print(""),
-                    ),
-                  ],
-                ),
+                // new Row(
+                //   children: <Widget>[
+                //     RaisedButton(
+                //       elevation: 0,
+                //       color: UIData.appBarColor,
+                //       child: new Row(
+                //         children: <Widget>[
+                //           new Text(
+                //             "Following",
+                //             style: new TextStyle(color: Colors.grey[600]),
+                //           ),
+                //           new Text(
+                //             " ${userProfile.following}",
+                //             style: new TextStyle(color: UIData.blackOrWhite),
+                //           ),
+                //         ],
+                //       ),
+                //       onPressed: () => print(""),
+                //     ),
+                //     RaisedButton(
+                //       elevation: 0,
+                //       color: UIData.appBarColor,
+                //       child: new Row(
+                //         children: <Widget>[
+                //           new Text(
+                //             "Followers",
+                //             style: new TextStyle(color: Colors.grey[600]),
+                //           ),
+                //           new Text(
+                //             " ${userProfile.followers}",
+                //             style: new TextStyle(color: UIData.blackOrWhite),
+                //           ),
+                //         ],
+                //       ),
+                //       onPressed: () => print(""),
+                //     ),
+                //   ],
+                // ),
                 TabBar(
                   controller: _tabController,
                   tabs: [
@@ -251,16 +261,6 @@ class ProfilePageState extends State<ProfilePage>
                 ),
               ],
             ),
-          ),
-          leading: new IconButton(
-            icon: new Icon(
-              defaultTargetPlatform == TargetPlatform.android
-                  ? Icons.arrow_back
-                  : Icons.arrow_back_ios,
-              color: UIData.blackOrWhite,
-            ),
-            onPressed: () =>
-                Navigator.canPop(context) ? Navigator.pop(context) : null,
           ),
         ),
         backgroundColor: UIData.dark,
@@ -345,9 +345,9 @@ class ProfilePageState extends State<ProfilePage>
     Color color;
     String name = document.data["groupname"];
     String currency = document.data["currency"];
-    String profit = document.data["profit"];
+    int profit = document.data["profit"];
 
-    if (int.tryParse(document.data["profit"]).isNegative) {
+    if (profit.isNegative) {
       color = Colors.red;
     } else {
       color = Colors.green;
@@ -360,9 +360,10 @@ class ProfilePageState extends State<ProfilePage>
       currency = currency.substring(0, 3);
       currency = currency + "...";
     }
-    if (profit.length >= 12) {
-      profit = profit.substring(0, 9);
-      profit = profit + "...";
+    String str = profit.toString();
+    if (str.length >= 12) {
+      str = str.substring(0, 9);
+      str = str + "...";
     }
     return ListTile(
       contentPadding: EdgeInsets.all(3.0),
@@ -396,7 +397,7 @@ class ProfilePageState extends State<ProfilePage>
             style: new TextStyle(color: UIData.blackOrWhite),
           ),
           new Text(
-            "Profit: $profit$currency",
+            "Profit: $str$currency",
             style: new TextStyle(color: UIData.blackOrWhite),
             overflow: TextOverflow.ellipsis,
           ),

@@ -1,25 +1,27 @@
 class ResultGame {
   ResultGame(
-      this.addon,
-      this.buyin,
-      this.currency,
-      this.gameName,
-      this.gameType,
-      this.groupName,
-      this.orderByTime,
-      this.payout,
-      this.placing,
-      this.playerAmount,
-      this.prizePool,
-      this.profit,
-      this.rebuy,
-      this.time,
-      // this.year,
-      // this.day,
-      // this.month,
-      this.bBlind,
-      this.sBlind,
-      this.date);
+    this.addon,
+    this.buyin,
+    this.currency,
+    this.gameName,
+    this.gameType,
+    this.groupName,
+    this.orderByTime,
+    this.payout,
+    this.placing,
+    this.playerAmount,
+    this.prizePool,
+    this.profit,
+    this.rebuy,
+    this.time,
+    // this.year,
+    // this.day,
+    // this.month,
+    this.bBlind,
+    this.sBlind,
+    this.date,
+    this.share,
+  );
 
   final int addon;
   final int buyin;
@@ -34,6 +36,7 @@ class ResultGame {
   final int bBlind;
 
   final DateTime date;
+  final bool share;
 
   final String currency;
   final String gameName;
@@ -48,29 +51,29 @@ class ResultGame {
     String hour = map["time"];
     hour = hour.substring(0, 2);
     return new ResultGame(
-        map["addon"],
-        map["buyin"],
-        map["currency"],
-        map["gamename"],
-        map["gametype"],
-        map["groupname"],
-        map["orderbytime"],
-        map["payout"],
-        map["placing"],
-        map["playeramount"],
-        map["prizepool"],
-        map["profit"],
-        map["rebuy"],
-        map["time"],
-        // map["year"],
-        // map["day"],
-        // map["month"],
-        map["bblind"],
-        map["sblind"],
-        new DateTime(
-          map["year"], map["month"], map["day"],
-          // int.tryParse(hour)
-        ));
+      map["addon"],
+      map["buyin"],
+      map["currency"],
+      map["gamename"],
+      map["gametype"],
+      map["groupname"],
+      map["orderbytime"],
+      map["payout"],
+      map["placing"],
+      map["playeramount"],
+      map["prizepool"],
+      map["profit"],
+      map["rebuy"],
+      map["time"],
+      map["bblind"],
+      map["sblind"],
+      new DateTime(
+        map["year"],
+        map["month"],
+        map["day"],
+      ),
+      map["share"],
+    );
   }
 }
 

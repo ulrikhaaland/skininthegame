@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:yadda/objects/resultgame.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/utils/uidata.dart';
+import 'package:flutter/foundation.dart';
 
 class ProfilePageResults extends StatefulWidget {
   ProfilePageResults({this.result, this.user, this.title});
@@ -18,6 +19,16 @@ class _ProfilePageResultsState extends State<ProfilePageResults> {
     return Scaffold(
       backgroundColor: UIData.dark,
       appBar: new AppBar(
+        leading: new IconButton(
+          icon: new Icon(
+            defaultTargetPlatform == TargetPlatform.android
+                ? Icons.arrow_back
+                : Icons.arrow_back_ios,
+            color: UIData.blackOrWhite,
+          ),
+          onPressed: () =>
+              Navigator.canPop(context) ? Navigator.pop(context) : null,
+        ),
         title: new Text(widget.title,
             style: new TextStyle(
                 color: UIData.blackOrWhite, fontSize: UIData.fontSize24)),

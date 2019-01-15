@@ -13,8 +13,9 @@ import 'package:yadda/objects/currency.dart';
 
 class ResultPage extends StatefulWidget {
   final User user;
+  final String currentUserResults;
   bool isLoading;
-  ResultPage({this.user, this.isLoading});
+  ResultPage({this.user, this.isLoading, this.currentUserResults});
   @override
   _ResultPageState createState() => _ResultPageState();
 }
@@ -67,7 +68,9 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
                       style: TextStyle(color: UIData.blackOrWhite),
                       hint: new Text(
                         widget.user.currency,
-                        style: new TextStyle(color: UIData.blackOrWhite, fontWeight: FontWeight.bold),
+                        style: new TextStyle(
+                            color: UIData.blackOrWhite,
+                            fontWeight: FontWeight.bold),
                       ),
                       items: <String>['USD', 'EURO', 'NOK', 'GBP']
                           .map((String value) {
@@ -247,10 +250,12 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
         resultGame.time,
         bBlind.round(),
         sBlind.round(),
-        resultGame.date);
+        resultGame.date,
+        resultGame.share);
     return resultGame;
   }
 
+  bool globalCurrency = false;
   void getData() async {
     cashgameResults.removeRange(0, cashgameResults.length);
     tournamentResults.removeRange(0, tournamentResults.length);
@@ -265,7 +270,16 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
     cashResultGameTotal = new ResultGameTotal(0, 0, 0, 0, 0, 0, 0);
     for (int i = 0; i < cashgameResults.length; i++) {
       if (cashgameResults[i].currency != widget.user.currency) {
-        cashgameResults[i] = exchange(cashgameResults[i]);
+        if (cashgameResults[i].currency == "NOK" ||
+            cashgameResults[i].currency == "USD" ||
+            cashgameResults[i].currency == "EURO" ||
+            cashgameResults[i].currency == "GBP") {
+          globalCurrency = true;
+          cashgameResults[i] = exchange(cashgameResults[i]);
+        }
+      }
+      if (!cashgameResults[i].share) {
+        cashgameResults.removeAt(i);
       }
       if (!cashgameResults[i].profit.isNegative) {
         cashResultGameTotal.winningSessions += 1;
@@ -302,6 +316,17 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
     });
     tournamentResultGameTotal = new ResultGameTotal(0, 0, 0, 0, 0, 0, 0);
     for (int i = 0; i < tournamentResults.length; i++) {
+      if (tournamentResults[i].currency != widget.user.currency) {
+        if (cashgameResults[i].currency == "NOK" ||
+            cashgameResults[i].currency == "USD" ||
+            cashgameResults[i].currency == "EURO" ||
+            cashgameResults[i].currency == "GBP") {
+          tournamentResults[i] = exchange(tournamentResults[i]);
+        }
+      }
+      if (!tournamentResults[i].share) {
+        tournamentResults.removeAt(i);
+      }
       if (tournamentResults[i].payout > 0) {
         tournamentResultGameTotal.itm += 1;
       }
