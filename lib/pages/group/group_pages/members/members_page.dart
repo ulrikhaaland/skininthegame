@@ -278,6 +278,7 @@ class MembersPageState extends State<MembersPage> {
       actionExtentRatio: 0.25,
       child: new Container(
         child: new ListTile(
+          leading: addImage(document.data["profilepicurl"]),
           title: new Text(
             document.data["username"],
             style: new TextStyle(color: UIData.blackOrWhite),

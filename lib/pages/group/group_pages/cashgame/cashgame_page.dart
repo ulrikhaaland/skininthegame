@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:yadda/utils/uidata.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -100,7 +101,6 @@ class CashGamePageState extends State<CashGamePage>
     currentUserId = widget.user.getId();
     currentUserName = widget.user.getName();
     groupId = widget.group.id;
-
     isAdmin = widget.group.admin;
 
     _tabController = new TabController(vsync: this, length: 4);
@@ -116,7 +116,7 @@ class CashGamePageState extends State<CashGamePage>
     gamePath =
         'groups/${widget.group.id}/games/type/$cashGameActiveOrHistory/${widget.gameId}';
     logPath = "$gamePath/log";
-
+    getMoneyOnTabel();
     getGroup();
   }
 
@@ -236,8 +236,13 @@ class CashGamePageState extends State<CashGamePage>
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: UIData.blackOrWhite),
                     ),
+                    new Text(
+                      "Money on table: $moneyOnTable",
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: UIData.blackOrWhite),
+                    ),
                     new Padding(
-                      padding: EdgeInsets.all(15.0),
+                      padding: EdgeInsets.all(12.0),
                     ),
                     new Text(
                       "${game.info}",
@@ -253,6 +258,23 @@ class CashGamePageState extends State<CashGamePage>
             secondLoading(),
           ],
         ));
+  }
+
+  int moneyOnTable = 0;
+
+  void getMoneyOnTabel() async {
+    QuerySnapshot qSnapActive = await firestoreInstance
+        .collection("$gamePath/activeplayers")
+        .getDocuments();
+    QuerySnapshot qSnapPlayers =
+        await firestoreInstance.collection("$gamePath/players").getDocuments();
+    qSnapPlayers.documents.forEach((DocumentSnapshot docPlayers) {
+      qSnapActive.documents.forEach((DocumentSnapshot docActive) {
+        if (docPlayers.documentID == docActive.documentID) {
+          moneyOnTable += docPlayers.data["buyin"];
+        }
+      });
+    });
   }
 
   setJoin() {
@@ -284,7 +306,7 @@ class CashGamePageState extends State<CashGamePage>
         child: Text(joinLeave),
         onPressed: () {
           if (hasJoined == true) {
-            removePlayer();
+            removePlayer(widget.user.id, false, widget.user.userName);
           } else {
             addPlayer();
           }
@@ -391,16 +413,36 @@ class CashGamePageState extends State<CashGamePage>
     }
   }
 
-  removePlayer() {
+  void updateMoneyOnTable(String uid) async {
+    DocumentSnapshot gameDoc = await firestoreInstance.document(gamePath).get();
+    DocumentSnapshot doc =
+        await firestoreInstance.document("$gamePath/players/$uid").get();
+
+    int buyin = doc.data["buyin"];
+    int payout = doc.data["payout"];
+    int amount = 0;
+    if (buyin == payout) {
+      amount = buyin;
+    } else if (payout == 0) {
+    } else if (buyin > payout) {
+      amount = buyin - payout;
+    } else {
+      amount = payout - buyin;
+    }
+    if (payout != 0) {
+      firestoreInstance.document(gamePath).updateData({
+        "moneyontable": gameDoc.data["moneyontable"] -= amount,
+      });
+    }
+  }
+
+  void removePlayer(String uid, bool removed, String name) async {
+    updateMoneyOnTable(uid);
     hasJoined = false;
     firestoreInstance.runTransaction((Transaction tx) async {
-      await firestoreInstance
-          .document("$gamePath/activeplayers/$currentUserId")
-          .delete();
+      await firestoreInstance.document("$gamePath/activeplayers/$uid").delete();
       firestoreInstance.runTransaction((Transaction tx) async {
-        await firestoreInstance
-            .document("$gamePath/queue/$currentUserId")
-            .delete();
+        await firestoreInstance.document("$gamePath/queue/$uid").delete();
         checkIfFull();
         if (full == true) {
           setQueue();
@@ -409,8 +451,12 @@ class CashGamePageState extends State<CashGamePage>
         }
       });
     });
-
-    Log().postLogToCollection("$currentUserName left game", logPath, "Leave");
+    if (removed) {
+      Log().postLogToCollection(
+          "$currentUserName removed $name from the game", logPath, "Remove");
+    } else {
+      Log().postLogToCollection("$name left game", logPath, "Leave");
+    }
   }
 
 // Check if player has registered the tournament, add and delete player to/from tournament.
@@ -442,6 +488,7 @@ class CashGamePageState extends State<CashGamePage>
           docSnap.data["calculatepayouts"],
           docSnap.data["currency"],
           docSnap.data["isrunning"],
+          docSnap.data["moneyontable"],
         );
 
         if (game.calculatePayouts == true && widget.history == true) {
@@ -633,14 +680,7 @@ class CashGamePageState extends State<CashGamePage>
                       .delete();
                 });
               }
-              firestoreInstance
-                  .document("$gamePath/activeplayers/${document.documentID}")
-                  .delete();
-              checkIfFull();
-              Log().postLogToCollection(
-                  "$currentUserName removed ${widget.user.userName} from the game",
-                  "$gamePath/log",
-                  "Remove");
+              removePlayer(document.documentID, true, document.data["name"]);
             }),
       ],
     );

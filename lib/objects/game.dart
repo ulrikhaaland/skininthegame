@@ -2,31 +2,34 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Game {
   Game(
-      this.totalPrizePool,
-      this.addon,
-      this.id,
-      this.info,
-      this.name,
-      this.fittedName,
-      this.adress,
-      this.bBlind,
-      this.buyin,
-      this.date,
-      this.gameType,
-      this.maxPlayers,
-      this.orderByTime,
-      this.rebuy,
-      this.registeredPlayers,
-      this.sBlind,
-      this.startingChips,
-      this.time,
-      this.calculatePayouts,
-      this.currency,
-      this.isRunning);
+    this.totalPrizePool,
+    this.addon,
+    this.id,
+    this.info,
+    this.name,
+    this.fittedName,
+    this.adress,
+    this.bBlind,
+    this.buyin,
+    this.date,
+    this.gameType,
+    this.maxPlayers,
+    this.orderByTime,
+    this.rebuy,
+    this.registeredPlayers,
+    this.sBlind,
+    this.startingChips,
+    this.time,
+    this.calculatePayouts,
+    this.currency,
+    this.isRunning,
+    this.moneyOnTable,
+  );
 
   bool calculatePayouts;
   bool isRunning;
 
+  int moneyOnTable;
   int addon;
   int buyin;
   int id;
@@ -70,31 +73,34 @@ class Game {
         "calculatepayouts": this.calculatePayouts,
         "currency": this.currency,
         "isrunning": this.isRunning,
+        "moneyontable": this.moneyOnTable,
       };
 
   Game fromMap(Map map) {
     Game game = new Game(
-        map["prizepool"],
-        addon,
-        id,
-        info,
-        name,
-        fittedName,
-        adress,
-        bBlind,
-        buyin,
-        date,
-        gameType,
-        maxPlayers,
-        orderByTime,
-        rebuy,
-        registeredPlayers,
-        sBlind,
-        startingChips,
-        time,
-        calculatePayouts,
-        currency,
-        isRunning);
+      map["prizepool"],
+      addon,
+      id,
+      info,
+      name,
+      fittedName,
+      adress,
+      bBlind,
+      buyin,
+      date,
+      gameType,
+      maxPlayers,
+      orderByTime,
+      rebuy,
+      registeredPlayers,
+      sBlind,
+      startingChips,
+      time,
+      calculatePayouts,
+      currency,
+      isRunning,
+      moneyOnTable,
+    );
     return game;
   }
 

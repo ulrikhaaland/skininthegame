@@ -91,7 +91,7 @@ class NewTournamentState extends State<NewTournament> {
     groupId = widget.group.id;
 
     game = new Game("", 0, null, "", "", "", "", 0, 0, "", "No Limit Hold'em",
-        18, 0, 0, 0, 0, "", "", false, "USD", false);
+        18, 0, 0, 0, 0, "", "", false, "USD", false, 0);
   }
 
   bool validateAndSave() {

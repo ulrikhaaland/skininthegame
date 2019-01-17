@@ -267,6 +267,7 @@ class TournamentPageState extends State<TournamentPage>
           docSnap.data["calculatepayouts"],
           docSnap.data["currency"],
           docSnap.data["isrunning"],
+          docSnap.data["moneyontable"],
         );
         checkIfFull();
         userFound = true;

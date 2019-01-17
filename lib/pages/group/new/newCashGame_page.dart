@@ -51,7 +51,7 @@ class NewCashGameState extends State<NewCashGame> {
     currentUserId = widget.user.id;
     groupId = widget.group.id;
     game = new Game("", 0, null, "", "", "", "", 0, 0, "", "No Limit Hold'em",
-        9, 0, 0, 0, 0, "", "", false, "USD", false);
+        9, 0, 0, 0, 0, "", "", false, "USD", false, 0);
     game.setDate("Not set");
     game.setTime("Not set");
   }

@@ -39,6 +39,8 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
 
   File _image;
 
+  Firestore firestoreInstace = Firestore.instance;
+
   String profilePicURL;
 
   Future getImage() async {
@@ -203,6 +205,7 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
             if (success) debugPrint('removed image!');
           });
         }
+
         widget.user.hasProfilePic =
             await ProfilePicture().uploadFile(widget.user.id, _image);
         var ref = await FirebaseStorage.instance
@@ -210,15 +213,23 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
             .child(widget.user.id)
             .getDownloadURL();
         widget.user.profilePicURL = ref;
+        QuerySnapshot qSnap = await firestoreInstace
+            .collection("users/${widget.user.id}/groups")
+            .getDocuments();
+        qSnap.documents.forEach((DocumentSnapshot doc) {
+          firestoreInstace
+              .document("groups/${doc.documentID}/members/${widget.user.id}")
+              .updateData({
+            "profilepicurl": widget.user.profilePicURL,
+          });
+        });
         setState(() {
           widget.loading = false;
         });
       }
       Navigator.pop(context);
-      await Firestore.instance.runTransaction((Transaction tx) async {
-        await Firestore.instance
-            .document("users/${widget.user.id}")
-            .updateData({
+      await firestoreInstace.runTransaction((Transaction tx) async {
+        await firestoreInstace.document("users/${widget.user.id}").updateData({
           'shareresults': widget.user.shareResults,
           'bio': widget.user.bio,
           "profilepicurl": widget.user.profilePicURL,
