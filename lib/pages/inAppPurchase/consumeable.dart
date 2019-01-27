@@ -249,13 +249,13 @@ class _ConsumeableState extends State<Consumeable> {
         "com.yadda.memberslarge"
       ];
       light = "Increase the limit by 10 members." +
-          "\n\nYour group will be able to host a total of ${widget.group.membersLimit + 10} members.";
+          "\n\nYour group will be able to host a total of  members.";
       medium = "Increase the limit by 30 members." +
-          "\n\nYour group will be able to host a total of ${widget.group.membersLimit + 30} members.";
+          "\n\nYour group will be able to host a total of  members.";
       large = "Increase the limit by 100 members." +
-          "\n\nYour group will be able to host a total of ${widget.group.membersLimit + 100} members.";
+          "\n\nYour group will be able to host a total of  members.";
       topBody =
-          "Your group has reached its limit of ${widget.group.membersLimit} members. Increase the limit to add more members.";
+          "Your group has reached its limit of  members. Increase the limit to add more members.";
       topTitle = "Your group is full!";
     }
   }

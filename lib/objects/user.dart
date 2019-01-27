@@ -11,7 +11,8 @@ class User {
       this.followers,
       this.hasProfilePic,
       this.profilePicURL,
-      this.currency);
+      this.currency,
+      this.appVersion);
 
   final String userName;
   final String id;
@@ -24,6 +25,7 @@ class User {
   bool shareResults;
   int following;
   int followers;
+  double appVersion;
   bool hasProfilePic;
 
   String getToken() {
@@ -54,5 +56,6 @@ class User {
         'followers': this.followers,
         'profilepicurl': this.profilePicURL,
         'currency': this.currency,
+        'appversion': this.appVersion,
       };
 }

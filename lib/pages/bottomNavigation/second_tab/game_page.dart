@@ -11,6 +11,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:yadda/pages/results/graph.dart';
 import 'package:yadda/pages/profile/invite_page.dart';
 import 'package:yadda/pages/profile/profile_page.dart';
+import 'package:yadda/pages/inAppPurchase/consumeable.dart';
 
 SearchBar searchBar;
 
@@ -204,6 +205,20 @@ class GamePageState extends State<GamePage> {
                 ),
                 new ListTile(
                   leading: IconButton(
+                    icon: Icon(Icons.exit_to_app, size: 30, color: Colors.grey),
+                    onPressed: null,
+                  ),
+                  title: new Text(
+                    "Logout",
+                    style: new TextStyle(
+                      fontSize: UIData.fontSize18,
+                      color: UIData.blackOrWhite,
+                    ),
+                  ),
+                  onTap: () => widget.onSignOut(),
+                ),
+                new ListTile(
+                  leading: IconButton(
                     icon: Icon(nightmodeIcon, size: 20, color: UIData.yellow),
                     onPressed: null,
                   ),
@@ -218,6 +233,27 @@ class GamePageState extends State<GamePage> {
                     }
                     setState(() {});
                   },
+                ),
+                new ListTile(
+                  leading: IconButton(
+                    icon: Icon(Icons.exit_to_app, size: 30, color: Colors.grey),
+                    onPressed: null,
+                  ),
+                  title: new Text(
+                    "Logout",
+                    style: new TextStyle(
+                      fontSize: UIData.fontSize18,
+                      color: UIData.blackOrWhite,
+                    ),
+                  ),
+                  onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Consumeable(
+                                  user: widget.user,
+                                  title: "Members",
+                                )),
+                      ),
                 ),
               ],
             ),

@@ -14,6 +14,7 @@ import 'package:yadda/utils/log.dart';
 import 'package:yadda/objects/game.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:yadda/pages/profile/profile_page.dart';
 
 class CashGamePage extends StatefulWidget {
   CashGamePage(
@@ -595,6 +596,10 @@ class CashGamePageState extends State<CashGamePage>
   }
 
   pushPlayerPage(String id, int buyin, int payout, String name, String url) {
+    bool createdPlayer = false;
+    if (id == name) {
+      createdPlayer = true;
+    }
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -609,6 +614,7 @@ class CashGamePageState extends State<CashGamePage>
                 game: game,
                 history: widget.history,
                 callBack: () => checkIfFull(),
+                createdPlayer: createdPlayer,
               )),
     );
   }
@@ -833,6 +839,14 @@ class CashGamePageState extends State<CashGamePage>
               if (isAdmin == true) {
                 addPlayerFromQueue(document.data["name"], document.data["id"],
                     document.data["profilepicurl"]);
+              } else {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ProfilePage(
+                              user: widget.user,
+                              profileId: document.documentID,
+                            )));
               }
             }),
       ),

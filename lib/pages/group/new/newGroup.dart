@@ -163,7 +163,7 @@ class NewGroupState extends State<NewGroup> {
       "uid": widget.user.id,
       'username': widget.user.userName,
       "admin": true,
-      "notifications": true,
+      "notification": true,
       "fcm": widget.user.fcm,
       "profilepicurl": widget.user.profilePicURL,
     });

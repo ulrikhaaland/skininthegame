@@ -5,24 +5,25 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/log.dart';
+import 'package:yadda/pages/profile/profile_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-
 import 'package:yadda/objects/game.dart';
 
 class CashGamePlayerPage extends StatefulWidget {
-  CashGamePlayerPage(
-      {Key key,
-      this.playerId,
-      this.playerUserName,
-      this.user,
-      this.buyinAmount,
-      this.group,
-      this.history,
-      this.callBack,
-      this.payout,
-      this.game,
-      this.url})
-      : super(key: key);
+  CashGamePlayerPage({
+    Key key,
+    this.playerId,
+    this.playerUserName,
+    this.user,
+    this.buyinAmount,
+    this.group,
+    this.history,
+    this.callBack,
+    this.payout,
+    this.game,
+    this.url,
+    this.createdPlayer,
+  }) : super(key: key);
   final User user;
   final Group group;
   final String playerId;
@@ -33,6 +34,7 @@ class CashGamePlayerPage extends StatefulWidget {
   final Game game;
   final bool history;
   final VoidCallback callBack;
+  final bool createdPlayer;
 
   @override
   CashGamePlayerPageState createState() => CashGamePlayerPageState();
@@ -195,46 +197,18 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
                   fontSize: UIData.fontSize20, color: UIData.blackOrWhite),
               overflow: TextOverflow.ellipsis,
             ),
+            onTap: () {
+              if (!widget.createdPlayer) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ProfilePage(
+                              user: widget.user,
+                              profileId: widget.playerId,
+                            )));
+              }
+            },
           ),
-          // new Divider(
-          //   height: .0,
-          //   color: Colors.black,
-          // ),
-          // new ListTile(
-          //   leading: new Icon(
-          //     Icons.delete,
-          //     size: 40.0,
-          //     color: UIData.red,
-          //   ),
-          //   title: new Text(
-          //     "Remove Player",
-          //     style: new TextStyle(
-          //         color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
-          //   ),
-          //   onTap: () {
-          //     if (widget.history == true) {
-          //       firestoreInstance.runTransaction((Transaction tx) async {
-          //         await firestoreInstance
-          //             .document("$gamePath/players/${widget.playerId}")
-          //             .delete();
-          //       });
-          //     }
-          //     firestoreInstance
-          //         .document("$gamePath/activeplayers/${widget.playerId}")
-          //         .delete();
-          //     widget.callBack();
-          //     Log().postLogToCollection(
-          //         "$currentUserName removed ${widget.playerUserName} from game",
-          //         "$gamePath/log",
-          //         "Remove");
-
-          //     Navigator.pop(context);
-          //   },
-          // ),
-          // new Divider(
-          //   height: .0,
-          //   color: Colors.black,
-          // ),
           new ListTile(
             leading: new Icon(
               Icons.attach_money,

@@ -16,7 +16,7 @@ class CloudFunctions {
           .collection("groups/$fromGroupId/members")
           .getDocuments();
       qSnap.documents.forEach((DocumentSnapshot doc) async {
-        if (doc.data["notifications"] == true && doc.data["fcm"] != null) {
+        if (doc.data["notification"] == true && doc.data["fcm"] != null) {
           print("${doc.data["fcm"]}");
           String dataURL =
               '$base?to=${doc.data["fcm"]}&gameName=$gameName&groupName=$groupName&fromGroupId=$fromGroupId&fromGameId=$fromGameId&gameType=$gameType&dailyMessage=${group.dailyMessage}&host=${group.host}&info=${group.info}&lowerCaseName=${group.lowerCaseName}&members=${group.members}&public=${group.public}&thumbs=${group.rating}';

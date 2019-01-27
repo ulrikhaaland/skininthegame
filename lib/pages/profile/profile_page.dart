@@ -14,15 +14,11 @@ import 'package:yadda/pages/results/graph.dart';
 class ProfilePage extends StatefulWidget {
   ProfilePage(
       {Key key,
-      this.auth,
-      this.onSignOut,
       this.user,
       this.setGroupPage,
       this.profileId})
       : super(key: key);
-  final BaseAuth auth;
   final String profileId;
-  final VoidCallback onSignOut;
   final VoidCallback setGroupPage;
   final User user;
 
@@ -82,6 +78,7 @@ class ProfilePageState extends State<ProfilePage>
           null,
           docSnap.data["profilepicurl"],
           docSnap.data["currency"],
+          null
         );
         setState(() {
           userFound = true;

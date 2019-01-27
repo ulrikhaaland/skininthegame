@@ -12,6 +12,7 @@ import 'package:yadda/utils/util.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/uidata.dart';
 import 'dart:async';
+import 'package:yadda/pages/update_page.dart';
 
 class RootPage extends StatefulWidget {
   RootPage({Key key, this.auth}) : super(key: key);
@@ -24,6 +25,7 @@ class RootPage extends StatefulWidget {
 enum AuthStatus {
   notSignedIn,
   signedIn,
+  updateApp,
   loading,
 }
 
@@ -37,6 +39,8 @@ class RootPageState extends State<RootPage> {
   UIData uiData = new UIData();
 
   FirebaseMessaging firebaseMessaging = FirebaseMessaging();
+
+  Firestore firestoreInstance = Firestore.instance;
 
   AuthStatus authStatus = AuthStatus.loading;
 
@@ -70,10 +74,20 @@ class RootPageState extends State<RootPage> {
     if (currentUser != null) {
       messagingToken = await firebaseMessaging.getToken();
       print(messagingToken);
-      Firestore.instance
+      firestoreInstance
           .document("users/$currentUser")
           .updateData({"fcm": messagingToken});
     }
+    QuerySnapshot qSnap = await firestoreInstance
+        .collection("users/$currentUser/groups")
+        .getDocuments();
+    qSnap.documents.forEach((DocumentSnapshot doc) {
+      firestoreInstance
+          .document("groups/${doc.data["id"]}/members/$currentUser")
+          .updateData({
+        "fcm": messagingToken,
+      });
+    });
     return messagingToken;
   }
 
@@ -90,7 +104,7 @@ class RootPageState extends State<RootPage> {
     var host = getValueFromMap(message, "host");
     var info = getValueFromMap(message, "info");
     var lowerCaseName = getValueFromMap(message, "lowerCaseName");
-    var docSnap = await Firestore.instance
+    var docSnap = await firestoreInstance
         .document("groups/$fromGroupId/members/${user.id}")
         .get();
     var admin = docSnap.data["admin"];
@@ -138,9 +152,9 @@ class RootPageState extends State<RootPage> {
   }
 
   Future<Null> getUserInfo() async {
-    Firestore.instance.runTransaction((Transaction tx) async {
+    firestoreInstance.runTransaction((Transaction tx) async {
       DocumentSnapshot docSnap =
-          await Firestore.instance.document("users/$currentUser").get();
+          await firestoreInstance.document("users/$currentUser").get();
       if (docSnap.exists) {
         user = new User(
             docSnap.data["email"],
@@ -154,11 +168,21 @@ class RootPageState extends State<RootPage> {
             docSnap.data["followers"],
             docSnap.data["hasprofilepic"],
             docSnap.data["profilepicurl"],
-            docSnap.data["currency"],);
+            docSnap.data["currency"],
+            docSnap.data["appversion"]);
+        double version = 0;
+        DocumentSnapshot docSnapV =
+            await firestoreInstance.document("version/version").get();
+        version = docSnapV.data["version"];
         setState(() {
-          authStatus = currentUser != null
-              ? AuthStatus.signedIn
-              : AuthStatus.notSignedIn;
+          if (currentUser != null) {
+            authStatus = AuthStatus.signedIn;
+            if (user.appVersion < version) {
+              authStatus = AuthStatus.updateApp;
+            }
+          } else {
+            authStatus = AuthStatus.notSignedIn;
+          }
         });
         uiData.nightMode(user.nightMode, user.id);
       } else {
@@ -195,6 +219,8 @@ class RootPageState extends State<RootPage> {
             onSignOut: () => _updateAuthStatus(AuthStatus.notSignedIn));
       case AuthStatus.loading:
         return new Essentials();
+      case AuthStatus.updateApp:
+        return new UpdatePage();
     }
   }
 }

@@ -74,9 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     three = ProfilePage(
       key: keyTwo,
-      auth: auth,
       setGroupPage: () => setGroupPage(),
-      onSignOut: () => _signOut(),
       user: widget.user,
       profileId: widget.user.id,
     );
