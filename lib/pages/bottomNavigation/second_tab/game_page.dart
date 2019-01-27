@@ -11,7 +11,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:yadda/pages/results/graph.dart';
 import 'package:yadda/pages/profile/invite_page.dart';
 import 'package:yadda/pages/profile/profile_page.dart';
-import 'package:yadda/pages/inAppPurchase/consumeable.dart';
+import 'package:yadda/pages/inAppPurchase/subscription.dart';
 
 SearchBar searchBar;
 
@@ -249,7 +249,7 @@ class GamePageState extends State<GamePage> {
                   onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => Consumeable(
+                            builder: (context) => Subscription(
                                   user: widget.user,
                                   title: "Members",
                                 )),
