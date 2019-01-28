@@ -13,8 +13,10 @@ import 'package:yadda/widgets/primary_button.dart';
 import 'package:yadda/pages/inAppPurchase/subscription.dart';
 
 class ProfilePage extends StatefulWidget {
-  ProfilePage({Key key, this.user, this.setGroupPage, this.profileId})
+  ProfilePage(
+      {Key key, this.user, this.setGroupPage, this.profileId, this.onSignOut})
       : super(key: key);
+  final VoidCallback onSignOut;
   final String profileId;
   final VoidCallback setGroupPage;
   final User user;
@@ -30,13 +32,13 @@ class ProfilePageState extends State<ProfilePage>
 
   bool userFound = false;
 
-  String followOrEdit = "Edit";
+  String followOrEdit = "Settings";
 
   bool ownProfile = false;
 
   User userProfile;
 
-  double profileBGSize = 250;
+  double profileBGSize = 180;
 
   @override
   void initState() {
@@ -44,7 +46,7 @@ class ProfilePageState extends State<ProfilePage>
     _tabController = new TabController(vsync: this, length: 4);
 
     if (widget.user.id == widget.profileId) {
-      followOrEdit = "Edit";
+      followOrEdit = "Settings";
       ownProfile = true;
     } else {
       followOrEdit = "Results";
@@ -82,22 +84,22 @@ class ProfilePageState extends State<ProfilePage>
         });
       });
     }
-    userFound = true;
+    setState(() {
+      userFound = true;
+    });
     setBGSize();
   }
 
   void setBGSize() {
-    setState(() {
-      if (userProfile.bio.length <= 42) {
-        profileBGSize = 180;
-      } else if (userProfile.bio.length <= 87) {
-        profileBGSize = 210;
-      } else if (userProfile.bio.length <= 131) {
-        profileBGSize = 230;
-      } else {
-        profileBGSize = 240;
-      }
-    });
+    if (userProfile.bio.length <= 42) {
+      profileBGSize = 180;
+    } else if (userProfile.bio.length <= 87) {
+      profileBGSize = 210;
+    } else if (userProfile.bio.length <= 131) {
+      profileBGSize = 230;
+    } else {
+      profileBGSize = 240;
+    }
   }
 
   @override
@@ -117,6 +119,9 @@ class ProfilePageState extends State<ProfilePage>
             onPressed: () =>
                 Navigator.canPop(context) ? Navigator.pop(context) : null,
           ),
+          actions: <Widget>[
+            settingsButton(),
+          ],
           bottom: PreferredSize(
             preferredSize: Size(0, profileBGSize),
             child: new Column(
@@ -130,55 +135,7 @@ class ProfilePageState extends State<ProfilePage>
                       padding: EdgeInsets.only(left: 14),
                       child: addImage(),
                     ),
-                    Padding(
-                      padding: EdgeInsets.only(
-                        right: 16,
-                      ),
-                      child: new ConstrainedBox(
-                        constraints:
-                            BoxConstraints(minWidth: 60.0, minHeight: 30.0),
-                        child: new RaisedButton(
-                            child: new Text(followOrEdit,
-                                style: new TextStyle(
-                                    color: Colors.black, fontSize: 16.0)),
-                            shape: new RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20.0))),
-                            color: UIData.yellowOrWhite,
-                            textColor: Colors.black,
-                            elevation: 8.0,
-                            onPressed: () {
-                              if (ownProfile) {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            ProfileSettingsPage(
-                                              user: widget.user,
-                                              setBGSize: () => setBGSize(),
-                                            )));
-                              } else if (userProfile.shareResults &&
-                                  widget.user.subLevel > 0) {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => ResultPage(
-                                              user: userProfile,
-                                              currentUser: widget.user,
-                                              isLoading: true,
-                                            )));
-                              } else {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => Subscription(
-                                              user: userProfile,
-                                              title: "Subscriptions",
-                                            )));
-                              }
-                            }),
-                      ),
-                    ),
+                    resultsButton(),
                   ],
                 ),
                 Padding(
@@ -283,6 +240,74 @@ class ProfilePageState extends State<ProfilePage>
       );
     } else {
       return Essentials();
+    }
+  }
+
+  Widget settingsButton() {
+    if (ownProfile) {
+      return new Padding(
+        padding: EdgeInsets.only(right: 4.0),
+        child: new IconButton(
+          icon: new Icon(
+            Icons.settings,
+            size: UIData.iconSizeAppBar,
+            color: UIData.blackOrWhite,
+          ),
+          onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => ProfileSettingsPage(
+                        user: widget.user,
+                        setBGSize: () => setBGSize(),
+                        onSignOut: () => widget.onSignOut(),
+                      ))),
+        ),
+      );
+    } else {
+      return new Container();
+    }
+  }
+
+  Widget resultsButton() {
+    if (!ownProfile) {
+      return Padding(
+        padding: EdgeInsets.only(
+          right: 16,
+        ),
+        child: new ConstrainedBox(
+          constraints: BoxConstraints(minWidth: 60.0, minHeight: 30.0),
+          child: new RaisedButton(
+              child: new Text(followOrEdit,
+                  style: new TextStyle(color: Colors.black, fontSize: 16.0)),
+              shape: new RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20.0))),
+              color: UIData.yellowOrWhite,
+              textColor: Colors.black,
+              elevation: 8.0,
+              onPressed: () {
+                if (userProfile.shareResults && widget.user.subLevel > 0) {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ResultPage(
+                                user: userProfile,
+                                currentUser: widget.user,
+                                isLoading: true,
+                              )));
+                } else {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Subscription(
+                                user: userProfile,
+                                title: "Subscriptions",
+                              )));
+                }
+              }),
+        ),
+      );
+    } else {
+      return new Container();
     }
   }
 

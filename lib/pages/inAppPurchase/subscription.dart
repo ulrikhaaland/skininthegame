@@ -10,12 +10,14 @@ import 'package:yadda/utils/essentials.dart';
 import 'subLevel.dart';
 
 class Subscription extends StatefulWidget {
-  Subscription({Key key, this.title, this.user, this.onUpdate, this.group})
+  Subscription(
+      {Key key, this.title, this.user, this.onUpdate, this.group, this.info})
       : super(key: key);
   final User user;
   final VoidCallback onUpdate;
   final String title;
   final Group group;
+  final bool info;
 
   @override
   _SubscriptionState createState() => new _SubscriptionState();
@@ -451,6 +453,8 @@ class _SubscriptionState extends State<Subscription> {
         padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
         child: Column(
           children: <Widget>[
+            information(),
+            SizedBox(height: 24.0),
             whalePlan(),
             SizedBox(height: 24.0),
             sharkPlan(),
@@ -460,23 +464,56 @@ class _SubscriptionState extends State<Subscription> {
         ),
       );
 
+  Widget information() {
+    if (widget.info == true) {
+      return Card(
+        color: UIData.listColor,
+        elevation: 3,
+        // padding: EdgeInsets.only(
+        //   bottom: 24.0,
+        // ),
+        child: Column(
+          children: <Widget>[
+            SizedBox(height: 12.0),
+            Align(
+              alignment: Alignment.center,
+              child: Text(
+                widget.title,
+                style: new TextStyle(
+                  color: UIData.red,
+                  fontSize: UIData.fontSize16,
+                ),
+              ),
+            ),
+            SizedBox(height: 12.0),
+          ],
+        ),
+      );
+    } else {
+      return Container();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      backgroundColor: UIData.dark,
-      appBar: new AppBar(
-        backgroundColor: UIData.appBarColor,
-        title: new Text(
-          widget.title,
-          style: new TextStyle(fontSize: UIData.fontSize24),
+    if (!loading)
+      return new Scaffold(
+        backgroundColor: UIData.dark,
+        appBar: new AppBar(
+          backgroundColor: UIData.appBarColor,
+          title: new Text(
+            "Subscriptions",
+            style: new TextStyle(fontSize: UIData.fontSize24),
+          ),
         ),
-      ),
-      body: Stack(
-        children: <Widget>[
-          Essentials().setScreen(allCards(context), loading),
-          Essentials().loading(isLoading),
-        ],
-      ),
-    );
+        body: Stack(
+          children: <Widget>[
+            allCards(context),
+            Essentials().loading(isLoading),
+          ],
+        ),
+      );
+    else
+      return new Essentials();
   }
 }

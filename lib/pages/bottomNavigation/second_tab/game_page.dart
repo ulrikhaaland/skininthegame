@@ -151,6 +151,7 @@ class GamePageState extends State<GamePage> {
                             builder: (context) => ProfilePage(
                                   user: widget.user,
                                   profileId: widget.user.id,
+                                  onSignOut: () => widget.onSignOut(),
                                 )),
                       ),
                 ),
@@ -167,7 +168,7 @@ class GamePageState extends State<GamePage> {
                     ),
                   ),
                   onTap: () {
-                    if (widget.user.subLevel == 0) {
+                    if (widget.user.subLevel > 0) {
                       Navigator.push(
                           context,
                           MaterialPageRoute(

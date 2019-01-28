@@ -12,6 +12,7 @@ import 'package:yadda/objects/game.dart';
 import 'package:yadda/utils/delete.dart';
 import 'package:yadda/auth.dart';
 import 'package:yadda/utils/layout.dart';
+import 'package:yadda/pages/inAppPurchase/subscription.dart';
 
 class CashGameSettingsPage extends StatefulWidget {
   CashGameSettingsPage({
@@ -107,6 +108,9 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
   String pathToCashGame;
   String cashgameActiveOrHistory = "cashgameactive";
 
+  DateTime _date;
+  TimeOfDay _time;
+
   initState() {
     super.initState();
     _tabController = new TabController(vsync: this, length: 2);
@@ -116,6 +120,15 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
     if (widget.history == true) {
       cashgameActiveOrHistory = "cashgamehistory";
     }
+    _date = new DateTime(
+        int.tryParse(widget.game.orderByTime.toString().substring(0, 4)),
+        int.tryParse(widget.game.orderByTime.toString().substring(4, 6)),
+        int.tryParse(widget.game.orderByTime.toString().substring(6, 8)));
+    _time = new TimeOfDay(
+        hour: int.tryParse(widget.game.orderByTime.toString().substring(8, 10)),
+        minute:
+            int.tryParse(widget.game.orderByTime.toString().substring(10, 12)));
+
     pathToCashGame =
         "groups/$groupId/games/type/$cashgameActiveOrHistory/${widget.game.id}";
 
@@ -342,13 +355,38 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
                                     new TextStyle(color: Colors.grey[600])),
                             autocorrect: false,
                             validator: (val) {
+                              val.isEmpty
+                                  ? val = widget.game.maxPlayers.toString()
+                                  : null;
+
                               if (widget.user.subLevel < 2) {
+                                String sub;
                                 if (widget.user.subLevel == 1 &&
                                     int.tryParse(val) > 9) {
-                                  return "Your current subscription only allows \n9 players per cash game";
+                                  sub =
+                                      "Your current subscription only allows \n9 players per cash game";
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Subscription(
+                                                user: widget.user,
+                                                info: true,
+                                                title: sub,
+                                              )));
+                                  return sub;
                                 } else if (widget.user.subLevel == 0 &&
                                     int.tryParse(val) > 6) {
-                                  return "Your current subscription only allows \n6 players per cash game";
+                                  sub =
+                                      "Your current subscription only allows \n6 players per cash game";
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Subscription(
+                                                user: widget.user,
+                                                info: true,
+                                                title: sub,
+                                              )));
+                                  return sub;
                                 }
                               }
                             },
@@ -494,16 +532,17 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
 
   void _saveGame() {
     if (validateAndSave()) {
-      if (date == null) {
-        date = widget.game.getDate().replaceAll("/", "");
-        String d = widget.game.getOrderByTime().toString();
-        date = "${d.replaceRange(4, d.length, "")}$date";
-      }
-      if (time == null) {
-        time = widget.game.getTime().replaceAll(":", "");
-        time = time.replaceAll("PM", "");
-      }
-      String orderByTime = "$date$time";
+      String month = _date.month.toString();
+      String day = _date.day.toString();
+      String hour = _time.hour.toString();
+      String minute = _time.minute.toString();
+
+      if (month.length == 1) month = "0" + month;
+      if (day.length == 1) day = "0" + day;
+      if (hour.length == 1) hour = "0" + hour;
+      if (minute.length == 1) minute = "0" + minute;
+
+      String orderByTime = "${_date.year}$month$day$hour$minute";
       widget.game.setOrderByTime(int.tryParse(orderByTime));
       widget.game.pushGameToFirestore(pathToCashGame, true);
 
@@ -1000,9 +1039,6 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
     );
     showDialog(context: context, child: dialog);
   }
-
-  DateTime _date = new DateTime.now();
-  TimeOfDay _time = new TimeOfDay.now();
 
   Future<Null> _selectDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(

@@ -131,8 +131,12 @@ class TournamentCreatePlayerPageState
     }
   }
 
-  addPlayer() {
-    if (validateAndSave()) {
+  addPlayer() async {
+    QuerySnapshot qSnap = await firestoreInstance
+        .collection(
+            "groups/$groupId/games/type/$activeOrHistory/${widget.game.id}/activeplayers")
+        .getDocuments();
+    if (validateAndSave() && qSnap.documents.length < widget.game.maxPlayers) {
       Log().postLogToCollection(
           "$playerName was added to the game", logPath, "Added");
       if (widget.fromCash != true) {
@@ -191,6 +195,15 @@ class TournamentCreatePlayerPageState
         backgroundColor: UIData.yellow,
         content: new Text(
           "$playerName has been added to the game",
+          textAlign: TextAlign.center,
+          style: new TextStyle(color: Colors.black),
+        ),
+      ));
+    } else {
+       Scaffold.of(formKey.currentState.context).showSnackBar(new SnackBar(
+        backgroundColor: UIData.yellow,
+        content: new Text(
+          "The game is full, increase the limit to add more players",
           textAlign: TextAlign.center,
           style: new TextStyle(color: Colors.black),
         ),

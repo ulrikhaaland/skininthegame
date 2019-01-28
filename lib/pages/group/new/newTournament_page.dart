@@ -10,6 +10,7 @@ import 'package:yadda/objects/game.dart';
 import 'package:yadda/utils/essentials.dart';
 import 'package:yadda/utils/layout.dart';
 import 'package:yadda/utils/cloudFunctions.dart';
+import 'package:yadda/pages/inAppPurchase/subscription.dart';
 
 class NewTournament extends StatefulWidget {
   NewTournament({Key key, this.user, this.group, this.fromTournamentGroupPage})
@@ -90,7 +91,7 @@ class NewTournamentState extends State<NewTournament> {
     groupId = widget.group.id;
 
     game = new Game("", 0, null, "", "", "", "", 0, 0, "", "No Limit Hold'em",
-        18, 0, 0, 0, 0, "", "", false, "USD", false, 0);
+        9, 0, 0, 0, 0, "", "", false, "USD", false, 0);
   }
 
   bool validateAndSave() {
@@ -296,15 +297,34 @@ class NewTournamentState extends State<NewTournament> {
                       labelStyle: new TextStyle(color: Colors.grey[600])),
                   autocorrect: false,
                   validator: (val) {
-                    if (val.isNotEmpty) {
-                      if (widget.user.subLevel < 2) {
-                        if (widget.user.subLevel == 1 &&
-                            int.tryParse(val) > 27) {
-                          return "Your current subscription only allows \n27 players per tournament";
-                        } else if (widget.user.subLevel == 0 &&
-                            int.tryParse(val) > 9) {
-                          return "Your current subscription only allows \n9 players per tournament";
-                        }
+                    val.isEmpty ? val = game.maxPlayers.toString() : null;
+                    if (widget.user.subLevel < 2) {
+                      String sub;
+                      if (widget.user.subLevel == 1 && int.tryParse(val) > 27) {
+                        sub =
+                            "Your current subscription only allows \n27 players per tournament";
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Subscription(
+                                      user: widget.user,
+                                      info: true,
+                                      title: sub,
+                                    )));
+                        return sub;
+                      } else if (widget.user.subLevel == 0 &&
+                          int.tryParse(val) > 9) {
+                        sub =
+                            "Your current subscription only allows \n9 players per tournament";
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Subscription(
+                                      user: widget.user,
+                                      info: true,
+                                      title: sub,
+                                    )));
+                        return sub;
                       }
                     }
                   },

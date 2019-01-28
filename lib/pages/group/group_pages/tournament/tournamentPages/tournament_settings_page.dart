@@ -9,6 +9,7 @@ import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/log.dart';
 import 'package:yadda/objects/game.dart';
 import 'package:yadda/utils/delete.dart';
+import 'package:yadda/pages/inAppPurchase/subscription.dart';
 
 class TournamentSettingsPage extends StatefulWidget {
   TournamentSettingsPage({
@@ -58,6 +59,9 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
   String pathToTournament;
   String tournamentActiveOrHistory = "tournamentactive";
 
+  DateTime _date;
+  TimeOfDay _time;
+
   @override
   initState() {
     super.initState();
@@ -69,6 +73,15 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
     if (widget.history == true) {
       tournamentActiveOrHistory = "tournamenthistory";
     }
+
+    _date = new DateTime(
+        int.tryParse(widget.game.orderByTime.toString().substring(0, 4)),
+        int.tryParse(widget.game.orderByTime.toString().substring(4, 6)),
+        int.tryParse(widget.game.orderByTime.toString().substring(6, 8)));
+    _time = new TimeOfDay(
+        hour: int.tryParse(widget.game.orderByTime.toString().substring(8, 10)),
+        minute:
+            int.tryParse(widget.game.orderByTime.toString().substring(10, 12)));
     pathToTournament =
         "groups/$groupId/games/type/$tournamentActiveOrHistory/${widget.game.id}";
 
@@ -117,16 +130,17 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
 
   void _saveGame() {
     if (validateAndSave()) {
-      if (date == null) {
-        date = widget.game.getDate().replaceAll("/", "");
-        String d = widget.game.getOrderByTime().toString();
-        date = "${d.replaceRange(4, d.length, "")}$date";
-      }
-      if (time == null) {
-        time = widget.game.getTime().replaceAll(":", "");
-        time = time.replaceAll("PM", "");
-      }
-      String orderByTime = "$date$time";
+      String month = _date.month.toString();
+      String day = _date.day.toString();
+      String hour = _time.hour.toString();
+      String minute = _time.minute.toString();
+
+      if (month.length == 1) month = "0" + month;
+      if (day.length == 1) day = "0" + day;
+      if (hour.length == 1) hour = "0" + hour;
+      if (minute.length == 1) minute = "0" + minute;
+
+      String orderByTime = "${_date.year}$month$day$hour$minute";
       widget.game.setOrderByTime(int.tryParse(orderByTime));
       widget.game.pushGameToFirestore(pathToTournament, true);
       Log().postLogToCollection(
@@ -370,13 +384,38 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                                     new TextStyle(color: Colors.grey[600])),
                             autocorrect: false,
                             validator: (val) {
+                              val.isEmpty
+                                  ? val = widget.game.maxPlayers.toString()
+                                  : null;
+
                               if (widget.user.subLevel < 2) {
+                                String sub;
                                 if (widget.user.subLevel == 1 &&
                                     int.tryParse(val) > 27) {
-                                  return "Your current subscription only allows \n27 players per tournament";
+                                  sub =
+                                      "Your current subscription only allows \n27 players per tournament";
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Subscription(
+                                                user: widget.user,
+                                                info: true,
+                                                title: sub,
+                                              )));
+                                  return sub;
                                 } else if (widget.user.subLevel == 0 &&
                                     int.tryParse(val) > 9) {
-                                  return "Your current subscription only allows \n9 players per tournament";
+                                  sub =
+                                      "Your current subscription only allows \n9 players per tournament";
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Subscription(
+                                                user: widget.user,
+                                                info: true,
+                                                title: sub,
+                                              )));
+                                  return sub;
                                 }
                               }
                             },
@@ -808,9 +847,6 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
     );
     showDialog(context: context, child: dialog);
   }
-
-  DateTime _date = new DateTime.now();
-  TimeOfDay _time = new TimeOfDay.now();
 
   Future<Null> _selectDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(

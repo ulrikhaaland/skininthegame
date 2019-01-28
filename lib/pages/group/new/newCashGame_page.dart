@@ -10,6 +10,7 @@ import 'package:yadda/objects/game.dart';
 import 'package:yadda/utils/layout.dart';
 import 'package:yadda/utils/essentials.dart';
 import 'package:yadda/utils/cloudFunctions.dart';
+import 'package:yadda/pages/inAppPurchase/subscription.dart';
 
 class NewCashGame extends StatefulWidget {
   NewCashGame({Key key, this.user, this.group, this.fromCashGamePage})
@@ -42,7 +43,6 @@ class NewCashGameState extends State<NewCashGame> {
   String date = "";
 
   bool gameIdAvailable = false;
-
 
   initState() {
     super.initState();
@@ -149,25 +149,24 @@ class NewCashGameState extends State<NewCashGame> {
 
   void _saveGame() {
     if (validateAndSave()) {
-      String orderByTime =
-          "${_date.year}${_date.month}${_date.day}${_time.hour}${_time.minute}";
+      String month = _date.month.toString();
+      String day = _date.day.toString();
+      String hour = _time.hour.toString();
+      String minute = _time.minute.toString();
+
+      if (month.length == 1) month = "0" + month;
+      if (day.length == 1) day = "0" + day;
+      if (hour.length == 1) hour = "0" + hour;
+      if (minute.length == 1) minute = "0" + minute;
+
+      String orderByTime = "${_date.year}$month$day$hour$minute";
       game.setOrderByTime(int.tryParse(orderByTime));
-      if (game.getOrderByTime() == null) {
-        game.setOrderByTime(int.tryParse(DateTime.now().year.toString() +
-            DateTime.now().month.toString() +
-            DateTime.now().day.toString() +
-            DateTime.now().hour.toString() +
-            DateTime.now().minute.toString()));
-      }
+
       if (game.date == "Not set") {
-        game.date = DateTime.now().day.toString() +
-            "/" +
-            DateTime.now().month.toString();
+        game.date = day + "/" + month;
       }
       if (game.time == "Not set") {
-        game.time = DateTime.now().hour.toString() +
-            ":" +
-            DateTime.now().minute.toString();
+        game.time = hour + ":" + minute;
       }
       game.setId(gameId);
       game.pushGameToFirestore(
@@ -302,15 +301,34 @@ class NewCashGameState extends State<NewCashGame> {
                       labelStyle: new TextStyle(color: Colors.grey[600])),
                   autocorrect: false,
                   validator: (val) {
-                    if (val.isNotEmpty) {
-                      if (widget.user.subLevel < 2) {
-                        if (widget.user.subLevel == 1 &&
-                            int.tryParse(val) > 9) {
-                          return "Your current subscription only allows \n9 players per cash game";
-                        } else if (widget.user.subLevel == 0 &&
-                            int.tryParse(val) > 6) {
-                          return "Your current subscription only allows \n6 players per cash game";
-                        }
+                    val.isEmpty ? val = game.maxPlayers.toString() : null;
+                    if (widget.user.subLevel < 2) {
+                      String sub;
+                      if (widget.user.subLevel == 1 && int.tryParse(val) > 9) {
+                        sub =
+                            "Your current subscription only allows \n9 players per cash game";
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Subscription(
+                                      user: widget.user,
+                                      info: true,
+                                      title: sub,
+                                    )));
+                        return sub;
+                      } else if (widget.user.subLevel == 0 &&
+                          int.tryParse(val) > 6) {
+                        sub =
+                            "Your current subscription only allows \n6 players per cash game";
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Subscription(
+                                      user: widget.user,
+                                      info: true,
+                                      title: sub,
+                                    )));
+                        return sub;
                       }
                     }
                   },

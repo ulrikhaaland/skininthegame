@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:yadda/auth.dart';
 import 'package:yadda/utils/uidata.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,14 +14,12 @@ import 'package:firebase_storage/firebase_storage.dart';
 class ProfileSettingsPage extends StatefulWidget {
   ProfileSettingsPage({
     Key key,
-    this.auth,
     this.onSignOut,
     this.user,
     this.setGroupPage,
     this.setBGSize,
     this.loading,
   }) : super(key: key);
-  final BaseAuth auth;
   final VoidCallback onSignOut;
   final VoidCallback setGroupPage;
   final VoidCallback setBGSize;
@@ -184,6 +181,74 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
                     color: Colors.black,
                   ),
                 ),
+                new ListTile(
+                  title: new Text(
+                    "Currency",
+                    style: new TextStyle(
+                      color: UIData.blackOrWhite,
+                      fontSize: UIData.fontSize20,
+                    ),
+                  ),
+                  trailing: Theme(
+                    data: Theme.of(context)
+                        .copyWith(canvasColor: UIData.appBarColor),
+                    child: new Container(
+                        // color: UIData.appBarColor,
+                        child: new DropdownButton<String>(
+                      style: TextStyle(color: UIData.blackOrWhite),
+                      hint: new Text(
+                        widget.user.currency,
+                        style: new TextStyle(
+                            color: UIData.blackOrWhite,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      items: <String>['USD', 'EURO', 'NOK', 'GBP']
+                          .map((String value) {
+                        return new DropdownMenuItem<String>(
+                          value: value,
+                          child: new Text(
+                            value,
+                            style: new TextStyle(color: UIData.blackOrWhite),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (_) {
+                        if (widget.user.currency != _) {
+                          setState(() {
+                            widget.user.currency = _;
+                          });
+                        }
+                      },
+                    )),
+                  ),
+                  onTap: null,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: 16, right: 16),
+                  child: Divider(
+                    height: 0.1,
+                    color: Colors.black,
+                  ),
+                ),
+                // new ListTile(
+                //     title: new Text(
+                //       "Sign out",
+                //       style: new TextStyle(
+                //         color: UIData.blackOrWhite,
+                //         fontSize: UIData.fontSize20,
+                //       ),
+                //     ),
+                //     onTap: () {
+                //       widget.onSignOut();
+                //       Navigator.of(context)..pop()..pop();
+                //     }),
+                // Padding(
+                //   padding: EdgeInsets.only(left: 16, right: 16),
+                //   child: Divider(
+                //     height: 0.1,
+                //     color: Colors.black,
+                //   ),
+                // ),
               ])),
           Essentials().loading(widget.loading)
         ],
@@ -233,6 +298,7 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
           'shareresults': widget.user.shareResults,
           'bio': widget.user.bio,
           "profilepicurl": widget.user.profilePicURL,
+          'currency': widget.user.currency,
         });
       });
     }
