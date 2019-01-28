@@ -9,7 +9,6 @@ import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/delete.dart';
 import 'package:yadda/utils/essentials.dart';
 import 'package:yadda/widgets/primary_button.dart';
-import 'package:yadda/utils/groupLeft.dart';
 import 'package:yadda/pages/inAppPurchase/consumeable.dart';
 
 class New extends StatefulWidget {
@@ -218,42 +217,20 @@ class NewState extends State<New> {
             style: new TextStyle(
                 color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
           ),
-          onTap: () async {
+          onTap: () {
             setState(() {
               isLoading = true;
             });
-            var allowed = await GroupLeft().checkMembersLeft(widget.group.id);
-            if (allowed == true) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => InviteUserPage(
-                          user: widget.user,
-                          group: widget.group,
-                        )),
-              );
-            } else if (widget.admin == false) {
-              Scaffold.of(formKey.currentState.context)
-                  .showSnackBar(new SnackBar(
-                backgroundColor: UIData.yellow,
-                content: new Text(
-                  "This group has reached its limit of members",
-                  textAlign: TextAlign.center,
-                  style: new TextStyle(color: Colors.black),
-                ),
-              ));
-            } else if (widget.admin == true) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => Consumeable(
-                          user: widget.user,
-                          title: "Members",
-                          onUpdate: null,
-                          group: widget.group,
-                        )),
-              );
-            }
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => InviteUserPage(
+                        user: widget.user,
+                        group: widget.group,
+                      )),
+            );
+
             setState(() {
               isLoading = false;
             });
@@ -278,37 +255,16 @@ class NewState extends State<New> {
             setState(() {
               isLoading = true;
             });
-            var allowed = await GroupLeft().checkMembersLeft(widget.group.id);
-            if (allowed == true) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => InvitationCodePage(
-                          user: widget.user,
-                          group: widget.group,
-                        )),
-              );
-            } else if (widget.admin == false) {
-              Scaffold.of(formKey.currentState.context)
-                  .showSnackBar(new SnackBar(
-                content: new Text(
-                  "This group has reached its limit of members",
-                  textAlign: TextAlign.center,
-                  style: new TextStyle(),
-                ),
-              ));
-            } else if (widget.admin == true) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => Consumeable(
-                          user: widget.user,
-                          title: "Members",
-                          onUpdate: null,
-                          group: widget.group,
-                        )),
-              );
-            }
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => InvitationCodePage(
+                        user: widget.user,
+                        group: widget.group,
+                      )),
+            );
+
             setState(() {
               isLoading = false;
             });

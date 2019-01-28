@@ -4,7 +4,6 @@ import 'package:yadda/widgets/login_background.dart';
 import 'package:yadda/utils/uidata.dart';
 import 'package:yadda/pages/group/group_pages/cashgame/group_page_cash_page.dart';
 import 'package:yadda/pages/group/group_pages/tournament/tournamentPages/group_page_tournaments_page.dart';
-import 'package:yadda/utils/groupLeft.dart';
 import 'package:yadda/auth.dart';
 import 'package:yadda/pages/group/group_pages/group_page_settings_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -249,28 +248,17 @@ class GroupDashboardState extends State<GroupDashboard> {
             setState(() {
               isLoading = true;
             });
-            var allowed = await GroupLeft().checkMembersLeft(group.id);
-            if (allowed == true) {
-              addMemberToGroup();
-              Scaffold.of(formKey.currentState.context)
-                  .showSnackBar(new SnackBar(
-                backgroundColor: UIData.yellow,
-                content: new Text(
-                  "You have joined group ${group.name}",
-                  textAlign: TextAlign.center,
-                  style: new TextStyle(color: UIData.whiteOrBlack),
-                ),
-              ));
-            } else {
-              Scaffold.of(formKey.currentState.context)
-                  .showSnackBar(new SnackBar(
-                content: new Text(
-                  "This group has reached its limit of members",
-                  textAlign: TextAlign.center,
-                  style: new TextStyle(),
-                ),
-              ));
-            }
+
+            addMemberToGroup();
+            Scaffold.of(formKey.currentState.context).showSnackBar(new SnackBar(
+              backgroundColor: UIData.yellow,
+              content: new Text(
+                "You have joined group ${group.name}",
+                textAlign: TextAlign.center,
+                style: new TextStyle(color: UIData.whiteOrBlack),
+              ),
+            ));
+
             setState(() {
               isLoading = false;
             });

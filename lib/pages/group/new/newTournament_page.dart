@@ -32,8 +32,7 @@ class NewTournamentState extends State<NewTournament> {
   String currentUserId;
   String groupId;
 
-  String date = "";
-  String time = "";
+  String year = "";
 
   // New game
 
@@ -142,20 +141,24 @@ class NewTournamentState extends State<NewTournament> {
 
   void _saveGame() {
     if (validateAndSave()) {
-      String orderByTime = "$date$time";
+      String month = _date.month.toString();
+      String day = _date.day.toString();
+      String hour = _time.hour.toString();
+      String minute = _time.minute.toString();
+
+      if (month.length == 1) month = "0" + month;
+      if (day.length == 1) day = "0" + day;
+      if (hour.length == 1) hour = "0" + hour;
+      if (minute.length == 1) minute = "0" + minute;
+
+      String orderByTime = "${_date.year}$month$day$hour$minute";
       game.setOrderByTime(int.tryParse(orderByTime));
-      if (game.getOrderByTime() == null) {
-        game.setOrderByTime(0);
-      }
+
       if (game.date == "") {
-        game.date = DateTime.now().day.toString() +
-            "/" +
-            DateTime.now().month.toString();
+        game.date = day + "/" + month;
       }
       if (game.time == "") {
-        game.time = DateTime.now().hour.toString() +
-            ":" +
-            DateTime.now().minute.toString();
+        game.time = hour + ":" + minute;
       }
       game.setId(gameId);
       game.pushGameToFirestore(
@@ -292,14 +295,16 @@ class NewTournamentState extends State<NewTournament> {
                       labelText: 'Maximum players',
                       labelStyle: new TextStyle(color: Colors.grey[600])),
                   autocorrect: false,
-                  
                   validator: (val) {
-                    if (widget.user.subLevel < 2) {
-                      if (widget.user.subLevel == 1 && int.tryParse(val) > 27) {
-                        return "Your current subscription only allow \n27 players per tournament";
-                      } else if (widget.user.subLevel == 0 &&
-                          int.tryParse(val) > 9) {
-                        return "Your current subscription only allow \n9 players per tournament";
+                    if (val.isNotEmpty) {
+                      if (widget.user.subLevel < 2) {
+                        if (widget.user.subLevel == 1 &&
+                            int.tryParse(val) > 27) {
+                          return "Your current subscription only allows \n27 players per tournament";
+                        } else if (widget.user.subLevel == 0 &&
+                            int.tryParse(val) > 9) {
+                          return "Your current subscription only allows \n9 players per tournament";
+                        }
                       }
                     }
                   },
@@ -322,6 +327,8 @@ class NewTournamentState extends State<NewTournament> {
                     } else if (widget.user.subLevel == 0 &&
                         int.tryParse(val) > 9) {
                       game.setMaxPlayers(9);
+                    } else {
+                      game.setMaxPlayers(int.tryParse(val));
                     }
                   })),
           padded(
@@ -446,6 +453,7 @@ class NewTournamentState extends State<NewTournament> {
             onSaved: (val) =>
                 val.isEmpty ? game.setInfo("No info") : game.setInfo(val),
           )),
+          disabledNotifications(),
           Padding(
             padding: EdgeInsets.only(left: 4.0, right: 4.0, bottom: 18.0),
             child: new CheckboxListTile(
@@ -459,17 +467,36 @@ class NewTournamentState extends State<NewTournament> {
                 ),
                 value: notifyMembers,
                 onChanged: (val) {
-                  if (val == true) {
-                    notifyMembers = true;
+                  if (widget.user.subLevel == 0) {
+                    showDisabledNotifications = true;
                   } else {
-                    notifyMembers = false;
+                    if (val == true) {
+                      notifyMembers = true;
+                    } else {
+                      notifyMembers = false;
+                    }
                   }
+
                   setState(() {});
                 }),
           ),
         ],
       ),
     );
+  }
+
+  bool showDisabledNotifications = false;
+  Widget disabledNotifications() {
+    if (showDisabledNotifications) {
+      return new Padding(
+          padding: EdgeInsets.all(18.0),
+          child: Text(
+            "Your current subscription does not include notifications",
+            style: new TextStyle(color: Colors.red),
+          ));
+    } else {
+      return new Container();
+    }
   }
 
   DateTime _date = new DateTime.now();
@@ -488,17 +515,12 @@ class NewTournamentState extends State<NewTournament> {
       setState(() {
         String _gameDate;
         _date = picked;
-        _gameDate = _date.toString();
-        List parts = _gameDate.split(" ");
+        String month = _date.month.toString();
+        String day = _date.day.toString();
+        month.length == 1 ? month = "0" + _date.month.toString() : null;
+        day.length == 1 ? day = "0" + _date.day.toString() : null;
+        _gameDate = day + "/" + month;
 
-        _gameDate = parts[0];
-        date = _gameDate.replaceAll("-", "");
-
-        String parts2 = _gameDate.substring(5);
-        _gameDate = parts2;
-
-        List parts3 = _gameDate.split("-");
-        _gameDate = "${parts3[1]}/${parts3[0]}";
         game.setDate(_gameDate);
       });
     }
@@ -515,13 +537,12 @@ class NewTournamentState extends State<NewTournament> {
       setState(() {
         String _gameTime;
         _time = picked;
-        _gameTime = _time.toString();
-        List parts = _gameTime.split("y");
-        List parts1 = parts[1].split("(");
-        List parts2 = parts1[1].split(")");
-        time = parts2[0];
-        time = time.replaceAll(":", "");
-        _gameTime = "${parts2[0]}";
+        String hour = _time.hour.toString();
+        String minute = _time.minute.toString();
+        hour.length == 1 ? hour = "0" + _time.hour.toString() : null;
+        minute.length == 1 ? minute = "0" + _time.minute.toString() : null;
+        _gameTime = hour + ":" + minute;
+
         game.setTime(_gameTime);
       });
     }

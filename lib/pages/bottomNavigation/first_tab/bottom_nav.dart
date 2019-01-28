@@ -8,7 +8,6 @@ import 'package:yadda/utils/uidata.dart';
 import 'package:yadda/pages/profile/profile_page.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/utils/layout.dart';
-import 'package:yadda/utils/groupLeft.dart';
 import 'package:yadda/widgets/primary_button.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -328,67 +327,51 @@ class PageOneState extends State<PageOne> {
   }
 
   void _saveGroup() async {
-    bool allowed = await GroupLeft().checkMembersLeft(groupId);
     await firestoreInstance.runTransaction((Transaction tx) async {
-      if (allowed == true) {
-        bool admin;
-        if (groupCode.contains("r")) {
-        } else if (groupCode.contains("o")) {
-          firestoreInstance
-              .document(
-                  "groups/$groupId/codes/onetimegroupcode/codes/$groupCode")
-              .delete();
-          firestoreInstance.document("codes/$groupCode").delete();
-        } else if (groupCode.contains("a")) {
-          await firestoreInstance.runTransaction((Transaction tx) async {
-            DocumentSnapshot docSnap =
-                await firestoreInstance.document("groups/$groupId").get();
-            if (docSnap.data["adminsleft"] < 1) {
-              admin = false;
-            } else {
-              admin = true;
-            }
-          });
-        }
+      bool admin;
+      if (groupCode.contains("r")) {
+      } else if (groupCode.contains("o")) {
         firestoreInstance
-            .document("groups/$groupId/members/${widget.user.id}")
-            .setData({
-          "uid": widget.user.id,
-          "username": widget.user.userName,
-          "admin": admin,
-          "notification": true,
-          "fcm": widget.user.fcm,
-          "profilepicurl": widget.user.profilePicURL,
+            .document("groups/$groupId/codes/onetimegroupcode/codes/$groupCode")
+            .delete();
+        firestoreInstance.document("codes/$groupCode").delete();
+      } else if (groupCode.contains("a")) {
+        await firestoreInstance.runTransaction((Transaction tx) async {
+          DocumentSnapshot docSnap =
+              await firestoreInstance.document("groups/$groupId").get();
+          if (docSnap.data["adminsleft"] < 1) {
+            admin = false;
+          } else {
+            admin = true;
+          }
         });
-        firestoreInstance
-            .document("users/${widget.user.id}/groups/$groupId")
-            .setData({
-          "id": groupId,
-          "name": groupName,
-          "numberofcashgames": 0,
-          "numberoftournaments": 0,
-          "members": 0,
-        });
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => RootPage(
-                    auth: widget.auth,
-                  )),
-        );
-      } else {
-        setState(() {
-          isLoading = false;
-        });
-        Scaffold.of(formKey.currentState.context).showSnackBar(new SnackBar(
-          backgroundColor: UIData.yellow,
-          content: new Text(
-            "This group has reached its limit of members",
-            textAlign: TextAlign.center,
-            style: new TextStyle(color: Colors.black),
-          ),
-        ));
       }
+      firestoreInstance
+          .document("groups/$groupId/members/${widget.user.id}")
+          .setData({
+        "uid": widget.user.id,
+        "username": widget.user.userName,
+        "admin": admin,
+        "notification": true,
+        "fcm": widget.user.fcm,
+        "profilepicurl": widget.user.profilePicURL,
+      });
+      firestoreInstance
+          .document("users/${widget.user.id}/groups/$groupId")
+          .setData({
+        "id": groupId,
+        "name": groupName,
+        "numberofcashgames": 0,
+        "numberoftournaments": 0,
+        "members": 0,
+      });
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => RootPage(
+                  auth: widget.auth,
+                )),
+      );
     });
   }
 

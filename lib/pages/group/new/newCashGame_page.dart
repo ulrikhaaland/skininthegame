@@ -43,15 +43,13 @@ class NewCashGameState extends State<NewCashGame> {
 
   bool gameIdAvailable = false;
 
-  DateTime _date = new DateTime.now();
-  TimeOfDay _time = new TimeOfDay.now();
 
   initState() {
     super.initState();
     currentUserId = widget.user.id;
     groupId = widget.group.id;
     game = new Game("", 0, null, "", "", "", "", 0, 0, "", "No Limit Hold'em",
-        9, 0, 0, 0, 0, "", "", false, "USD", false, 0);
+        6, 0, 0, 0, 0, "", "", false, "USD", false, 0);
     game.setDate("Not set");
     game.setTime("Not set");
   }
@@ -103,6 +101,7 @@ class NewCashGameState extends State<NewCashGame> {
       form.save();
       return true;
     }
+    isLoading = false;
     return false;
   }
 
@@ -150,8 +149,16 @@ class NewCashGameState extends State<NewCashGame> {
 
   void _saveGame() {
     if (validateAndSave()) {
-      String orderByTime = "$date$time";
+      String orderByTime =
+          "${_date.year}${_date.month}${_date.day}${_time.hour}${_time.minute}";
       game.setOrderByTime(int.tryParse(orderByTime));
+      if (game.getOrderByTime() == null) {
+        game.setOrderByTime(int.tryParse(DateTime.now().year.toString() +
+            DateTime.now().month.toString() +
+            DateTime.now().day.toString() +
+            DateTime.now().hour.toString() +
+            DateTime.now().minute.toString()));
+      }
       if (game.date == "Not set") {
         game.date = DateTime.now().day.toString() +
             "/" +
@@ -294,9 +301,42 @@ class NewCashGameState extends State<NewCashGame> {
                       labelText: 'Maximum players',
                       labelStyle: new TextStyle(color: Colors.grey[600])),
                   autocorrect: false,
-                  onSaved: (val) => val.isEmpty
-                      ? game.setMaxPlayers(9)
-                      : game.setMaxPlayers(int.tryParse(val)))),
+                  validator: (val) {
+                    if (val.isNotEmpty) {
+                      if (widget.user.subLevel < 2) {
+                        if (widget.user.subLevel == 1 &&
+                            int.tryParse(val) > 9) {
+                          return "Your current subscription only allows \n9 players per cash game";
+                        } else if (widget.user.subLevel == 0 &&
+                            int.tryParse(val) > 6) {
+                          return "Your current subscription only allows \n6 players per cash game";
+                        }
+                      }
+                    }
+                  },
+                  onSaved: (val) {
+                    if (val.isEmpty) {
+                      switch (widget.user.subLevel) {
+                        case (0):
+                          game.setMaxPlayers(6);
+                          break;
+                        case (1):
+                          game.setMaxPlayers(9);
+                          break;
+                        case (2):
+                          game.setMaxPlayers(9);
+                          break;
+                      }
+                    } else if (widget.user.subLevel == 1 &&
+                        int.tryParse(val) > 9) {
+                      game.setMaxPlayers(9);
+                    } else if (widget.user.subLevel == 0 &&
+                        int.tryParse(val) > 6) {
+                      game.setMaxPlayers(6);
+                    } else {
+                      game.setMaxPlayers(int.tryParse(val));
+                    }
+                  })),
           Layout().padded(
               child: new TextFormField(
                   textCapitalization: TextCapitalization.sentences,
@@ -383,6 +423,7 @@ class NewCashGameState extends State<NewCashGame> {
             onSaved: (val) =>
                 val.isEmpty ? game.setInfo("Not Set") : game.setInfo(val),
           )),
+          disabledNotifications(),
           Padding(
             padding: EdgeInsets.only(
               left: 4.0,
@@ -399,7 +440,11 @@ class NewCashGameState extends State<NewCashGame> {
                 ),
                 value: notifyMembers,
                 onChanged: (val) {
-                  notifyMembers = val;
+                  if (widget.user.subLevel == 0) {
+                    showDisabledNotifications = true;
+                  } else {
+                    notifyMembers = val;
+                  }
                   setState(() {});
                 }),
           ),
@@ -430,6 +475,23 @@ class NewCashGameState extends State<NewCashGame> {
     );
   }
 
+  bool showDisabledNotifications = false;
+  Widget disabledNotifications() {
+    if (showDisabledNotifications) {
+      return new Padding(
+          padding: EdgeInsets.all(18.0),
+          child: Text(
+            "Your current subscription does not include notifications",
+            style: new TextStyle(color: Colors.red),
+          ));
+    } else {
+      return new Container();
+    }
+  }
+
+  DateTime _date = new DateTime.now();
+  TimeOfDay _time = new TimeOfDay.now();
+
   Future<Null> _selectDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
       context: context,
@@ -443,17 +505,12 @@ class NewCashGameState extends State<NewCashGame> {
       setState(() {
         String _gameDate;
         _date = picked;
-        _gameDate = _date.toString();
-        List parts = _gameDate.split(" ");
+        String month = _date.month.toString();
+        String day = _date.day.toString();
+        month.length == 1 ? month = "0" + _date.month.toString() : null;
+        day.length == 1 ? day = "0" + _date.day.toString() : null;
+        _gameDate = day + "/" + month;
 
-        _gameDate = parts[0];
-        date = _gameDate.replaceAll("-", "");
-
-        String parts2 = _gameDate.substring(5);
-        _gameDate = parts2;
-
-        List parts3 = _gameDate.split("-");
-        _gameDate = "${parts3[1]}/${parts3[0]}";
         game.setDate(_gameDate);
       });
     }
@@ -470,13 +527,12 @@ class NewCashGameState extends State<NewCashGame> {
       setState(() {
         String _gameTime;
         _time = picked;
-        _gameTime = _time.toString();
-        List parts = _gameTime.split("y");
-        List parts1 = parts[1].split("(");
-        List parts2 = parts1[1].split(")");
-        time = parts2[0];
-        time = time.replaceAll(":", "");
-        _gameTime = "${parts2[0]}";
+        String hour = _time.hour.toString();
+        String minute = _time.minute.toString();
+        hour.length == 1 ? hour = "0" + _time.hour.toString() : null;
+        minute.length == 1 ? minute = "0" + _time.minute.toString() : null;
+        _gameTime = hour + ":" + minute;
+
         game.setTime(_gameTime);
       });
     }

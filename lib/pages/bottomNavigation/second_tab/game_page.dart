@@ -167,16 +167,24 @@ class GamePageState extends State<GamePage> {
                     ),
                   ),
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ResultPage(
-                                user: widget.user,
-                                currentUser: widget.user,
-                                isLoading: true,
-                              )),
-                    );
-                    // widget.onSignOut();
+                    if (widget.user.subLevel == 0) {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ResultPage(
+                                    user: widget.user,
+                                    currentUser: widget.user,
+                                    isLoading: true,
+                                  )));
+                    } else {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Subscription(
+                                    user: widget.user,
+                                    title: "Subscription",
+                                  )));
+                    }
                   },
                 ),
                 new ListTile(

@@ -7,7 +7,6 @@ import 'package:yadda/pages/group/new/newTournament_page.dart';
 import 'package:yadda/pages/group/group_pages/tournament/tournamentPages/tournament_page.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
-import 'package:yadda/utils/groupLeft.dart';
 import 'package:yadda/pages/inAppPurchase/consumeable.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:yadda/utils/delete.dart';
@@ -129,31 +128,16 @@ class GroupTournamentsState extends State<GroupTournaments>
             size: UIData.iconSizeAppBar,
             color: UIData.blackOrWhite,
           ),
-          onPressed: () async {
-            var allowed = await GroupLeft()
-                .checkAmountLeft(widget.group.id, "tournamentsleft");
-            if (allowed) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => NewTournament(
-                          user: widget.user,
-                          group: widget.group,
-                          fromTournamentGroupPage: fromTournamentGroupPage,
-                        )),
-              );
-            } else if (!allowed) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => Consumeable(
-                          user: widget.user,
-                          title: "Tournaments",
-                          onUpdate: null,
-                          group: widget.group,
-                        )),
-              );
-            }
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => NewTournament(
+                        user: widget.user,
+                        group: widget.group,
+                        fromTournamentGroupPage: fromTournamentGroupPage,
+                      )),
+            );
           });
     } else {
       return new IconButton(

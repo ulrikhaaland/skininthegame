@@ -331,19 +331,50 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
                           ],
                         ),
                         new TextFormField(
-                          keyboardType: TextInputType.numberWithOptions(),
-                          initialValue: widget.game.maxPlayers.toString(),
-                          maxLength: 6,
-                          style: new TextStyle(color: UIData.blackOrWhite),
-                          key: new Key('maximumplayers'),
-                          decoration: new InputDecoration(
-                              labelText: 'Maximum players',
-                              labelStyle:
-                                  new TextStyle(color: Colors.grey[600])),
-                          autocorrect: false,
-                          onSaved: (val) =>
-                              widget.game.setMaxPlayers(int.tryParse(val)),
-                        ),
+                            keyboardType: TextInputType.numberWithOptions(),
+                            initialValue: widget.game.maxPlayers.toString(),
+                            maxLength: 6,
+                            style: new TextStyle(color: UIData.blackOrWhite),
+                            key: new Key('maximumplayers'),
+                            decoration: new InputDecoration(
+                                labelText: 'Maximum players',
+                                labelStyle:
+                                    new TextStyle(color: Colors.grey[600])),
+                            autocorrect: false,
+                            validator: (val) {
+                              if (widget.user.subLevel < 2) {
+                                if (widget.user.subLevel == 1 &&
+                                    int.tryParse(val) > 9) {
+                                  return "Your current subscription only allows \n9 players per cash game";
+                                } else if (widget.user.subLevel == 0 &&
+                                    int.tryParse(val) > 6) {
+                                  return "Your current subscription only allows \n6 players per cash game";
+                                }
+                              }
+                            },
+                            onSaved: (val) {
+                              if (val.isEmpty) {
+                                switch (widget.user.subLevel) {
+                                  case (0):
+                                    widget.game.setMaxPlayers(6);
+                                    break;
+                                  case (1):
+                                    widget.game.setMaxPlayers(9);
+                                    break;
+                                  case (2):
+                                    widget.game.setMaxPlayers(9);
+                                    break;
+                                }
+                              } else if (widget.user.subLevel == 1 &&
+                                  int.tryParse(val) > 9) {
+                                widget.game.setMaxPlayers(9);
+                              } else if (widget.user.subLevel == 0 &&
+                                  int.tryParse(val) > 6) {
+                                widget.game.setMaxPlayers(6);
+                              } else {
+                                widget.game.setMaxPlayers(int.tryParse(val));
+                              }
+                            }),
                         new TextFormField(
                           textCapitalization: TextCapitalization.sentences,
                           initialValue: widget.game.gameType,
@@ -480,8 +511,8 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
           "$currentUserName updated game. Name: ${widget.game.name}, Adress: ${widget.game.adress}, Date: ${widget.game.date}, Time: ${widget.game.time}, Maxplayers: ${widget.game.maxPlayers}, Buyin: ${widget.game.buyin} Rebuys: ${widget.game.rebuy}, Addon: ${widget.game.addon}, Starting chips: ${widget.game.startingChips}, Prize pool: ${widget.game.totalPrizePool} Gametype: ${widget.game.gameType}, Gameinfo: ${widget.game.info}",
           "$pathToCashGame/log",
           "Update");
+      showSnackBar("Game has been updated");
     }
-    showSnackBar("Game has been updated");
   }
 
   Widget padded({Widget child}) {
@@ -761,6 +792,7 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
   Future<Null> saveResults() async {
     String string = widget.game.orderByTime.toString();
     string = string.substring(0, 4);
+    string == "null" ? string = DateTime.now().year.toString() : null;
     await firestoreInstance.runTransaction((Transaction tx) async {
       QuerySnapshot qSnap = await firestoreInstance
           .collection("$pathToCashGame/players")
@@ -985,17 +1017,12 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
       setState(() {
         String _gameDate;
         _date = picked;
-        _gameDate = _date.toString();
-        List parts = _gameDate.split(" ");
+        String month = _date.month.toString();
+        String day = _date.day.toString();
+        month.length == 1 ? month = "0" + _date.month.toString() : null;
+        day.length == 1 ? day = "0" + _date.day.toString() : null;
+        _gameDate = day + "/" + month;
 
-        _gameDate = parts[0];
-        date = _gameDate.replaceAll("-", "");
-
-        String parts2 = _gameDate.substring(5);
-        _gameDate = parts2;
-
-        List parts3 = _gameDate.split("-");
-        _gameDate = "${parts3[1]}/${parts3[0]}";
         widget.game.setDate(_gameDate);
       });
     }
@@ -1012,13 +1039,12 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
       setState(() {
         String _gameTime;
         _time = picked;
-        _gameTime = _time.toString();
-        List parts = _gameTime.split("y");
-        List parts1 = parts[1].split("(");
-        List parts2 = parts1[1].split(")");
-        time = parts2[0];
-        time = time.replaceAll(":", "");
-        _gameTime = "${parts2[0]}";
+        String hour = _time.hour.toString();
+        String minute = _time.minute.toString();
+        hour.length == 1 ? hour = "0" + _time.hour.toString() : null;
+        minute.length == 1 ? minute = "0" + _time.minute.toString() : null;
+        _gameTime = hour + ":" + minute;
+
         widget.game.setTime(_gameTime);
       });
     }

@@ -359,19 +359,50 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                           ],
                         ),
                         new TextFormField(
-                          keyboardType: TextInputType.numberWithOptions(),
-                          initialValue: widget.game.maxPlayers.toString(),
-                          maxLength: 6,
-                          style: new TextStyle(color: UIData.blackOrWhite),
-                          key: new Key('maximumplayers'),
-                          decoration: new InputDecoration(
-                              labelText: 'Maximum players',
-                              labelStyle:
-                                  new TextStyle(color: Colors.grey[600])),
-                          autocorrect: false,
-                          onSaved: (val) =>
-                              widget.game.setMaxPlayers(int.tryParse(val)),
-                        ),
+                            keyboardType: TextInputType.numberWithOptions(),
+                            initialValue: widget.game.maxPlayers.toString(),
+                            maxLength: 6,
+                            style: new TextStyle(color: UIData.blackOrWhite),
+                            key: new Key('maximumplayers'),
+                            decoration: new InputDecoration(
+                                labelText: 'Maximum players',
+                                labelStyle:
+                                    new TextStyle(color: Colors.grey[600])),
+                            autocorrect: false,
+                            validator: (val) {
+                              if (widget.user.subLevel < 2) {
+                                if (widget.user.subLevel == 1 &&
+                                    int.tryParse(val) > 27) {
+                                  return "Your current subscription only allows \n27 players per tournament";
+                                } else if (widget.user.subLevel == 0 &&
+                                    int.tryParse(val) > 9) {
+                                  return "Your current subscription only allows \n9 players per tournament";
+                                }
+                              }
+                            },
+                            onSaved: (val) {
+                              if (val.isEmpty) {
+                                switch (widget.user.subLevel) {
+                                  case (0):
+                                    widget.game.setMaxPlayers(9);
+                                    break;
+                                  case (1):
+                                    widget.game.setMaxPlayers(18);
+                                    break;
+                                  case (2):
+                                    widget.game.setMaxPlayers(27);
+                                    break;
+                                }
+                              } else if (widget.user.subLevel == 1 &&
+                                  int.tryParse(val) > 27) {
+                                widget.game.setMaxPlayers(27);
+                              } else if (widget.user.subLevel == 0 &&
+                                  int.tryParse(val) > 9) {
+                                widget.game.setMaxPlayers(9);
+                              } else {
+                                widget.game.setMaxPlayers(int.tryParse(val));
+                              }
+                            }),
                         new TextFormField(
                           textCapitalization: TextCapitalization.sentences,
                           initialValue: widget.game.gameType,
@@ -794,17 +825,12 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
       setState(() {
         String _gameDate;
         _date = picked;
-        _gameDate = _date.toString();
-        List parts = _gameDate.split(" ");
+        String month = _date.month.toString();
+        String day = _date.day.toString();
+        month.length == 1 ? month = "0" + _date.month.toString() : null;
+        day.length == 1 ? day = "0" + _date.day.toString() : null;
+        _gameDate = day + "/" + month;
 
-        _gameDate = parts[0];
-        date = _gameDate.replaceAll("-", "");
-
-        String parts2 = _gameDate.substring(5);
-        _gameDate = parts2;
-
-        List parts3 = _gameDate.split("-");
-        _gameDate = "${parts3[1]}/${parts3[0]}";
         widget.game.setDate(_gameDate);
       });
     }
@@ -821,13 +847,12 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
       setState(() {
         String _gameTime;
         _time = picked;
-        _gameTime = _time.toString();
-        List parts = _gameTime.split("y");
-        List parts1 = parts[1].split("(");
-        List parts2 = parts1[1].split(")");
-        time = parts2[0];
-        time = time.replaceAll(":", "");
-        _gameTime = "${parts2[0]}";
+        String hour = _time.hour.toString();
+        String minute = _time.minute.toString();
+        hour.length == 1 ? hour = "0" + _time.hour.toString() : null;
+        minute.length == 1 ? minute = "0" + _time.minute.toString() : null;
+        _gameTime = hour + ":" + minute;
+
         widget.game.setTime(_gameTime);
       });
     }

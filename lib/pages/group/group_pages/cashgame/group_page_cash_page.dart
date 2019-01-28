@@ -7,7 +7,6 @@ import 'cashgame_page.dart';
 import '../../new/newCashGame_page.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
-import 'package:yadda/utils/groupLeft.dart';
 import 'package:yadda/pages/inAppPurchase/consumeable.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:yadda/utils/delete.dart';
@@ -124,30 +123,15 @@ class GroupCashGamesState extends State<GroupCashGames>
                 size: UIData.iconSizeAppBar,
                 color: UIData.blackOrWhite,
               ),
-              onPressed: () async {
-                var allowed = await GroupLeft()
-                    .checkAmountLeft(widget.group.id, "cashgamesleft");
-                if (allowed == true) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => NewCashGame(
-                              user: widget.user,
-                              group: widget.group,
-                            )),
-                  );
-                } else if (allowed == false) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => Consumeable(
-                              user: widget.user,
-                              title: "Cash Games",
-                              onUpdate: null,
-                              group: widget.group,
-                            )),
-                  );
-                }
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => NewCashGame(
+                            user: widget.user,
+                            group: widget.group,
+                          )),
+                );
               }));
     } else {
       return new FlatButton(onPressed: null, child: new Text(""));
