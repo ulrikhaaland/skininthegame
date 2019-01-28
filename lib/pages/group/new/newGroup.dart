@@ -136,25 +136,8 @@ class NewGroupState extends State<NewGroup> {
   }
 
   void _saveGroup() {
-    group = new Group(
-        groupName,
-        dailyMessage,
-        currentUserId,
-        groupId,
-        _groupInfo,
-        groupName.toLowerCase(),
-        1,
-        public,
-        0,
-        true,
-        0,
-        0,
-        9,
-        2,
-        5,
-        5,
-        true);
-    group.setPostsLeft(5);
+    group = new Group(groupName, dailyMessage, currentUserId, groupId,
+        _groupInfo, groupName.toLowerCase(), 1, public, 0, true, 0, 0, true);
     group.pushGroupToFirestore("groups/$groupId");
     group.pushGroupToFirestore("users/$currentUserId/groups/$groupId");
     Firestore.instance

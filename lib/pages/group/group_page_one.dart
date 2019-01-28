@@ -724,10 +724,6 @@ class GroupDashboardState extends State<GroupDashboard> {
             admin,
             documentSnapshot.data["numberofcashgames"],
             documentSnapshot.data["numberoftournaments"],
-            documentSnapshot.data["memberslimit"],
-            documentSnapshot.data["adminsleft"],
-            documentSnapshot.data["cashgamesleft"],
-            documentSnapshot.data["tournamentsleft"],
             documentSnapshot.data["shareresults"],
           );
           if (widget.user.id == group.host) {

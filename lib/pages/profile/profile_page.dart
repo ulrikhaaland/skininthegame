@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:yadda/auth.dart';
 import 'package:yadda/utils/uidata.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/pages/profile/profile_page_settings.dart';
@@ -10,13 +9,11 @@ import 'package:yadda/pages/profile/profile_page_results.dart';
 import 'package:yadda/objects/resultgame.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:yadda/pages/results/graph.dart';
+import 'package:yadda/widgets/primary_button.dart';
+import 'package:yadda/pages/inAppPurchase/subscription.dart';
 
 class ProfilePage extends StatefulWidget {
-  ProfilePage(
-      {Key key,
-      this.user,
-      this.setGroupPage,
-      this.profileId})
+  ProfilePage({Key key, this.user, this.setGroupPage, this.profileId})
       : super(key: key);
   final String profileId;
   final VoidCallback setGroupPage;
@@ -66,20 +63,20 @@ class ProfilePageState extends State<ProfilePage>
         DocumentSnapshot docSnap =
             await firestoreInstance.document("users/${widget.profileId}").get();
         userProfile = new User(
-          docSnap.data["email"],
-          docSnap.data["id"],
-          docSnap.data["name"],
-          docSnap.data["fcm"],
-          docSnap.data["bio"],
-          docSnap.data["nightmode"],
-          docSnap.data["shareresults"],
-          docSnap.data["following"],
-          docSnap.data["followers"],
-          null,
-          docSnap.data["profilepicurl"],
-          docSnap.data["currency"],
-          null
-        );
+            docSnap.data["email"],
+            docSnap.data["id"],
+            docSnap.data["name"],
+            docSnap.data["fcm"],
+            docSnap.data["bio"],
+            docSnap.data["nightmode"],
+            docSnap.data["shareresults"],
+            docSnap.data["following"],
+            docSnap.data["followers"],
+            null,
+            docSnap.data["profilepicurl"],
+            docSnap.data["currency"],
+            null,
+            docSnap.data["sublevel"]);
         setState(() {
           userFound = true;
         });
@@ -160,7 +157,8 @@ class ProfilePageState extends State<ProfilePage>
                                               user: widget.user,
                                               setBGSize: () => setBGSize(),
                                             )));
-                              } else if (userProfile.shareResults) {
+                              } else if (userProfile.shareResults &&
+                                  widget.user.subLevel > 0) {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -168,6 +166,14 @@ class ProfilePageState extends State<ProfilePage>
                                               user: userProfile,
                                               currentUser: widget.user,
                                               isLoading: true,
+                                            )));
+                              } else {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => Subscription(
+                                              user: userProfile,
+                                              title: "Subscriptions",
                                             )));
                               }
                             }),
@@ -323,8 +329,54 @@ class ProfilePageState extends State<ProfilePage>
         ));
   }
 
+  Widget subRequired() {
+    return new Padding(
+        padding: EdgeInsets.all(10.0),
+        child: new Align(
+          alignment: Alignment.topCenter,
+          child: new Container(
+            height: 180,
+            decoration: new BoxDecoration(
+                color: UIData.listColor,
+                border: Border.all(color: UIData.darkest),
+                borderRadius: new BorderRadius.all(const Radius.circular(8.0))),
+            child: new Padding(
+                padding: EdgeInsets.all(10.0),
+                child: new Column(
+                  children: <Widget>[
+                    new Text(
+                      "A subscription is required to view player results",
+                      style: new TextStyle(
+                        fontSize: 25.0,
+                        color: UIData.blackOrWhite,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 24.0),
+                    SizedBox(
+                      width: 240.0,
+                      height: 50.0,
+                      child: PrimaryButton(
+                        text: "Subscribe",
+                        onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Subscription(
+                                      user: widget.user,
+                                      title: "Subscription",
+                                    ))),
+                      ),
+                    ),
+                  ],
+                )),
+          ),
+        ));
+  }
+
   Widget setCashStream() {
-    if (userProfile.shareResults || ownProfile) {
+    if (widget.user.subLevel < 1) {
+      return subRequired();
+    } else if (userProfile.shareResults || ownProfile) {
       return cashGameStream();
     } else {
       return notSharing("cash game");
@@ -332,7 +384,9 @@ class ProfilePageState extends State<ProfilePage>
   }
 
   Widget setTournamentStream() {
-    if (userProfile.shareResults || ownProfile) {
+    if (widget.user.subLevel < 1) {
+      return subRequired();
+    } else if (userProfile.shareResults || ownProfile) {
       return tournamentStream();
     } else {
       return notSharing("tournament");

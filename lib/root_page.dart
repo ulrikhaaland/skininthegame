@@ -13,6 +13,7 @@ import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/uidata.dart';
 import 'dart:async';
 import 'package:yadda/pages/update_page.dart';
+import 'package:yadda/pages/inAppPurchase/subLevel.dart';
 
 class RootPage extends StatefulWidget {
   RootPage({Key key, this.auth}) : super(key: key);
@@ -36,6 +37,8 @@ class RootPageState extends State<RootPage> {
   String messagingToken;
   User user;
 
+  int subLevel;
+
   UIData uiData = new UIData();
 
   FirebaseMessaging firebaseMessaging = FirebaseMessaging();
@@ -46,7 +49,6 @@ class RootPageState extends State<RootPage> {
 
   initState() {
     super.initState();
-
     getUserId();
     firebaseMessaging.configure(onLaunch: (Map<String, dynamic> msg) {
       print("onLaunch called");
@@ -68,6 +70,11 @@ class RootPageState extends State<RootPage> {
         .listen((IosNotificationSettings setting) {
       print("IOS Setting Registered");
     });
+  }
+
+  @override
+  void dispose() async {
+    super.dispose();
   }
 
   Future<String> updateFcmToken() async {
@@ -108,24 +115,8 @@ class RootPageState extends State<RootPage> {
         .document("groups/$fromGroupId/members/${user.id}")
         .get();
     var admin = docSnap.data["admin"];
-    Group group = new Group(
-        groupName,
-        dailyMessage,
-        host,
-        fromGroupId,
-        info,
-        lowerCaseName,
-        null,
-        null,
-        null,
-        admin,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null);
+    Group group = new Group(groupName, dailyMessage, host, fromGroupId, info,
+        lowerCaseName, null, null, null, admin, null, null, null);
     if (gameType == "Tournament!") {
       Navigator.of(context).push(new MaterialPageRoute(
           builder: (context) => new TournamentPage(
@@ -157,19 +148,22 @@ class RootPageState extends State<RootPage> {
           await firestoreInstance.document("users/$currentUser").get();
       if (docSnap.exists) {
         user = new User(
-            docSnap.data["email"],
-            docSnap.data["id"],
-            docSnap.data["name"],
-            await updateFcmToken(),
-            docSnap.data["bio"],
-            docSnap.data["nightmode"],
-            docSnap.data["shareresults"],
-            docSnap.data["following"],
-            docSnap.data["followers"],
-            docSnap.data["hasprofilepic"],
-            docSnap.data["profilepicurl"],
-            docSnap.data["currency"],
-            docSnap.data["appversion"]);
+          docSnap.data["email"],
+          docSnap.data["id"],
+          docSnap.data["name"],
+          await updateFcmToken(),
+          docSnap.data["bio"],
+          docSnap.data["nightmode"],
+          docSnap.data["shareresults"],
+          docSnap.data["following"],
+          docSnap.data["followers"],
+          docSnap.data["hasprofilepic"],
+          docSnap.data["profilepicurl"],
+          docSnap.data["currency"],
+          docSnap.data["appversion"],
+          0,
+          // await SubLevel().getSubLevel()
+        );
         double version = 0;
         DocumentSnapshot docSnapV =
             await firestoreInstance.document("version/version").get();

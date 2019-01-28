@@ -12,7 +12,8 @@ class User {
       this.hasProfilePic,
       this.profilePicURL,
       this.currency,
-      this.appVersion);
+      this.appVersion,
+      this.subLevel);
 
   final String userName;
   final String id;
@@ -27,6 +28,7 @@ class User {
   int followers;
   double appVersion;
   bool hasProfilePic;
+  int subLevel;
 
   String getToken() {
     return this.fcm;
@@ -57,5 +59,6 @@ class User {
         'profilepicurl': this.profilePicURL,
         'currency': this.currency,
         'appversion': this.appVersion,
+        'sublevel': this.subLevel,
       };
 }

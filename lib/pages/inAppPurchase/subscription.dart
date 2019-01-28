@@ -7,6 +7,7 @@ import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yadda/utils/essentials.dart';
+import 'subLevel.dart';
 
 class Subscription extends StatefulWidget {
   Subscription({Key key, this.title, this.user, this.onUpdate, this.group})
@@ -23,17 +24,13 @@ class Subscription extends StatefulWidget {
 class _SubscriptionState extends State<Subscription> {
   static List<String> iapId = ["shark", "whale"];
 
-  String groupBody = "";
-  String groupTitle = "";
+  String fishTitle = "";
+  String sharkTitle = "";
+  String whaleTitle = "";
 
-  String light;
-  String medium;
-  String large;
+  bool activeShark = false;
+  bool activeWhale = false;
 
-  String topBody;
-  String topTitle;
-
-  String freePlan;
   List<IAPItem> _items = [];
   bool loading = true;
   bool isLoading = false;
@@ -42,6 +39,12 @@ class _SubscriptionState extends State<Subscription> {
   void initState() {
     super.initState();
     initPlatformState();
+  }
+
+  @override
+  void dispose() async {
+    super.dispose();
+    await FlutterInappPurchase.endConnection;
   }
 
   Future<void> initPlatformState() async {
@@ -62,7 +65,8 @@ class _SubscriptionState extends State<Subscription> {
   }
 
   Future<Null> _getProduct() async {
-    List<IAPItem> items = await FlutterInappPurchase.getProducts(iapId);
+    List<IAPItem> items = await FlutterInappPurchase.getSubscriptions(iapId);
+    int subLevel = await SubLevel().getSubLevel();
 
     items[0].body = "light";
     items[1].body = "medium";
@@ -70,32 +74,46 @@ class _SubscriptionState extends State<Subscription> {
     this._items.add(items[0]);
     this._items.add(items[1]);
 
-    // for (var item in items) {
-    //   if (item.productId.contains("light")) {
-    //     item.body = light;
-    //   } else if (item.productId.contains("medium")) {
-    //     item.body = medium;
-    //   } else if (item.productId.contains("large")) {
-    //     item.body = large;
-    //   }
-    // }
+    if (subLevel > 0) {
+      fishTitle = "FREE";
+    }
+    subLevel == 1
+        ? sharkTitle = "YOUR PLAN"
+        : sharkTitle = '${_items[0].price} ${_items[0].currency} / MONTH';
+    if (subLevel == 2) {
+      whaleTitle = "YOUR PLAN";
+      sharkTitle = '${_items[0].price} ${_items[0].currency} / MONTH';
+    } else {
+      whaleTitle = '${_items[1].price} ${_items[1].currency} / MONTH';
+    }
     loading = false;
     setState(() {});
   }
 
-  Future<Null> _buyProduct(IAPItem item) async {
+  Future<Null> _buySubscription(IAPItem item) async {
     try {
       setState(() {
         isLoading = true;
       });
       PurchasedItem purchased =
-          await FlutterInappPurchase.buyProduct(item.productId);
+          await FlutterInappPurchase.buySubscription(item.productId);
       print(purchased.transactionReceipt);
-      if (purchased.transactionReceipt.isNotEmpty) {}
-      String msg = await FlutterInappPurchase.consumeAllItems;
-      print('consumeAllItems: $msg');
+      if (purchased.transactionReceipt.isNotEmpty) {
+        if (item.productId == "whale") {
+          widget.user.subLevel = 2;
+        }
+        if (item.productId == "shark") {
+          widget.user.subLevel = 1;
+        }
+        Firestore.instance.document("users/${widget.user.id}").updateData({
+          'sublevel': widget.user.subLevel,
+        });
+      }
     } catch (error) {
       print('$error');
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -112,7 +130,7 @@ class _SubscriptionState extends State<Subscription> {
           Align(
             alignment: Alignment.center,
             child: Text(
-              "Fish Plan",
+              "Fish Plan (FREE)",
               style: new TextStyle(
                 color: UIData.blackOrWhite,
                 fontSize: UIData.fontSize24,
@@ -162,7 +180,7 @@ class _SubscriptionState extends State<Subscription> {
                     height: 50.0,
                     child: PrimaryButton(
                       onPressed: () => null,
-                      text: 'YOUR PLAN',
+                      text: fishTitle,
                     ),
                   ),
                   SizedBox(height: 24.0),
@@ -263,7 +281,7 @@ class _SubscriptionState extends State<Subscription> {
                     color: UIData.blackOrWhite,
                   ),
                   Text(
-                    "Get access to your own and other players results",
+                    "Track your own and other players results",
                     style:
                         TextStyle(fontSize: 16.0, color: UIData.blackOrWhite),
                     textAlign: TextAlign.center,
@@ -277,8 +295,8 @@ class _SubscriptionState extends State<Subscription> {
                     width: 240.0,
                     height: 50.0,
                     child: PrimaryButton(
-                      onPressed: () => null,
-                      text: '${_items[0].price} ${_items[0].currency}',
+                      onPressed: () => _buySubscription(_items[0]),
+                      text: sharkTitle,
                     ),
                   ),
                   SizedBox(height: 24.0),
@@ -363,8 +381,8 @@ class _SubscriptionState extends State<Subscription> {
                     width: 240.0,
                     height: 50.0,
                     child: PrimaryButton(
-                      onPressed: () => null,
-                      text: '${_items[1].price} ${_items[1].currency}',
+                      onPressed: () => _buySubscription(_items[1]),
+                      text: whaleTitle,
                     ),
                   ),
                   SizedBox(height: 24.0),
@@ -414,7 +432,7 @@ class _SubscriptionState extends State<Subscription> {
                       width: 340.0,
                       height: 50.0,
                       child: PrimaryButton(
-                        onPressed: () => _buyProduct(item),
+                        onPressed: () => null,
                         text: '${item.price} ${item.currency}',
                       ),
                     ),
@@ -433,11 +451,11 @@ class _SubscriptionState extends State<Subscription> {
         padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
         child: Column(
           children: <Widget>[
-            fishPlan(),
+            whalePlan(),
             SizedBox(height: 24.0),
             sharkPlan(),
             SizedBox(height: 24.0),
-            whalePlan(),
+            fishPlan(),
           ],
         ),
       );

@@ -56,11 +56,11 @@ class _ConsumeableState extends State<Consumeable> {
         "com.yadda.adminslarge"
       ];
       light = "Increase the limit by 3." +
-          "\n\nYour group will be able to host a total of ${widget.group.adminsLeft + 3} Admins.";
+          "\n\nYour group will be able to host a total of { + 3} Admins.";
       medium = "Increase the limit by 9." +
-          "\n\nYour group will be able to host a total of ${widget.group.adminsLeft + 9} Admins.";
+          "\n\nYour group will be able to host a total of { + 9} Admins.";
       large = "Increase the limit by 30." +
-          "\n\nYour group will be able to host a total of ${widget.group.adminsLeft + 30} Admins.";
+          "\n\nYour group will be able to host a total of { + 30} Admins.";
       topBody =
           "Your group has reached its limit of admins. Increase the limit to host more admins.";
       topTitle = "Out of Admins!";
@@ -109,11 +109,11 @@ class _ConsumeableState extends State<Consumeable> {
         "com.yadda.cashgameslarge"
       ];
       light = "Increase the limit by 5." +
-          "\n\nYour group will be able to host a total of ${widget.group.cashGamesLeft + 5} Cash Games.";
+          "\n\nYour group will be able to host a total of  + 5} Cash Games.";
       medium = "Increase the limit by 15." +
-          "\n\nYour group will be able to host a total of ${widget.group.cashGamesLeft + 15} Cash Games.";
+          "\n\nYour group will be able to host a total of  + 15} Cash Games.";
       large = "Increase the limit by 50." +
-          "\n\nYour group will be able to host a total of ${widget.group.cashGamesLeft + 50} Cash Games.";
+          "\n\nYour group will be able to host a total of  + 50} Cash Games.";
       topBody =
           "Your group has reached its limit of Cash Games. Increase the limit to host more Cash Games.";
       topTitle = "Out of Cash Games!";
@@ -196,11 +196,11 @@ class _ConsumeableState extends State<Consumeable> {
         "com.yadda.tournamentlarge"
       ];
       light = "Increase the limit by 5." +
-          "\n\nYour group will be able to host a total of ${widget.group.tournamentsLeft + 5} tournaments.";
+          "\n\nYour group will be able to host a total of  + 5} tournaments.";
       medium = "Increase the limit by 15." +
-          "\n\nYour group will be able to host a total of ${widget.group.tournamentsLeft + 15} tournaments.";
+          "\n\nYour group will be able to host a total of  + 15} tournaments.";
       large = "Increase the limit by 50." +
-          "\n\nYour group will be able to host a total of ${widget.group.tournamentsLeft + 50} tournaments.";
+          "\n\nYour group will be able to host a total of  + 50} tournaments.";
       topBody =
           "Your group has reached its limit of tournaments. Increase the limit to host more tournaments.";
       topTitle = "Out of tournaments!";

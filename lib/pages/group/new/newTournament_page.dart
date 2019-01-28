@@ -100,6 +100,7 @@ class NewTournamentState extends State<NewTournament> {
       form.save();
       return true;
     }
+    isLoading = false;
     return false;
   }
 
@@ -291,9 +292,38 @@ class NewTournamentState extends State<NewTournament> {
                       labelText: 'Maximum players',
                       labelStyle: new TextStyle(color: Colors.grey[600])),
                   autocorrect: false,
-                  onSaved: (val) => val.isEmpty
-                      ? game.setMaxPlayers(18)
-                      : game.setMaxPlayers(int.tryParse(val)))),
+                  
+                  validator: (val) {
+                    if (widget.user.subLevel < 2) {
+                      if (widget.user.subLevel == 1 && int.tryParse(val) > 27) {
+                        return "Your current subscription only allow \n27 players per tournament";
+                      } else if (widget.user.subLevel == 0 &&
+                          int.tryParse(val) > 9) {
+                        return "Your current subscription only allow \n9 players per tournament";
+                      }
+                    }
+                  },
+                  onSaved: (val) {
+                    if (val.isEmpty) {
+                      switch (widget.user.subLevel) {
+                        case (0):
+                          game.setMaxPlayers(9);
+                          break;
+                        case (1):
+                          game.setMaxPlayers(18);
+                          break;
+                        case (2):
+                          game.setMaxPlayers(27);
+                          break;
+                      }
+                    } else if (widget.user.subLevel == 1 &&
+                        int.tryParse(val) > 27) {
+                      game.setMaxPlayers(27);
+                    } else if (widget.user.subLevel == 0 &&
+                        int.tryParse(val) > 9) {
+                      game.setMaxPlayers(9);
+                    }
+                  })),
           padded(
               child: new TextFormField(
                   textCapitalization: TextCapitalization.sentences,

@@ -251,7 +251,7 @@ class GamePageState extends State<GamePage> {
                         MaterialPageRoute(
                             builder: (context) => Subscription(
                                   user: widget.user,
-                                  title: "Members",
+                                  title: "Subscriptions",
                                 )),
                       ),
                 ),

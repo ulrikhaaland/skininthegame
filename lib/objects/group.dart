@@ -14,10 +14,6 @@ class Group {
       this.admin,
       this.numberOfCashGames,
       this.numberOfTournaments,
-      this.membersLimit,
-      this.adminsLeft,
-      this.cashGamesLeft,
-      this.tournamentsLeft,
       this.shareResults);
 
   Firestore firestoreInstance = Firestore.instance;
@@ -32,11 +28,7 @@ class Group {
   double rating;
   int numberOfTournaments;
   int numberOfCashGames;
-  int cashGamesLeft;
-  int tournamentsLeft;
-  int adminsLeft;
-  int postsLeft;
-  int membersLimit;
+
   bool admin;
   bool public;
   bool shareResults;
@@ -54,11 +46,6 @@ class Group {
         'public': this.public,
         'numberoftournaments': this.numberOfTournaments,
         'numberofcashgames': this.numberOfCashGames,
-        "cashgamesleft": this.cashGamesLeft,
-        "tournamentsleft": this.tournamentsLeft,
-        "adminsleft": this.adminsLeft,
-        "postsleft": this.postsLeft,
-        "memberslimit": this.membersLimit,
         "shareresults": this.shareResults,
       };
 
@@ -85,46 +72,6 @@ class Group {
         'shareresults': shareResults,
       });
     });
-  }
-
-  void setCashGamesLeft(int cashGamesLeft) {
-    this.cashGamesLeft = cashGamesLeft;
-  }
-
-  int getCashGamesLeft() {
-    return this.cashGamesLeft;
-  }
-
-  void setTournamentsLeft(int tournamentsLeft) {
-    this.tournamentsLeft = tournamentsLeft;
-  }
-
-  int getTournamentsLeft() {
-    return this.tournamentsLeft;
-  }
-
-  void setAdminsLeft(int adminsLeft) {
-    this.adminsLeft = adminsLeft;
-  }
-
-  int getAdminsLeft() {
-    return this.adminsLeft;
-  }
-
-  void setMembersLimit(int membersLimit) {
-    this.membersLimit = membersLimit;
-  }
-
-  int getMembersLimit() {
-    return this.membersLimit;
-  }
-
-  void setPostsLeft(int postsLeft) {
-    this.postsLeft = postsLeft;
-  }
-
-  int getPostsLeft() {
-    return this.postsLeft;
   }
 
   void setRating(double rating) {
