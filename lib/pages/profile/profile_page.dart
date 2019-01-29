@@ -65,20 +65,21 @@ class ProfilePageState extends State<ProfilePage>
         DocumentSnapshot docSnap =
             await firestoreInstance.document("users/${widget.profileId}").get();
         userProfile = new User(
-            docSnap.data["email"],
-            docSnap.data["id"],
-            docSnap.data["name"],
-            docSnap.data["fcm"],
-            docSnap.data["bio"],
-            docSnap.data["nightmode"],
-            docSnap.data["shareresults"],
-            docSnap.data["following"],
-            docSnap.data["followers"],
-            null,
-            docSnap.data["profilepicurl"],
-            docSnap.data["currency"],
-            null,
-            docSnap.data["sublevel"]);
+          docSnap.data["email"],
+          docSnap.data["id"],
+          docSnap.data["name"],
+          docSnap.data["fcm"],
+          docSnap.data["bio"],
+          docSnap.data["nightmode"],
+          docSnap.data["shareresults"],
+          docSnap.data["following"],
+          docSnap.data["followers"],
+          null,
+          docSnap.data["profilepicurl"],
+          docSnap.data["currency"],
+          null,
+          docSnap.data["sublevel"],
+        );
         setState(() {
           userFound = true;
         });
@@ -363,7 +364,7 @@ class ProfilePageState extends State<ProfilePage>
             height: 180,
             decoration: new BoxDecoration(
                 color: UIData.listColor,
-                border: Border.all(color: UIData.darkest),
+                border: Border.all(color: Colors.grey[600]),
                 borderRadius: new BorderRadius.all(const Radius.circular(8.0))),
             child: new Padding(
                 padding: EdgeInsets.all(10.0),

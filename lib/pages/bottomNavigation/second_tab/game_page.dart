@@ -243,27 +243,27 @@ class GamePageState extends State<GamePage> {
                     setState(() {});
                   },
                 ),
-                new ListTile(
-                  leading: IconButton(
-                    icon: Icon(Icons.exit_to_app, size: 30, color: Colors.grey),
-                    onPressed: null,
-                  ),
-                  title: new Text(
-                    "Logout",
-                    style: new TextStyle(
-                      fontSize: UIData.fontSize18,
-                      color: UIData.blackOrWhite,
-                    ),
-                  ),
-                  onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Subscription(
-                                  user: widget.user,
-                                  title: "Subscriptions",
-                                )),
-                      ),
-                ),
+                // new ListTile(
+                //   leading: IconButton(
+                //     icon: Icon(Icons.exit_to_app, size: 30, color: Colors.grey),
+                //     onPressed: null,
+                //   ),
+                //   title: new Text(
+                //     "Logout",
+                //     style: new TextStyle(
+                //       fontSize: UIData.fontSize18,
+                //       color: UIData.blackOrWhite,
+                //     ),
+                //   ),
+                //   onTap: () => Navigator.push(
+                //         context,
+                //         MaterialPageRoute(
+                //             builder: (context) => Subscription(
+                //                   user: widget.user,
+                //                   title: "Subscriptions",
+                //                 )),
+                //       ),
+                // ),
               ],
             ),
           ),
@@ -462,7 +462,7 @@ class GamePageState extends State<GamePage> {
           child: new Container(
             decoration: new BoxDecoration(
                 color: UIData.listColor,
-                border: Border.all(color: UIData.darkest),
+                border: Border.all(color: Colors.grey[600]),
                 borderRadius: new BorderRadius.all(const Radius.circular(8.0))),
             child: new Padding(
                 padding: EdgeInsets.all(10.0),

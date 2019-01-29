@@ -13,6 +13,8 @@ import '../group/group_pages/feed/feed_page.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/essentials.dart';
+import 'package:yadda/pages/inAppPurchase/subLevel.dart';
+import 'package:yadda/pages/inAppPurchase/subscription.dart';
 
 class GroupDashboard extends StatefulWidget {
   const GroupDashboard(
@@ -245,23 +247,39 @@ class GroupDashboardState extends State<GroupDashboard> {
             ),
           ),
           onTap: () async {
-            setState(() {
-              isLoading = true;
-            });
+            if (await SubLevel()
+                .groupsLeft(widget.user.id, widget.user.subLevel)) {
+              setState(() {
+                isLoading = true;
+              });
 
-            addMemberToGroup();
-            Scaffold.of(formKey.currentState.context).showSnackBar(new SnackBar(
-              backgroundColor: UIData.yellow,
-              content: new Text(
-                "You have joined group ${group.name}",
-                textAlign: TextAlign.center,
-                style: new TextStyle(color: UIData.whiteOrBlack),
-              ),
-            ));
+              addMemberToGroup();
+              Scaffold.of(formKey.currentState.context)
+                  .showSnackBar(new SnackBar(
+                backgroundColor: UIData.yellow,
+                content: new Text(
+                  "You have joined group ${group.name}",
+                  textAlign: TextAlign.center,
+                  style: new TextStyle(color: UIData.whiteOrBlack),
+                ),
+              ));
 
-            setState(() {
-              isLoading = false;
-            });
+              setState(() {
+                isLoading = false;
+              });
+            } else {
+              int i;
+              widget.user.subLevel == 0 ? i = 3 : i = 10;
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Subscription(
+                            user: widget.user,
+                            info: true,
+                            title:
+                                "Your current subscription does only allow you to be a part of $i groups at any given time",
+                          )));
+            }
           });
     } else if (isMember == true) {
       return new IconButton(

@@ -200,7 +200,7 @@ class TournamentCreatePlayerPageState
         ),
       ));
     } else {
-       Scaffold.of(formKey.currentState.context).showSnackBar(new SnackBar(
+      Scaffold.of(formKey.currentState.context).showSnackBar(new SnackBar(
         backgroundColor: UIData.yellow,
         content: new Text(
           "The game is full, increase the limit to add more players",

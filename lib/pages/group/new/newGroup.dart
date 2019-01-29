@@ -6,6 +6,8 @@ import 'package:yadda/utils/uidata.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/essentials.dart';
+import 'package:yadda/pages/inAppPurchase/subscription.dart';
+import 'package:yadda/pages/inAppPurchase/subLevel.dart';
 
 class NewGroup extends StatefulWidget {
   NewGroup({Key key, this.user, this.onUpdate}) : super(key: key);
@@ -61,11 +63,26 @@ class NewGroupState extends State<NewGroup> {
                     fontSize: UIData.fontSize16, color: UIData.blackOrWhite),
                 textAlign: TextAlign.center,
               ),
-              onPressed: () {
-                setState(() {
-                  isLoading = true;
-                });
-                setGroupId();
+              onPressed: () async {
+                if (await SubLevel()
+                    .groupsLeft(widget.user.id, widget.user.subLevel)) {
+                  setState(() {
+                    isLoading = true;
+                  });
+                  setGroupId();
+                } else {
+                  int i;
+                  widget.user.subLevel == 0 ? i = 3 : i = 10;
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Subscription(
+                                user: widget.user,
+                                info: true,
+                                title:
+                                    "Your current subscription does only allow you to be a part of $i groups at any given time",
+                              )));
+                }
               }),
         ],
         title: new Text(

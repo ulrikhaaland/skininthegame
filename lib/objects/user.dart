@@ -1,19 +1,20 @@
 class User {
   User(
-      this.email,
-      this.id,
-      this.userName,
-      this.fcm,
-      this.bio,
-      this.nightMode,
-      this.shareResults,
-      this.following,
-      this.followers,
-      this.hasProfilePic,
-      this.profilePicURL,
-      this.currency,
-      this.appVersion,
-      this.subLevel);
+    this.email,
+    this.id,
+    this.userName,
+    this.fcm,
+    this.bio,
+    this.nightMode,
+    this.shareResults,
+    this.following,
+    this.followers,
+    this.hasProfilePic,
+    this.profilePicURL,
+    this.currency,
+    this.appVersion,
+    this.subLevel,
+  );
 
   final String userName;
   final String id;

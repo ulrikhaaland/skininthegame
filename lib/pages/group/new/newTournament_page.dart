@@ -489,6 +489,15 @@ class NewTournamentState extends State<NewTournament> {
                 onChanged: (val) {
                   if (widget.user.subLevel == 0) {
                     showDisabledNotifications = true;
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Subscription(
+                                  user: widget.user,
+                                  info: true,
+                                  title:
+                                      "Your current subscription does not include notifications",
+                                )));
                   } else {
                     if (val == true) {
                       notifyMembers = true;

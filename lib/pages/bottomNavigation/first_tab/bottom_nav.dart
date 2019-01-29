@@ -9,6 +9,8 @@ import 'package:yadda/pages/profile/profile_page.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/utils/layout.dart';
 import 'package:yadda/widgets/primary_button.dart';
+import 'package:yadda/pages/inAppPurchase/subLevel.dart';
+import 'package:yadda/pages/inAppPurchase/subscription.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage(
@@ -270,19 +272,34 @@ class PageOneState extends State<PageOne> {
         child: new PrimaryButton(
             color: UIData.yellow,
             text: "Join",
-            onPressed: () {
-              setState(() {
-                isLoading = true;
-              });
-              String typeOfCode;
-              if (groupCode.contains("r")) {
-                typeOfCode = "reusablegroupcode";
-              } else if (groupCode.contains("a")) {
-                typeOfCode = "admingroupcode";
-              } else if (groupCode.contains("o")) {
-                typeOfCode = "code";
+            onPressed: () async {
+              if (await SubLevel()
+                  .groupsLeft(widget.user.id, widget.user.subLevel)) {
+                setState(() {
+                  isLoading = true;
+                });
+                String typeOfCode;
+                if (groupCode.contains("r")) {
+                  typeOfCode = "reusablegroupcode";
+                } else if (groupCode.contains("a")) {
+                  typeOfCode = "admingroupcode";
+                } else if (groupCode.contains("o")) {
+                  typeOfCode = "code";
+                }
+                _getGroup(typeOfCode);
+              } else {
+                int i;
+                widget.user.subLevel == 0 ? i = 3 : i = 10;
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => Subscription(
+                              user: widget.user,
+                              info: true,
+                              title:
+                                  "Your current subscription does only allow you to be a part of $i groups at any given time",
+                            )));
               }
-              _getGroup(typeOfCode);
             }),
       ),
     ]);

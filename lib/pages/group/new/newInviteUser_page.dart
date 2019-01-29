@@ -84,21 +84,15 @@ class InviteUserPageState extends State<InviteUserPage> {
         backgroundColor: UIData.dark,
         appBar: new AppBar(
           backgroundColor: UIData.appBarColor,
-
-          iconTheme: IconThemeData(
-            color: UIData.blackOrWhite
-          ),
+          iconTheme: IconThemeData(color: UIData.blackOrWhite),
           elevation: 0,
-         
           title: new Directionality(
             textDirection: Directionality.of(context),
             child: TextField(
-              
               autofocus: true,
               autocorrect: false,
               style: new TextStyle(color: UIData.blackOrWhite),
               decoration: InputDecoration(
-                
                 fillColor: UIData.white,
                 labelText: 'Search for users',
                 labelStyle: new TextStyle(color: Colors.grey[600]),
@@ -155,7 +149,7 @@ class InviteUserPageState extends State<InviteUserPage> {
           alignment: Alignment.topCenter,
           child: new Container(
             decoration: new BoxDecoration(
-              color: UIData.listColor,
+                color: UIData.listColor,
                 border: Border.all(color: Colors.grey[600]),
                 borderRadius: new BorderRadius.all(const Radius.circular(8.0))),
             child: new Padding(
