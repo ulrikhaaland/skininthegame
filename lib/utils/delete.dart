@@ -117,10 +117,9 @@ class Delete {
         .delete();
     deleteCollection("groups/$groupId/codes/onetimegroupcode/codes", 5);
     deleteCollection("groups/$groupId/posts", 5);
-    deleteCollection("groups/$groupId/thumbs", 5);
+    deleteCollection("groups/$groupId/rating", 5);
     deleteCollection("groups/$groupId/members", 5);
     firestoreInstance.document("codes/$groupId").delete();
-
     firestoreInstance.document("groups/$groupId").delete();
   }
 }

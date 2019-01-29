@@ -49,7 +49,7 @@ class NewCashGameState extends State<NewCashGame> {
     currentUserId = widget.user.id;
     groupId = widget.group.id;
     game = new Game("", 0, null, "", "", "", "", 0, 0, "", "No Limit Hold'em",
-        6, 0, 0, 0, 0, "", "", false, "USD", false, 0);
+        6, 0, 0, 0, 0, "", "", false, widget.user.currency, false, 0);
     game.setDate("Not set");
     game.setTime("Not set");
   }
@@ -421,12 +421,12 @@ class NewCashGameState extends State<NewCashGame> {
                   style: new TextStyle(color: UIData.blackOrWhite),
                   key: new Key('currency'),
                   decoration: new InputDecoration(
-                      hintText: game.currency,
-                      labelText: 'Payout currency',
+                      hintText: widget.user.currency,
+                      labelText: 'Currency',
                       labelStyle: new TextStyle(color: Colors.grey[600])),
                   autocorrect: false,
                   onSaved: (val) => val.isEmpty
-                      ? game.setCurrency("USD")
+                      ? game.setCurrency(widget.user.currency)
                       : game.setCurrency(val))),
           Layout().padded(
               child: new TextFormField(

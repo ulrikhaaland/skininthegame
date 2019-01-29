@@ -392,7 +392,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
           child: new Container(
             decoration: new BoxDecoration(
                 color: UIData.listColor,
-                border: Border.all(color: UIData.darkest),
+                border: Border.all(color: Colors.grey[600]),
                 borderRadius: new BorderRadius.all(const Radius.circular(8.0))),
             child: new Padding(
                 padding: EdgeInsets.all(12.0),

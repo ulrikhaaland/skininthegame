@@ -21,7 +21,6 @@ class New extends StatefulWidget {
       this.onUpdate,
       this.group})
       : super(key: key);
-
   final VoidCallback initState;
   final VoidCallback onUpdate;
   final User user;
@@ -150,7 +149,8 @@ class NewState extends State<New> {
           child: new Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
         new Container(
             padding: const EdgeInsets.all(16.0),
-            child: new Form(child: new Column(children: _pageWidgets()))),
+            child: new Form(
+                key: formKey, child: new Column(children: _pageWidgets()))),
       ])),
     ])));
   }
@@ -355,31 +355,67 @@ class NewState extends State<New> {
           height: .0,
           color: Colors.black,
         ),
-        Padding(
-          padding: EdgeInsets.only(bottom: 58.0),
-        ),
-        new Form(
-          key: formKey,
-          child: new TextFormField(
-            textCapitalization: TextCapitalization.sentences,
-            initialValue: info,
-            maxLength: 110,
-            maxLines: 2,
-            style: new TextStyle(color: UIData.blackOrWhite),
-            key: new Key('dailymessage'),
-            decoration: new InputDecoration(
-                hintText: "A message that will appear at the group dashboard",
-                border: OutlineInputBorder(),
-                hintStyle: new TextStyle(
-                  color: Colors.grey,
-                  fontSize: 12,
-                ),
-                labelStyle: new TextStyle(color: Colors.grey[600])),
-            autocorrect: false,
-            onSaved: (val) {
-              info = val;
-            },
+        new Container(
+          // color: UIData.darkest,
+          child: ListTile(
+            // leading: new Text(
+            //   "Biography \n",
+            //   style: TextStyle(color: UIData.blackOrWhite, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+            // ),
+            title: new TextFormField(
+              style: TextStyle(color: UIData.blackOrWhite),
+              initialValue: widget.group.dailyMessage,
+              maxLines: 2,
+              maxLength: 160,
+              decoration: InputDecoration(
+                  border: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  // UnderlineInputBorder(
+                  //     borderSide: BorderSide(color: UIData.blackOrWhite)),
+                  labelText: "Daily message...",
+                  labelStyle: TextStyle(color: Colors.grey[600])),
+              onSaved: (val) {
+                widget.group.dailyMessage = val;
+              },
+            ),
           ),
+        ),
+
+        // Padding(
+        //   padding: EdgeInsets.only(top: 16),
+        // ),
+        Divider(
+          height: 0.1,
+          color: Colors.black,
+        ),
+        new Container(
+          // color: UIData.darkest,
+          child: ListTile(
+            // leading: new Text(
+            //   "Biography \n",
+            //   style: TextStyle(color: UIData.blackOrWhite, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+            // ),
+            title: new TextFormField(
+              style: TextStyle(color: UIData.blackOrWhite),
+              initialValue: widget.group.info,
+              maxLines: 2,
+              maxLength: 160,
+              decoration: InputDecoration(
+                  border: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  // UnderlineInputBorder(
+                  //     borderSide: BorderSide(color: UIData.blackOrWhite)),
+                  labelText: "Group description...",
+                  labelStyle: TextStyle(color: Colors.grey[600])),
+              onSaved: (val) {
+                widget.group.info = val;
+              },
+            ),
+          ),
+        ),
+        Divider(
+          height: 0.1,
+          color: Colors.black,
         ),
         Padding(
           padding: EdgeInsets.only(top: 24.0),
@@ -496,14 +532,16 @@ class NewState extends State<New> {
 
   _pushInfo() {
     if (validateAndSave()) {
-      if (info == null) {
-        info = "";
+      if (widget.group.dailyMessage == null) {
+        widget.group.dailyMessage = "";
+      }
+      if (widget.group.info == null) {
+        widget.group.info = "";
       }
       firestoreInstance.document("groups/$groupId").updateData({
-        "dailymessage": info,
+        "dailymessage": widget.group.dailyMessage,
+        'info': widget.group.info
       });
-      widget.group.setDailyMessage(info);
-      setState(() {});
       widget.initState();
       Navigator.pop(context);
     }

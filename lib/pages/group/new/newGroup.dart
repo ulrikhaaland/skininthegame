@@ -117,7 +117,7 @@ class NewGroupState extends State<NewGroup> {
 
   void setGroupId() {
     try {
-      var random = new Random().nextInt(999999999);
+      var random = new Random().nextInt(99999);
       groupId = random.toString();
       checkGroupId();
       print(groupId);
@@ -130,13 +130,11 @@ class NewGroupState extends State<NewGroup> {
   }
 
   void checkGroupId() async {
-    CollectionReference cRef =
-        Firestore.instance.collection("groups/$groupType/$groupId");
+    DocumentReference cRef = Firestore.instance.document("groups/$groupId");
 
     Firestore.instance.runTransaction((Transaction tx) async {
-      QuerySnapshot qSnap =
-          await cRef.where("groupid", isEqualTo: groupId).getDocuments();
-      if (qSnap.documents.isEmpty) {
+      DocumentSnapshot qSnap = await cRef.get();
+      if (!qSnap.exists) {
         setState(() {
           debugPrint("true");
           gameIdAvailable = true;
@@ -225,6 +223,7 @@ class NewGroupState extends State<NewGroup> {
         )),
         padded(
             child: new TextField(
+          maxLength: 160,
           textCapitalization: TextCapitalization.sentences,
           style: new TextStyle(color: UIData.blackOrWhite),
           key: new Key('info'),

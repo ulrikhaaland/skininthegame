@@ -18,6 +18,11 @@ class SubLevel {
           qSnap.documents.length > 9 ? tru = false : tru = true;
         }
         break;
+      case (2):
+        {
+          tru = true;  
+        }
+        break;
     }
     return tru;
   }

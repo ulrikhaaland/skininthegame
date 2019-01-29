@@ -481,6 +481,19 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
                           ],
                         ),
                         new TextFormField(
+                            textCapitalization: TextCapitalization.sentences,
+                            style: new TextStyle(color: UIData.blackOrWhite),
+                            key: new Key('currency'),
+                            initialValue: widget.game.currency,
+                            decoration: new InputDecoration(
+                                labelText: 'Currency',
+                                labelStyle:
+                                    new TextStyle(color: Colors.grey[600])),
+                            autocorrect: false,
+                            onSaved: (val) => val.isEmpty
+                                ? widget.game.setCurrency(widget.user.currency)
+                                : widget.game.setCurrency(val)),
+                        new TextFormField(
                           textCapitalization: TextCapitalization.sentences,
                           initialValue: widget.game.info,
                           maxLines: 3,
@@ -554,6 +567,28 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
     }
   }
 
+  void getMoneyOnTabel() async {
+    int moneyOnTable = 0;
+
+    QuerySnapshot qSnapActive = await firestoreInstance
+        .collection("$pathToCashGame/activeplayers")
+        .getDocuments();
+    QuerySnapshot qSnapPlayers = await firestoreInstance
+        .collection("$pathToCashGame/players")
+        .getDocuments();
+    qSnapPlayers.documents.forEach((DocumentSnapshot docPlayers) {
+      qSnapActive.documents.forEach((DocumentSnapshot docActive) {
+        if (docPlayers.documentID == docActive.documentID) {
+          moneyOnTable += docPlayers.data["buyin"];
+        }
+      });
+    });
+    widget.game.moneyOnTable = moneyOnTable;
+    firestoreInstance
+        .document(pathToCashGame)
+        .updateData({'moneyontable': moneyOnTable});
+  }
+
   Widget padded({Widget child}) {
     return new Padding(
       padding: EdgeInsets.only(left: 18.0, right: 18.0, bottom: 18.0),
@@ -582,6 +617,7 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
               color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
         ),
         onTap: () {
+          getMoneyOnTabel();
           firestoreInstance.document(pathToCashGame).updateData({
             "isrunning": true,
           });

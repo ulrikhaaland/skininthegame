@@ -543,6 +543,19 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                           onSaved: (val) => widget.game.setTotalPrizePool(val),
                         ),
                         new TextFormField(
+                            textCapitalization: TextCapitalization.sentences,
+                            style: new TextStyle(color: UIData.blackOrWhite),
+                            key: new Key('currency'),
+                            initialValue: widget.game.currency,
+                            decoration: new InputDecoration(
+                                labelText: 'Currency',
+                                labelStyle:
+                                    new TextStyle(color: Colors.grey[600])),
+                            autocorrect: false,
+                            onSaved: (val) => val.isEmpty
+                                ? widget.game.setCurrency(widget.user.currency)
+                                : widget.game.setCurrency(val)),
+                        new TextFormField(
                           textCapitalization: TextCapitalization.sentences,
                           initialValue: widget.game.info,
                           maxLines: 3,

@@ -12,6 +12,8 @@ import 'package:yadda/pages/results/graph.dart';
 import 'package:yadda/pages/profile/invite_page.dart';
 import 'package:yadda/pages/profile/profile_page.dart';
 import 'package:yadda/pages/inAppPurchase/subscription.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:yadda/utils/delete.dart';
 
 SearchBar searchBar;
 
@@ -488,74 +490,96 @@ class GamePageState extends State<GamePage> {
   }
 
   Widget _buildListItem(BuildContext context, DocumentSnapshot document) {
-    return ListTile(
-      contentPadding: EdgeInsets.all(3.0),
-      title: new Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-              child: Container(
-            // color: Colors.grey,
-            padding: EdgeInsets.all(10.0),
-            decoration: new BoxDecoration(
-                color: UIData.listColor,
-                border: Border.all(color: Colors.grey),
-                borderRadius: new BorderRadius.all(const Radius.circular(8.0))),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text(
-                  document['name'],
-                  style: new TextStyle(
-                      color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                new Padding(
-                  padding: EdgeInsets.all(1.0),
-                ),
-                new Row(children: <Widget>[
-                  new Icon(
-                    Icons.whatshot,
-                    color: Colors.red,
-                    size: 25.0,
-                  ),
-                  new Align(),
-                  Text(" ${document["numberoftournaments"].toString()}",
-                      overflow: TextOverflow.ellipsis,
+    String deleteOrLeave = "Leave";
+    widget.user.id == document.data["host"] ? deleteOrLeave = "Delete" : null;
+    return new Slidable(
+      // enabled: enabled,
+      delegate: new SlidableDrawerDelegate(),
+      actionExtentRatio: 0.25,
+      child: new Container(
+        child: new ListTile(
+          contentPadding: EdgeInsets.all(3.0),
+          title: new Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                  child: Container(
+                // color: Colors.grey,
+                padding: EdgeInsets.all(10.0),
+                decoration: new BoxDecoration(
+                    color: UIData.listColor,
+                    border: Border.all(color: Colors.grey),
+                    borderRadius:
+                        new BorderRadius.all(const Radius.circular(8.0))),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      document['name'],
                       style: new TextStyle(
                           color: UIData.blackOrWhite,
-                          fontSize: UIData.fontSize20)),
-                  new Icon(
-                    Icons.attach_money,
-                    color: Colors.green,
-                    size: 25.0,
-                  ),
-                  Text("${document["numberofcashgames"].toString()}",
+                          fontSize: UIData.fontSize20),
                       overflow: TextOverflow.ellipsis,
-                      style: new TextStyle(
-                          color: UIData.blackOrWhite,
-                          fontSize: UIData.fontSize20)),
-                ]),
-              ],
-            ),
-          )),
-        ],
-      ),
-      onTap: () {
-        groupId = document.documentID;
+                    ),
+                    new Padding(
+                      padding: EdgeInsets.all(1.0),
+                    ),
+                    new Row(children: <Widget>[
+                      new Icon(
+                        Icons.whatshot,
+                        color: Colors.red,
+                        size: 25.0,
+                      ),
+                      new Align(),
+                      Text(" ${document["numberoftournaments"].toString()}",
+                          overflow: TextOverflow.ellipsis,
+                          style: new TextStyle(
+                              color: UIData.blackOrWhite,
+                              fontSize: UIData.fontSize20)),
+                      new Icon(
+                        Icons.attach_money,
+                        color: Colors.green,
+                        size: 25.0,
+                      ),
+                      Text("${document["numberofcashgames"].toString()}",
+                          overflow: TextOverflow.ellipsis,
+                          style: new TextStyle(
+                              color: UIData.blackOrWhite,
+                              fontSize: UIData.fontSize20)),
+                    ]),
+                  ],
+                ),
+              )),
+            ],
+          ),
+          onTap: () {
+            groupId = document.documentID;
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => GroupDashboard(
-                    user: widget.user,
-                    groupId: groupId,
-                    updateState: () => updateState(),
-                    // groupType: type,
-                    onUpdate: () => _registeredGames(),
-                  )),
-        );
-      },
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => GroupDashboard(
+                        user: widget.user,
+                        groupId: groupId,
+                        updateState: () => updateState(),
+                        // groupType: type,
+                        onUpdate: () => _registeredGames(),
+                      )),
+            );
+          },
+        ),
+      ),
+      secondaryActions: <Widget>[
+        Padding(
+          padding: EdgeInsets.fromLTRB(0, 10.0, 0, 0),
+          child: new IconSlideAction(
+              caption: deleteOrLeave,
+              color: UIData.red,
+              icon: Icons.delete,
+              onTap: () =>
+                  _showDeleteGroupAlert(deleteOrLeave, document.data["id"])),
+        ),
+      ],
     );
   }
 
@@ -653,5 +677,49 @@ class GamePageState extends State<GamePage> {
                 buildSearch(context, snapshot.data.documents[index]),
           );
         });
+  }
+
+  void _showDeleteGroupAlert(String deleteOrLeave, String gid) {
+    AlertDialog dialog = new AlertDialog(
+      title: new Text(
+        "Are you sure you want to ${deleteOrLeave.toLowerCase()} this group?",
+        textAlign: TextAlign.center,
+      ),
+      contentPadding: EdgeInsets.all(20.0),
+      actions: <Widget>[
+        new FlatButton(
+          onPressed: () async {
+            Navigator.pop(context);
+            setState(() {
+              userFound = false;
+            });
+            if (deleteOrLeave == "Leave") {
+              await firestoreInstance
+                  .document("users/${widget.user.id}/groups/$gid")
+                  .delete();
+              await firestoreInstance
+                  .document("groups/$gid/members/${widget.user.id}")
+                  .delete();
+            } else if (deleteOrLeave == "Delete") {
+              await Delete().deleteGroup(gid);
+            }
+            setState(() {
+              userFound = true;
+            });
+          },
+          child: new Text(
+            "Yes",
+            textAlign: TextAlign.left,
+          ),
+        ),
+        new FlatButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: new Text("Cancel"),
+        ),
+      ],
+    );
+    showDialog(context: context, child: dialog);
   }
 }

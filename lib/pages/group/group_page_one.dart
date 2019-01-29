@@ -310,20 +310,32 @@ class GroupDashboardState extends State<GroupDashboard> {
     );
   }
 
-  Widget dailyMessageCard() => Container(
-      alignment: Alignment.center,
-      height: 40.0,
-      width: 500.0,
-      child: Text(
-        group.getDailyMessage(),
-        style: TextStyle(
-          fontSize: 20.0,
-          color: UIData.blackOrWhite,
-          // fontWeight: FontWeight.bold,
-        ),
-        textAlign: TextAlign.center,
-        // overflow: TextOverflow.ellipsis,
-      ));
+  Widget dailyMessageCard() {
+    String message;
+    isMember ? message = group.getDailyMessage() : message = group.getInfo();
+    if (message.isNotEmpty)
+      return new Padding(
+          padding: EdgeInsets.all(12.0),
+          child: new Align(
+            alignment: Alignment.topCenter,
+            child: new Container(
+              decoration: new BoxDecoration(
+                  color: UIData.listColor,
+                  border: Border.all(color: Colors.grey[600]),
+                  borderRadius:
+                      new BorderRadius.all(const Radius.circular(8.0))),
+              child: new Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: new Text(
+                    message,
+                    style: new TextStyle(
+                        fontSize: 20.0, color: UIData.blackOrWhite),
+                  )),
+            ),
+          ));
+    else
+      return new Container();
+  }
 
   Widget actionMenuCard() => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),

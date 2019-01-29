@@ -91,8 +91,6 @@ class UIData {
   static Color appBarColor = Color.fromRGBO(20, 29, 38, 1.0);
   static Color yellowOrWhite = Color.fromRGBO(251, 192, 45, 1.0);
 
-  
-
   static Color listColor = darkest;
 
   // static Color yellow = Color.fromRGBO(251, 192, 45, 1.0);

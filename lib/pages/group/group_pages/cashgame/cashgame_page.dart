@@ -117,7 +117,6 @@ class CashGamePageState extends State<CashGamePage>
     gamePath =
         'groups/${widget.group.id}/games/type/$cashGameActiveOrHistory/${widget.gameId}';
     logPath = "$gamePath/log";
-    getMoneyOnTabel();
     getGroup();
   }
 
@@ -238,7 +237,7 @@ class CashGamePageState extends State<CashGamePage>
                       style: TextStyle(color: UIData.blackOrWhite),
                     ),
                     new Text(
-                      "Money on table: $moneyOnTable",
+                      "Money in play: ${game.moneyOnTable}",
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: UIData.blackOrWhite),
                     ),
@@ -259,23 +258,6 @@ class CashGamePageState extends State<CashGamePage>
             secondLoading(),
           ],
         ));
-  }
-
-  int moneyOnTable = 0;
-
-  void getMoneyOnTabel() async {
-    QuerySnapshot qSnapActive = await firestoreInstance
-        .collection("$gamePath/activeplayers")
-        .getDocuments();
-    QuerySnapshot qSnapPlayers =
-        await firestoreInstance.collection("$gamePath/players").getDocuments();
-    qSnapPlayers.documents.forEach((DocumentSnapshot docPlayers) {
-      qSnapActive.documents.forEach((DocumentSnapshot docActive) {
-        if (docPlayers.documentID == docActive.documentID) {
-          moneyOnTable += docPlayers.data["buyin"];
-        }
-      });
-    });
   }
 
   setJoin() {
@@ -438,7 +420,6 @@ class CashGamePageState extends State<CashGamePage>
   }
 
   void removePlayer(String uid, bool removed, String name) async {
-    updateMoneyOnTable(uid);
     hasJoined = false;
     firestoreInstance.runTransaction((Transaction tx) async {
       await firestoreInstance.document("$gamePath/activeplayers/$uid").delete();
@@ -452,6 +433,8 @@ class CashGamePageState extends State<CashGamePage>
         }
       });
     });
+    updateMoneyOnTable(uid);
+
     if (removed) {
       Log().postLogToCollection(
           "$currentUserName removed $name from the game", logPath, "Remove");

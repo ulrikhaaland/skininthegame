@@ -161,8 +161,8 @@ class RootPageState extends State<RootPage> {
           docSnap.data["profilepicurl"],
           docSnap.data["currency"],
           docSnap.data["appversion"],
-          // 0,
-          await SubLevel().getSubLevel(),
+          0,
+          // await SubLevel().getSubLevel(),
         );
         double version = 0;
         DocumentSnapshot docSnapV =
