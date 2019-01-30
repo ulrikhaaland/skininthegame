@@ -43,7 +43,7 @@ class NewTournamentState extends State<NewTournament> {
 
   bool isLoading = false;
 
-  bool notifyMembers = false;
+  bool notifyMembers = true;
 
   Game game;
 
@@ -91,7 +91,7 @@ class NewTournamentState extends State<NewTournament> {
     groupId = widget.group.id;
 
     game = new Game("", 0, null, "", "", "", "", 0, 0, "", "No Limit Hold'em",
-        9, 0, 0, 0, 0, "", "", false, widget.user.currency, false, 0);
+        9, 0, 0, 0, 0, "", "", false, widget.user.currency, false, 0, null);
   }
 
   bool validateAndSave() {

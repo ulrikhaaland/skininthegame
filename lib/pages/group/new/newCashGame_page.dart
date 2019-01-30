@@ -36,6 +36,7 @@ class NewCashGameState extends State<NewCashGame> {
   bool isLoading = false;
 
   bool notifyMembers = false;
+  bool moneyOnTable = false;
 
   int gameId;
 
@@ -48,8 +49,34 @@ class NewCashGameState extends State<NewCashGame> {
     super.initState();
     currentUserId = widget.user.id;
     groupId = widget.group.id;
-    game = new Game("", 0, null, "", "", "", "", 0, 0, "", "No Limit Hold'em",
-        6, 0, 0, 0, 0, "", "", false, widget.user.currency, false, 0);
+    if (widget.user.subLevel > 0) {
+      notifyMembers = true;
+      moneyOnTable = true;
+    }
+    game = new Game(
+        "",
+        0,
+        null,
+        "",
+        "",
+        "",
+        "",
+        0,
+        0,
+        "",
+        "No Limit Hold'em",
+        6,
+        0,
+        0,
+        0,
+        0,
+        "",
+        "",
+        true,
+        widget.user.currency,
+        false,
+        0,
+        moneyOnTable);
     game.setDate("Not set");
     game.setTime("Not set");
   }
@@ -190,20 +217,6 @@ class NewCashGameState extends State<NewCashGame> {
     }
   }
 
-  Widget padded({Widget child}) {
-    return new Padding(
-      padding: EdgeInsets.only(left: 18.0, right: 18.0, bottom: 18.0),
-      child: child,
-    );
-  }
-
-  Widget paddedTwo({Widget child}) {
-    return new Padding(
-      padding: EdgeInsets.symmetric(vertical: 12.0),
-      child: child,
-    );
-  }
-
   Widget page() {
     return new SingleChildScrollView(
       child: Column(
@@ -247,7 +260,7 @@ class NewCashGameState extends State<NewCashGame> {
           new Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              paddedTwo(
+              Layout().paddedTwo(
                 child: new ConstrainedBox(
                   constraints:
                       BoxConstraints.expand(height: 40.0, width: 120.0),
@@ -267,7 +280,7 @@ class NewCashGameState extends State<NewCashGame> {
                       }),
                 ),
               ),
-              paddedTwo(
+              Layout().paddedTwo(
                 child: new ConstrainedBox(
                   constraints:
                       BoxConstraints.expand(height: 40.0, width: 120.0),
@@ -371,7 +384,7 @@ class NewCashGameState extends State<NewCashGame> {
           new Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              paddedTwo(
+              Layout().paddedTwo(
                 child: new Container(
                   width: 120.0,
                   child: new TextFormField(
@@ -392,7 +405,7 @@ class NewCashGameState extends State<NewCashGame> {
                   ),
                 ),
               ),
-              paddedTwo(
+              Layout().paddedTwo(
                 child: new Container(
                   width: 120.0,
                   child: new TextFormField(
@@ -441,7 +454,6 @@ class NewCashGameState extends State<NewCashGame> {
             onSaved: (val) =>
                 val.isEmpty ? game.setInfo("Not Set") : game.setInfo(val),
           )),
-          disabledNotifications(),
           Padding(
             padding: EdgeInsets.only(
               left: 4.0,
@@ -475,6 +487,7 @@ class NewCashGameState extends State<NewCashGame> {
                   setState(() {});
                 }),
           ),
+          disabledNotifications(),
           Padding(
             padding: EdgeInsets.only(top: 16),
           ),
@@ -497,6 +510,45 @@ class NewCashGameState extends State<NewCashGame> {
                   setState(() {});
                 }),
           ),
+          Padding(
+            padding: EdgeInsets.only(
+              left: 4.0,
+              right: 4.0,
+            ),
+            child: new CheckboxListTile(
+                subtitle: new Text(
+                  "Let users see how much money is on the table",
+                  style: new TextStyle(
+                    color: Colors.grey[600],
+                  ),
+                ),
+                title: new Text(
+                  "Money on the table",
+                  style: new TextStyle(color: UIData.blackOrWhite),
+                ),
+                value: game.showMoneyOnTable,
+                onChanged: (val) {
+                  if (widget.user.subLevel == 0) {
+                    showDisabledMoneyOnTheTable = true;
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Subscription(
+                                  user: widget.user,
+                                  info: true,
+                                  title:
+                                      "Your current subscription does not include showing money on the table",
+                                )));
+                  } else {
+                    game.showMoneyOnTable = val;
+                    setState(() {});
+                  }
+                }),
+          ),
+          disabledMoneyOnTheTable(),
+          Padding(
+            padding: EdgeInsets.only(top: 16),
+          ),
         ],
       ),
     );
@@ -506,9 +558,23 @@ class NewCashGameState extends State<NewCashGame> {
   Widget disabledNotifications() {
     if (showDisabledNotifications) {
       return new Padding(
-          padding: EdgeInsets.all(18.0),
+          padding: EdgeInsets.only(left: 20.0, right: 20.0),
           child: Text(
             "Your current subscription does not include notifications",
+            style: new TextStyle(color: Colors.red),
+          ));
+    } else {
+      return new Container();
+    }
+  }
+
+  bool showDisabledMoneyOnTheTable = false;
+  Widget disabledMoneyOnTheTable() {
+    if (showDisabledMoneyOnTheTable) {
+      return new Padding(
+          padding: EdgeInsets.only(left: 20.0, right: 20.0, bottom: 16.0),
+          child: Text(
+            "Your current subscription does not include showing money on the table",
             style: new TextStyle(color: Colors.red),
           ));
     } else {

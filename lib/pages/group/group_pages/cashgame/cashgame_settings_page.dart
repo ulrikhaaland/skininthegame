@@ -506,6 +506,42 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
                           autocorrect: false,
                           onSaved: (val) => widget.game.setInfo(val),
                         ),
+                        Padding(
+                          padding: EdgeInsets.only(bottom: 16.0),
+                        ),
+                        new CheckboxListTile(
+                            subtitle: new Text(
+                              "Let users see how much money is on the table",
+                              style: new TextStyle(
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            title: new Text(
+                              "Money on the table",
+                              style: new TextStyle(color: UIData.blackOrWhite),
+                            ),
+                            value: widget.game.showMoneyOnTable,
+                            onChanged: (val) {
+                              if (widget.user.subLevel == 0) {
+                                showDisabledMoneyOnTheTable = true;
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => Subscription(
+                                              user: widget.user,
+                                              info: true,
+                                              title:
+                                                  "Your current subscription does not include showing money on the table",
+                                            )));
+                              } else {
+                                widget.game.showMoneyOnTable = val;
+                                setState(() {});
+                              }
+                            }),
+                        disabledMoneyOnTheTable(),
+                        Padding(
+                          padding: EdgeInsets.only(bottom: 16.0),
+                        ),
                       ],
                     ),
                   ),
@@ -516,6 +552,20 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
         ],
       ),
     );
+  }
+
+  bool showDisabledMoneyOnTheTable = false;
+  Widget disabledMoneyOnTheTable() {
+    if (showDisabledMoneyOnTheTable) {
+      return new Padding(
+          padding: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
+          child: Text(
+            "Your current subscription does not include showing money on the table",
+            style: new TextStyle(color: Colors.red),
+          ));
+    } else {
+      return new Container();
+    }
   }
 
   bool validateAndSave() {
@@ -567,28 +617,6 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
     }
   }
 
-  void getMoneyOnTabel() async {
-    int moneyOnTable = 0;
-
-    QuerySnapshot qSnapActive = await firestoreInstance
-        .collection("$pathToCashGame/activeplayers")
-        .getDocuments();
-    QuerySnapshot qSnapPlayers = await firestoreInstance
-        .collection("$pathToCashGame/players")
-        .getDocuments();
-    qSnapPlayers.documents.forEach((DocumentSnapshot docPlayers) {
-      qSnapActive.documents.forEach((DocumentSnapshot docActive) {
-        if (docPlayers.documentID == docActive.documentID) {
-          moneyOnTable += docPlayers.data["buyin"];
-        }
-      });
-    });
-    widget.game.moneyOnTable = moneyOnTable;
-    firestoreInstance
-        .document(pathToCashGame)
-        .updateData({'moneyontable': moneyOnTable});
-  }
-
   Widget padded({Widget child}) {
     return new Padding(
       padding: EdgeInsets.only(left: 18.0, right: 18.0, bottom: 18.0),
@@ -617,7 +645,6 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
               color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
         ),
         onTap: () {
-          getMoneyOnTabel();
           firestoreInstance.document(pathToCashGame).updateData({
             "isrunning": true,
           });

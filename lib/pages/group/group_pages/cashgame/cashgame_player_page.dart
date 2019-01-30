@@ -23,6 +23,8 @@ class CashGamePlayerPage extends StatefulWidget {
     this.game,
     this.url,
     this.createdPlayer,
+    this.fromAll,
+    this.onUpdate,
   }) : super(key: key);
   final User user;
   final Group group;
@@ -34,7 +36,9 @@ class CashGamePlayerPage extends StatefulWidget {
   final Game game;
   final bool history;
   final VoidCallback callBack;
+  final VoidCallback onUpdate;
   final bool createdPlayer;
+  final bool fromAll;
 
   @override
   CashGamePlayerPageState createState() => CashGamePlayerPageState();
@@ -156,56 +160,72 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
 
   setBuyin() async {
     if (validateAndSave()) {
-      int buyinAmount = 0;
-      int payoutAmount = 0;
-      firestoreInstance
-          .document("$gamePath/activeplayers/${widget.playerId}")
-          .updateData({"buyin": newPlayerBuyinAmount, 'payout': newPayout});
-      // firestoreInstance
-      //     .document(
-      //         "$gamePath/activeplayers/${widget.playerId}")
-      //     .updateData({"buyin": newPlayerBuyinAmount, 'payout': newPayout});
-      if (oldPayout != newPayout) {
-        payoutAmount = newPayout - oldPayout;
-
-        Log().postLogToCollection(
-            "$currentUserName changed ${widget.playerUserName} payout amount from $oldPayout to $newPayout",
-            "$gamePath/log",
-            "Payout");
-      }
-      if (oldPlayerBuyinAmount != newPlayerBuyinAmount) {
-        buyinAmount = newPlayerBuyinAmount - oldPlayerBuyinAmount;
-
-        if (widget.game.isRunning) {
-          await firestoreInstance.runTransaction((Transaction tx) async {
-            DocumentReference docRef = firestoreInstance.document(gamePath);
-
-            DocumentSnapshot docSnap = await tx.get(docRef);
-            int onTable = docSnap.data["moneyontable"] + buyinAmount;
-            await tx.update(docRef, {'moneyontable': onTable});
+      if (widget.fromAll) {
+        if (oldPayout != newPayout) {
+          Log().postLogToCollection(
+              "$currentUserName changed ${widget.playerUserName} payout amount from $oldPayout to $newPayout",
+              "$gamePath/log",
+              "Payout");
+        }
+        if (oldPlayerBuyinAmount != newPlayerBuyinAmount) {
+          Log().postLogToCollection(
+              "$currentUserName changed ${widget.playerUserName} buyin amount from $oldPlayerBuyinAmount to $newPlayerBuyinAmount",
+              "$gamePath/log",
+              "Buyin");
+        }
+        if (oldPayout != newPayout ||
+            oldPlayerBuyinAmount != newPlayerBuyinAmount) {
+          firestoreInstance
+              .document("$gamePath/players/${widget.playerId}")
+              .updateData({
+            "payout": newPayout,
+            "buyin": newPlayerBuyinAmount,
           });
         }
+      } else {
+        int buyinAmount = 0;
+        int payoutAmount = 0;
+        firestoreInstance
+            .document("$gamePath/activeplayers/${widget.playerId}")
+            .updateData({"buyin": newPlayerBuyinAmount, 'payout': newPayout});
+        // firestoreInstance
+        //     .document(
+        //         "$gamePath/activeplayers/${widget.playerId}")
+        //     .updateData({"buyin": newPlayerBuyinAmount, 'payout': newPayout});
+        if (oldPayout != newPayout) {
+          payoutAmount = newPayout - oldPayout;
 
-        Log().postLogToCollection(
-            "$currentUserName changed ${widget.playerUserName} buyin amount from $oldPlayerBuyinAmount to $newPlayerBuyinAmount",
-            "$gamePath/log",
-            "Buyin");
-      }
-      if (buyinAmount != 0 || payoutAmount != 0) {
-        await firestoreInstance.runTransaction((Transaction tx) async {
-          DocumentReference docRef = firestoreInstance
-              .document("$gamePath/players/${widget.playerId}");
-          DocumentSnapshot docSnap = await tx.get(docRef);
-          await tx.update(docRef, {
-            "buyin": docSnap.data["buyin"] + buyinAmount,
-            "payout": docSnap.data["payout"] + payoutAmount
+          Log().postLogToCollection(
+              "$currentUserName changed ${widget.playerUserName} payout amount from $oldPayout to $newPayout",
+              "$gamePath/log",
+              "Payout");
+        }
+        if (oldPlayerBuyinAmount != newPlayerBuyinAmount) {
+          buyinAmount = newPlayerBuyinAmount - oldPlayerBuyinAmount;
+
+          Log().postLogToCollection(
+              "$currentUserName changed ${widget.playerUserName} buyin amount from $oldPlayerBuyinAmount to $newPlayerBuyinAmount",
+              "$gamePath/log",
+              "Buyin");
+        }
+        if (buyinAmount != 0 || payoutAmount != 0) {
+          await firestoreInstance.runTransaction((Transaction tx) async {
+            DocumentReference docRef = firestoreInstance
+                .document("$gamePath/players/${widget.playerId}");
+            DocumentSnapshot docSnap = await tx.get(docRef);
+            await tx.update(docRef, {
+              "buyin": docSnap.data["buyin"] + buyinAmount,
+              "payout": docSnap.data["payout"] + payoutAmount
+            });
           });
+        }
+        widget.onUpdate();
+        setState(() {
+          isLoading = false;
         });
       }
-      setState(() {
-        isLoading = false;
-      });
     }
+
     Navigator.pop(context);
   }
 
@@ -299,6 +319,17 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
                   fontSize: UIData.fontSize20, color: UIData.blackOrWhite),
               overflow: TextOverflow.ellipsis,
             ),
+            onTap: () {
+              if (!widget.createdPlayer) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ProfilePage(
+                              user: widget.user,
+                              profileId: widget.playerId,
+                            )));
+              }
+            },
           ),
           new Divider(
             height: .0,
@@ -320,19 +351,6 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
           new Divider(
             height: .0,
             color: Colors.black,
-          ),
-          new ListTile(
-            leading: new Icon(
-              Icons.attach_money,
-              size: 40.0,
-              color: UIData.green,
-            ),
-            title: new Text(
-              "Payout: $oldPayout",
-              style: new TextStyle(
-                  fontSize: UIData.fontSize20, color: UIData.blackOrWhite),
-            ),
-            onTap: null,
           ),
         ],
       );

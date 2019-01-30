@@ -175,7 +175,7 @@ class CashGamePageState extends State<CashGamePage>
             color: UIData.yellow,
             size: 30.0,
           ),
-          text: "All",
+          text: "Totals",
         ),
       ];
     } else {
@@ -452,36 +452,25 @@ class CashGamePageState extends State<CashGamePage>
     }
   }
 
-  Future<Null> updateMoneyOnTable(String uid) async {
-    DocumentSnapshot doc =
-        await firestoreInstance.document("$gamePath/activeplayers/$uid").get();
-    await firestoreInstance.runTransaction((Transaction tx) async {
-      DocumentReference docRef = firestoreInstance.document(gamePath);
-      DocumentSnapshot gameDoc = await tx.get(docRef);
-
-      int x = gameDoc.data["moneyontable"];
-      // int buyin = doc.data["buyin"];
-      int payout = doc.data["payout"];
-      int amount = x - payout;
-      // if (buyin == payout) {
-      //   amount = buyin;
-      // } else if (payout == 0) {
-      // } else if (buyin > payout) {
-      //   amount = buyin - payout;
-      // } else {
-      //   amount = payout - buyin;
-      // }
-      if (payout != 0) {
-        await tx.update(docRef, {
-          "moneyontable": amount,
-        });
-      }
-    });
+  void updateMoneyOnTable() async {
+    if (game.isRunning) {
+      int a = 0;
+      QuerySnapshot qSnap = await firestoreInstance
+          .collection("$gamePath/players")
+          .getDocuments();
+      qSnap.documents.forEach((doc) {
+        int b = doc.data["buyin"];
+        int p = doc.data["payout"];
+        a += b - p;
+      });
+      game.moneyOnTable = a;
+      firestoreInstance.document(gamePath).updateData({"moneyontable": a});
+    }
     return;
   }
 
   void removePlayer(String uid, bool removed, String name) async {
-    await updateMoneyOnTable(uid);
+    updateMoneyOnTable();
     hasJoined = false;
     await firestoreInstance.document("$gamePath/activeplayers/$uid").delete();
     await firestoreInstance.document("$gamePath/queue/$uid").delete();
@@ -530,6 +519,7 @@ class CashGamePageState extends State<CashGamePage>
           docSnap.data["currency"],
           docSnap.data["isrunning"],
           docSnap.data["moneyontable"],
+          docSnap.data["showmoneyontable"],
         );
 
         if (game.calculatePayouts == true && widget.history == true) {
@@ -635,7 +625,8 @@ class CashGamePageState extends State<CashGamePage>
     }
   }
 
-  pushPlayerPage(String id, int buyin, int payout, String name, String url) {
+  pushPlayerPage(
+      String id, int buyin, int payout, String name, String url, bool fromAll) {
     bool createdPlayer = false;
     if (id == name) {
       createdPlayer = true;
@@ -655,6 +646,8 @@ class CashGamePageState extends State<CashGamePage>
                 history: widget.history,
                 callBack: () => checkIfFull(),
                 createdPlayer: createdPlayer,
+                fromAll: fromAll,
+                onUpdate: () => updateMoneyOnTable(),
               )),
     );
   }
@@ -692,29 +685,14 @@ class CashGamePageState extends State<CashGamePage>
             overflow: TextOverflow.ellipsis,
           ),
           // trailing: iconButtonDelete(document.documentID),
-          onTap: () {
-            setState(() {
-              isLoading = true;
-            });
-            // firestoreInstance
-            //     .document(
-            //         "groups/$groupId/games/type/cashgameactive/${widget.gameId}/players/${document.documentID}")
-            //     .get()
-            //     .then((datasnapshot) {
-            //   int buyin = datasnapshot.data["buyin"];
-            //   int payout = datasnapshot.data["payout"];
-
-            setState(() {
-              isLoading = false;
-            });
-            pushPlayerPage(
-                document.documentID,
-                document.data["buyin"],
-                document.data["payout"],
-                document.data["name"],
-                document.data["profilepicurl"]);
-            // });
-          },
+          onTap: () => pushPlayerPage(
+              document.documentID,
+              document.data["buyin"],
+              document.data["payout"],
+              document.data["name"],
+              document.data["profilepicurl"],
+              false),
+          // });
         ),
       ),
       secondaryActions: <Widget>[
@@ -763,25 +741,13 @@ class CashGamePageState extends State<CashGamePage>
         overflow: TextOverflow.ellipsis,
       ),
       // trailing: iconButtonDelete(document.documentID),
-      onTap: () {
-        setState(() {
-          isLoading = true;
-        });
-        firestoreInstance
-            .document(
-                "groups/$groupId/games/type/cashgameactive/${widget.gameId}/players/${document.documentID}")
-            .get()
-            .then((datasnapshot) {
-          int buyin = datasnapshot.data["buyin"];
-          int payout = datasnapshot.data["payout"];
-
-          setState(() {
-            isLoading = false;
-          });
-          pushPlayerPage(document.documentID, buyin, payout,
-              document.data["name"], document.data["profilepicurl"]);
-        });
-      },
+      onTap: () => pushPlayerPage(
+          document.documentID,
+          document.data["buyin"],
+          document.data["payout"],
+          document.data["name"],
+          document.data["profilepicurl"],
+          true),
     );
   }
 
@@ -1040,7 +1006,7 @@ class CashGamePageState extends State<CashGamePage>
                 isLoading = false;
               });
               pushPlayerPage(document.documentID, playerBuyin, payout,
-                  document.data["name"], document.data["profilepicurl"]);
+                  document.data["name"], document.data["profilepicurl"], false);
             });
           },
         ),

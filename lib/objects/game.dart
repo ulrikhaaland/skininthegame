@@ -24,10 +24,12 @@ class Game {
     this.currency,
     this.isRunning,
     this.moneyOnTable,
+    this.showMoneyOnTable,
   );
 
   bool calculatePayouts;
   bool isRunning;
+  bool showMoneyOnTable;
 
   int moneyOnTable;
   int addon;
@@ -74,6 +76,7 @@ class Game {
         "currency": this.currency,
         "isrunning": this.isRunning,
         "moneyontable": this.moneyOnTable,
+        "showmoneyontable": this.showMoneyOnTable,
       };
 
   Game fromMap(Map map) {
@@ -100,6 +103,7 @@ class Game {
       currency,
       isRunning,
       moneyOnTable,
+      showMoneyOnTable,
     );
     return game;
   }

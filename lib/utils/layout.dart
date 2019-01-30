@@ -8,6 +8,13 @@ class Layout {
     );
   }
 
+  Widget paddedTwo({Widget child}) {
+    return new Padding(
+      padding: EdgeInsets.symmetric(vertical: 12.0),
+      child: child,
+    );
+  }
+
   Widget divider() {
     return new Divider(
       height: .0,
