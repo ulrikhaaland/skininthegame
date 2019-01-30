@@ -197,6 +197,7 @@ class GroupCashGamesState extends State<GroupCashGames>
                         user: widget.user,
                         group: widget.group,
                         gameId: gameId,
+                        history: false,
                       )),
             );
           },

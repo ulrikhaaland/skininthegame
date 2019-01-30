@@ -80,7 +80,7 @@ class CashGamePageState extends State<CashGamePage>
   String groupId;
 
   IconData playerOrResultsIcon = Icons.people;
-  String playerOrResultsString = "Players";
+  String playerOrResultsString = "Active";
   IconData queueOrCalculateIcon = Icons.timer;
   String queueOrCalculateString = "Waiting";
 
@@ -104,9 +104,12 @@ class CashGamePageState extends State<CashGamePage>
     groupId = widget.group.id;
     isAdmin = widget.group.admin;
 
-    _tabController = new TabController(vsync: this, length: 4);
     if (isAdmin == true) {
+      _tabController = new TabController(vsync: this, length: 5);
+
       _formType = FormType.edit;
+    } else {
+      _tabController = new TabController(vsync: this, length: 4);
     }
     if (widget.history == true) {
       activeOrNot = "players";
@@ -131,6 +134,88 @@ class CashGamePageState extends State<CashGamePage>
     return setScreen();
   }
 
+  List<Widget> tabs() {
+    if (isAdmin && widget.history == false) {
+      return [
+        Tab(
+          icon: Icon(
+            Icons.info,
+            color: UIData.blackOrWhite,
+            size: 30.0,
+          ),
+          text: "Status",
+        ),
+        Tab(
+          icon: Icon(
+            Icons.message,
+            color: Colors.grey[600],
+            size: 30.0,
+          ),
+          text: "Posts",
+        ),
+        Tab(
+          icon: Icon(
+            playerOrResultsIcon,
+            color: Colors.blue,
+            size: 30.0,
+          ),
+          text: playerOrResultsString,
+        ),
+        Tab(
+          icon: Icon(
+            queueOrCalculateIcon,
+            color: UIData.green,
+            size: 30.0,
+          ),
+          text: "Wait",
+        ),
+        Tab(
+          icon: Icon(
+            Icons.group,
+            color: UIData.yellow,
+            size: 30.0,
+          ),
+          text: "All",
+        ),
+      ];
+    } else {
+      return [
+        Tab(
+          icon: Icon(
+            Icons.info,
+            color: UIData.blackOrWhite,
+            size: 30.0,
+          ),
+          text: "Status",
+        ),
+        Tab(
+          icon: Icon(
+            Icons.message,
+            color: Colors.grey[600],
+            size: 30.0,
+          ),
+          text: "Posts",
+        ),
+        Tab(
+          icon: Icon(
+            playerOrResultsIcon,
+            color: Colors.blue,
+            size: 30.0,
+          ),
+          text: playerOrResultsString,
+        ),
+        Tab(
+          icon: Icon(
+            queueOrCalculateIcon,
+            color: UIData.green,
+            size: 30.0,
+          ),
+          text: queueOrCalculateString,
+        ),
+      ];
+    }
+  }
+
   Scaffold page() {
     return new Scaffold(
         appBar: AppBar(
@@ -152,40 +237,7 @@ class CashGamePageState extends State<CashGamePage>
           backgroundColor: UIData.appBarColor,
           bottom: TabBar(
             controller: _tabController,
-            tabs: [
-              Tab(
-                icon: Icon(
-                  Icons.info,
-                  color: UIData.blackOrWhite,
-                  size: 30.0,
-                ),
-                text: "Status",
-              ),
-              Tab(
-                icon: Icon(
-                  Icons.message,
-                  color: Colors.grey[600],
-                  size: 30.0,
-                ),
-                text: "Posts",
-              ),
-              Tab(
-                icon: Icon(
-                  playerOrResultsIcon,
-                  color: Colors.blue,
-                  size: 30.0,
-                ),
-                text: playerOrResultsString,
-              ),
-              Tab(
-                icon: Icon(
-                  queueOrCalculateIcon,
-                  color: UIData.green,
-                  size: 30.0,
-                ),
-                text: queueOrCalculateString,
-              ),
-            ],
+            tabs: tabs(),
           ),
         ),
         backgroundColor: UIData.dark,
@@ -253,6 +305,7 @@ class CashGamePageState extends State<CashGamePage>
                 streamOfPosts(),
                 setPlayersOrResult(),
                 setQueueOrPayouts(),
+                all(),
               ],
             ),
             secondLoading(),
@@ -342,7 +395,7 @@ class CashGamePageState extends State<CashGamePage>
     });
   }
 
-  addPlayer() {
+  addPlayer() async {
     hasJoined = true;
     setLeave();
     if (full != true) {
@@ -352,28 +405,31 @@ class CashGamePageState extends State<CashGamePage>
             .setData({
           'name': currentUserName,
           'id': currentUserId,
+          "buyin": 0,
+          "payout": 0,
           "profilepicurl": widget.user.profilePicURL,
         });
         checkIfFull();
       });
-      firestoreInstance.runTransaction((Transaction tx) async {
-        DocumentSnapshot docSnap = await firestoreInstance
-            .document("$gamePath/players/$currentUserId")
-            .get();
-        if (!docSnap.exists) {
-          firestoreInstance.runTransaction((Transaction tx) async {
-            await firestoreInstance
-                .document("$gamePath/players/$currentUserId")
-                .setData({
-              'name': currentUserName,
-              'id': currentUserId,
-              "buyin": 0,
-              "payout": 0,
-              "profilepicurl": widget.user.profilePicURL,
-            });
-          });
-        }
-      });
+
+      DocumentReference docRef =
+          firestoreInstance.document("$gamePath/players/$currentUserId");
+      DocumentSnapshot docSnap = await docRef.get();
+      if (!docSnap.exists) {
+        await docRef.setData({
+          'name': currentUserName,
+          'id': currentUserId,
+          "buyin": 0,
+          "payout": 0,
+          "profilepicurl": widget.user.profilePicURL,
+        });
+        // } else {
+        //  DocumentSnapshot docSnap = await tx.get(firestoreInstance.document(gamePath));
+        //  await tx.update(firestoreInstance.document(gamePath), {
+        //    "moneyontable": docSnap.data["buyin"]
+        //  });
+        // }
+      }
 
       Log().postLogToCollection(
           "$currentUserName joined game", logPath, "Joined");
@@ -396,44 +452,45 @@ class CashGamePageState extends State<CashGamePage>
     }
   }
 
-  void updateMoneyOnTable(String uid) async {
-    DocumentSnapshot gameDoc = await firestoreInstance.document(gamePath).get();
+  Future<Null> updateMoneyOnTable(String uid) async {
     DocumentSnapshot doc =
-        await firestoreInstance.document("$gamePath/players/$uid").get();
+        await firestoreInstance.document("$gamePath/activeplayers/$uid").get();
+    await firestoreInstance.runTransaction((Transaction tx) async {
+      DocumentReference docRef = firestoreInstance.document(gamePath);
+      DocumentSnapshot gameDoc = await tx.get(docRef);
 
-    int buyin = doc.data["buyin"];
-    int payout = doc.data["payout"];
-    int amount = 0;
-    if (buyin == payout) {
-      amount = buyin;
-    } else if (payout == 0) {
-    } else if (buyin > payout) {
-      amount = buyin - payout;
-    } else {
-      amount = payout - buyin;
-    }
-    if (payout != 0) {
-      firestoreInstance.document(gamePath).updateData({
-        "moneyontable": gameDoc.data["moneyontable"] -= amount,
-      });
-    }
+      int x = gameDoc.data["moneyontable"];
+      // int buyin = doc.data["buyin"];
+      int payout = doc.data["payout"];
+      int amount = x - payout;
+      // if (buyin == payout) {
+      //   amount = buyin;
+      // } else if (payout == 0) {
+      // } else if (buyin > payout) {
+      //   amount = buyin - payout;
+      // } else {
+      //   amount = payout - buyin;
+      // }
+      if (payout != 0) {
+        await tx.update(docRef, {
+          "moneyontable": amount,
+        });
+      }
+    });
+    return;
   }
 
   void removePlayer(String uid, bool removed, String name) async {
+    await updateMoneyOnTable(uid);
     hasJoined = false;
-    firestoreInstance.runTransaction((Transaction tx) async {
-      await firestoreInstance.document("$gamePath/activeplayers/$uid").delete();
-      firestoreInstance.runTransaction((Transaction tx) async {
-        await firestoreInstance.document("$gamePath/queue/$uid").delete();
-        checkIfFull();
-        if (full == true) {
-          setQueue();
-        } else {
-          setJoin();
-        }
-      });
-    });
-    updateMoneyOnTable(uid);
+    await firestoreInstance.document("$gamePath/activeplayers/$uid").delete();
+    await firestoreInstance.document("$gamePath/queue/$uid").delete();
+    checkIfFull();
+    if (full == true) {
+      setQueue();
+    } else {
+      setJoin();
+    }
 
     if (removed) {
       Log().postLogToCollection(
@@ -639,20 +696,24 @@ class CashGamePageState extends State<CashGamePage>
             setState(() {
               isLoading = true;
             });
-            firestoreInstance
-                .document(
-                    "groups/$groupId/games/type/cashgameactive/${widget.gameId}/players/${document.documentID}")
-                .get()
-                .then((datasnapshot) {
-              int buyin = datasnapshot.data["buyin"];
-              int payout = datasnapshot.data["payout"];
+            // firestoreInstance
+            //     .document(
+            //         "groups/$groupId/games/type/cashgameactive/${widget.gameId}/players/${document.documentID}")
+            //     .get()
+            //     .then((datasnapshot) {
+            //   int buyin = datasnapshot.data["buyin"];
+            //   int payout = datasnapshot.data["payout"];
 
-              setState(() {
-                isLoading = false;
-              });
-              pushPlayerPage(document.documentID, buyin, payout,
-                  document.data["name"], document.data["profilepicurl"]);
+            setState(() {
+              isLoading = false;
             });
+            pushPlayerPage(
+                document.documentID,
+                document.data["buyin"],
+                document.data["payout"],
+                document.data["name"],
+                document.data["profilepicurl"]);
+            // });
           },
         ),
       ),
@@ -689,6 +750,55 @@ class CashGamePageState extends State<CashGamePage>
             itemCount: snapshot.data.documents.length,
             itemBuilder: (context, index) =>
                 _registeredList(context, snapshot.data.documents[index]),
+          );
+        });
+  }
+
+  Widget allList(BuildContext context, DocumentSnapshot document) {
+    return new ListTile(
+      leading: addImage(document.data["profilepicurl"]),
+      title: new Text(
+        document.data["name"],
+        style: new TextStyle(fontSize: 25.0, color: UIData.blackOrWhite),
+        overflow: TextOverflow.ellipsis,
+      ),
+      // trailing: iconButtonDelete(document.documentID),
+      onTap: () {
+        setState(() {
+          isLoading = true;
+        });
+        firestoreInstance
+            .document(
+                "groups/$groupId/games/type/cashgameactive/${widget.gameId}/players/${document.documentID}")
+            .get()
+            .then((datasnapshot) {
+          int buyin = datasnapshot.data["buyin"];
+          int payout = datasnapshot.data["payout"];
+
+          setState(() {
+            isLoading = false;
+          });
+          pushPlayerPage(document.documentID, buyin, payout,
+              document.data["name"], document.data["profilepicurl"]);
+        });
+      },
+    );
+  }
+
+  Widget all() {
+    return StreamBuilder(
+        stream: firestoreInstance
+            .collection(
+                "groups/$groupId/games/type/cashgameactive/${widget.gameId}/players")
+            // .orderBy("orderbytime")
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return loading();
+          return ListView.builder(
+            itemExtent: 60.0,
+            itemCount: snapshot.data.documents.length,
+            itemBuilder: (context, index) =>
+                allList(context, snapshot.data.documents[index]),
           );
         });
   }

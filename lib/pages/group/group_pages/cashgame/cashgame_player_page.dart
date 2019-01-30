@@ -156,38 +156,51 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
 
   setBuyin() async {
     if (validateAndSave()) {
+      int buyinAmount = 0;
+      int payoutAmount = 0;
       firestoreInstance
-          .document("$gamePath/players/${widget.playerId}")
+          .document("$gamePath/activeplayers/${widget.playerId}")
           .updateData({"buyin": newPlayerBuyinAmount, 'payout': newPayout});
       // firestoreInstance
       //     .document(
       //         "$gamePath/activeplayers/${widget.playerId}")
       //     .updateData({"buyin": newPlayerBuyinAmount, 'payout': newPayout});
-
-      if (oldPlayerBuyinAmount != newPlayerBuyinAmount) {
-        Log().postLogToCollection(
-            "$currentUserName changed ${widget.playerUserName} buyin amount from $oldPlayerBuyinAmount to $newPlayerBuyinAmount",
-            "$gamePath/log",
-            "Buyin");
-
-        if (widget.game.isRunning) {
-          int amount = newPlayerBuyinAmount - oldPlayerBuyinAmount;
-
-          await firestoreInstance.runTransaction((Transaction tx) async {
-            DocumentSnapshot docSnap =
-                await tx.get(firestoreInstance.document(gamePath));
-            int onTable = docSnap.data["moneyontable"] + amount;
-            await tx.update(firestoreInstance.document(gamePath),
-                {'moneyontable': onTable});
-          });
-        }
-      }
-
       if (oldPayout != newPayout) {
+        payoutAmount = newPayout - oldPayout;
+
         Log().postLogToCollection(
             "$currentUserName changed ${widget.playerUserName} payout amount from $oldPayout to $newPayout",
             "$gamePath/log",
             "Payout");
+      }
+      if (oldPlayerBuyinAmount != newPlayerBuyinAmount) {
+        buyinAmount = newPlayerBuyinAmount - oldPlayerBuyinAmount;
+
+        if (widget.game.isRunning) {
+          await firestoreInstance.runTransaction((Transaction tx) async {
+            DocumentReference docRef = firestoreInstance.document(gamePath);
+
+            DocumentSnapshot docSnap = await tx.get(docRef);
+            int onTable = docSnap.data["moneyontable"] + buyinAmount;
+            await tx.update(docRef, {'moneyontable': onTable});
+          });
+        }
+
+        Log().postLogToCollection(
+            "$currentUserName changed ${widget.playerUserName} buyin amount from $oldPlayerBuyinAmount to $newPlayerBuyinAmount",
+            "$gamePath/log",
+            "Buyin");
+      }
+      if (buyinAmount != 0 || payoutAmount != 0) {
+        await firestoreInstance.runTransaction((Transaction tx) async {
+          DocumentReference docRef = firestoreInstance
+              .document("$gamePath/players/${widget.playerId}");
+          DocumentSnapshot docSnap = await tx.get(docRef);
+          await tx.update(docRef, {
+            "buyin": docSnap.data["buyin"] + buyinAmount,
+            "payout": docSnap.data["payout"] + payoutAmount
+          });
+        });
       }
       setState(() {
         isLoading = false;
@@ -235,7 +248,9 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
                 labelStyle: new TextStyle(color: Colors.grey[600]),
                 labelText: "Total buyin amount",
               ),
-              onSaved: (val) => newPlayerBuyinAmount = int.tryParse(val),
+              onSaved: (val) => val.isEmpty
+                  ? newPlayerBuyinAmount = 0
+                  : newPlayerBuyinAmount = int.tryParse(val),
             ),
             onTap: null,
           ),
@@ -259,7 +274,8 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
                 labelStyle: new TextStyle(color: Colors.grey[600]),
                 labelText: "Payout",
               ),
-              onSaved: (val) => newPayout = int.tryParse(val),
+              onSaved: (val) =>
+                  val.isEmpty ? newPayout = 0 : newPayout = int.tryParse(val),
             ),
             onTap: null,
           ),
