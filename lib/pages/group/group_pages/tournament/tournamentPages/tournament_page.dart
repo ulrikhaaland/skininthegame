@@ -253,7 +253,7 @@ class TournamentPageState extends State<TournamentPage>
           docSnap.data["name"],
           docSnap.data["fittedname"],
           docSnap.data["adress"],
-          null,
+          0,
           docSnap.data["buyin"],
           docSnap.data["date"],
           docSnap.data["gametype"],
@@ -261,14 +261,17 @@ class TournamentPageState extends State<TournamentPage>
           docSnap.data["orderbytime"],
           docSnap.data["rebuy"],
           docSnap.data["registeredplayers"],
-          null,
+          0,
           docSnap.data["startingchips"],
           docSnap.data["time"],
           docSnap.data["calculatepayouts"],
           docSnap.data["currency"],
           docSnap.data["isrunning"],
           docSnap.data["moneyontable"],
-          null,
+          false,
+          1,
+          rebuyPrice: docSnap.data["rebuyprice"],
+          addonPrice: docSnap.data["addonprice"],
         );
         checkIfFull();
         userFound = true;
@@ -430,16 +433,8 @@ class TournamentPageState extends State<TournamentPage>
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: UIData.blackOrWhite),
                     ),
-                    new Text(
-                      "Rebuy: ${game.rebuy}",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: UIData.blackOrWhite),
-                    ),
-                    new Text(
-                      "Addon: ${game.addon}",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: UIData.blackOrWhite),
-                    ),
+                    rebuy(),
+                    addon(),
                     new Text(
                       "Starting stack: ${game.startingChips}",
                       overflow: TextOverflow.ellipsis,
@@ -487,6 +482,30 @@ class TournamentPageState extends State<TournamentPage>
             secondLoading(),
           ],
         ));
+  }
+
+  Widget rebuy() {
+    if (game.rebuy > 0) {
+      return new Text(
+        "Rebuy: ${game.rebuy} Price: ${game.rebuyPrice}",
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(color: UIData.blackOrWhite),
+      );
+    } else {
+      return new Container();
+    }
+  }
+
+  Widget addon() {
+    if (game.addon > 0) {
+      return new Text(
+        "Addon: ${game.addon} Price: ${game.addonPrice}",
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(color: UIData.blackOrWhite),
+      );
+    } else {
+      return new Container();
+    }
   }
 
   Widget secondLoading() {

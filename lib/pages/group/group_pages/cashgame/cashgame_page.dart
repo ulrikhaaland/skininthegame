@@ -181,7 +181,6 @@ class CashGamePageState extends State<CashGamePage>
     } else {
       return [
         Tab(
-          
           icon: Icon(
             Icons.info,
             color: UIData.blackOrWhite,
@@ -246,7 +245,6 @@ class CashGamePageState extends State<CashGamePage>
         body: new Stack(
           children: <Widget>[
             new TabBarView(
-              
               controller: _tabController,
               children: [
                 ListView(
@@ -512,29 +510,30 @@ class CashGamePageState extends State<CashGamePage>
           await firestoreInstance.document("$gamePath").get();
       if (docSnap.data.isNotEmpty) {
         game = new Game(
-          null,
-          null,
+          "0",
+          0,
           docSnap.data["id"],
           docSnap.data["info"],
           docSnap.data["name"],
           docSnap.data["fittedname"],
           docSnap.data["adress"],
           docSnap.data["bblind"],
-          null,
+          0,
           docSnap.data["date"],
           docSnap.data["gametype"],
           docSnap.data["maxplayers"],
           docSnap.data["orderbytime"],
-          null,
+          0,
           docSnap.data["registeredplayers"],
           docSnap.data["sblind"],
-          null,
+          "0",
           docSnap.data["time"],
           docSnap.data["calculatepayouts"],
           docSnap.data["currency"],
           docSnap.data["isrunning"],
           docSnap.data["moneyontable"],
           docSnap.data["showmoneyontable"],
+          0
         );
 
         if (game.calculatePayouts == true && widget.history == true) {

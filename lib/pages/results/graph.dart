@@ -230,28 +230,57 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
     double buyin = resultGame.buyin * rate;
     double payout = resultGame.payout * rate;
     double profit = resultGame.profit * rate;
-    double bBlind = resultGame.bBlind * rate;
-    double sBlind = resultGame.sBlind * rate;
+    double bBlind;
+    double sBlind;
+    if (resultGame.type == 0) {
+      bBlind = resultGame.bBlind * rate;
+      sBlind = resultGame.sBlind * rate;
+    }
 
-    resultGame = new ResultGame(
-        resultGame.addon,
-        buyin.round(),
-        widget.currentUser.currency,
-        resultGame.gameName,
-        resultGame.gameType,
-        resultGame.groupName,
-        resultGame.orderByTime,
-        payout.round(),
-        resultGame.placing,
-        resultGame.playerAmount,
-        resultGame.prizePool,
-        profit.round(),
-        resultGame.rebuy,
-        resultGame.time,
-        bBlind.round(),
-        sBlind.round(),
-        resultGame.date,
-        resultGame.share);
+    if (resultGame.type == 0) {
+      resultGame = new ResultGame(
+          null,
+          buyin.round(),
+          widget.currentUser.currency,
+          resultGame.gameName,
+          resultGame.gameType,
+          resultGame.groupName,
+          resultGame.orderByTime,
+          payout.round(),
+          null,
+          resultGame.playerAmount,
+          null,
+          profit.round(),
+          null,
+          resultGame.time,
+          bBlind.round(),
+          sBlind.round(),
+          resultGame.date,
+          resultGame.share,
+          resultGame.type);
+    } else {
+      resultGame = new ResultGame(
+          resultGame.addon,
+          buyin.round(),
+          widget.currentUser.currency,
+          resultGame.gameName,
+          resultGame.gameType,
+          resultGame.groupName,
+          resultGame.orderByTime,
+          payout.round(),
+          resultGame.placing,
+          resultGame.playerAmount,
+          resultGame.prizePool,
+          profit.round(),
+          resultGame.rebuy,
+          resultGame.time,
+          null,
+          null,
+          resultGame.date,
+          resultGame.share,
+          resultGame.type);
+    }
+
     return resultGame;
   }
 
@@ -317,10 +346,10 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
     tournamentResultGameTotal = new ResultGameTotal(0, 0, 0, 0, 0, 0, 0);
     for (int i = 0; i < tournamentResults.length; i++) {
       if (tournamentResults[i].currency != widget.currentUser.currency) {
-        if (cashgameResults[i].currency == "NOK" ||
-            cashgameResults[i].currency == "USD" ||
-            cashgameResults[i].currency == "EURO" ||
-            cashgameResults[i].currency == "GBP") {
+        if (tournamentResults[i].currency == "NOK" ||
+            tournamentResults[i].currency == "USD" ||
+            tournamentResults[i].currency == "EURO" ||
+            tournamentResults[i].currency == "GBP") {
           tournamentResults[i] = exchange(tournamentResults[i]);
         }
       }
@@ -369,7 +398,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
   Widget hasTournaments() {
     if (tournamentResults.isNotEmpty) {
       return SelectionCallbackExample.withSampleData(
-          tournamentData, widget.user, true);
+          tournamentData, widget.currentUser, true);
     } else {
       return notSharing("tournament");
     }

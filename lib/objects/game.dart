@@ -2,34 +2,37 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Game {
   Game(
-    this.totalPrizePool,
-    this.addon,
-    this.id,
-    this.info,
-    this.name,
-    this.fittedName,
-    this.adress,
-    this.bBlind,
-    this.buyin,
-    this.date,
-    this.gameType,
-    this.maxPlayers,
-    this.orderByTime,
-    this.rebuy,
-    this.registeredPlayers,
-    this.sBlind,
-    this.startingChips,
-    this.time,
-    this.calculatePayouts,
-    this.currency,
-    this.isRunning,
-    this.moneyOnTable,
-    this.showMoneyOnTable,
-  );
+      this.totalPrizePool,
+      this.addon,
+      this.id,
+      this.info,
+      this.name,
+      this.fittedName,
+      this.adress,
+      this.bBlind,
+      this.buyin,
+      this.date,
+      this.gameType,
+      this.maxPlayers,
+      this.orderByTime,
+      this.rebuy,
+      this.registeredPlayers,
+      this.sBlind,
+      this.startingChips,
+      this.time,
+      this.calculatePayouts,
+      this.currency,
+      this.isRunning,
+      this.moneyOnTable,
+      this.showMoneyOnTable,
+      this.type,
+      {this.addonPrice,
+      this.rebuyPrice});
 
   bool calculatePayouts;
   bool isRunning;
   bool showMoneyOnTable;
+  int type;
 
   int moneyOnTable;
   int addon;
@@ -41,6 +44,8 @@ class Game {
   int registeredPlayers;
   int bBlind;
   int sBlind;
+  int addonPrice;
+  int rebuyPrice;
 
   String adress;
   String date;
@@ -77,6 +82,9 @@ class Game {
         "isrunning": this.isRunning,
         "moneyontable": this.moneyOnTable,
         "showmoneyontable": this.showMoneyOnTable,
+        'addonprice': this.addonPrice,
+        'rebuyprice': this.rebuyPrice,
+        'type': this.type,
       };
 
   Game fromMap(Map map) {
@@ -104,6 +112,9 @@ class Game {
       isRunning,
       moneyOnTable,
       showMoneyOnTable,
+      type,
+      rebuyPrice: this.rebuyPrice,
+      addonPrice: this.addonPrice,
     );
     return game;
   }

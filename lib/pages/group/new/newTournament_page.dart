@@ -40,6 +40,7 @@ class NewTournamentState extends State<NewTournament> {
   int gameId;
 
   bool gameIdAvailable = false;
+  bool sameAsBuyin = true;
 
   bool isLoading = false;
 
@@ -90,8 +91,34 @@ class NewTournamentState extends State<NewTournament> {
     currentUserId = widget.user.id;
     groupId = widget.group.id;
 
-    game = new Game("", 0, null, "", "", "", "", 0, 0, "", "No Limit Hold'em",
-        9, 0, 0, 0, 0, "", "", false, widget.user.currency, false, 0, null);
+    game = new Game(
+      "",
+      0,
+      null,
+      "",
+      "",
+      "",
+      "",
+      0,
+      0,
+      "",
+      "No Limit Hold'em",
+      9,
+      0,
+      0,
+      0,
+      0,
+      "",
+      "",
+      false,
+      widget.user.currency,
+      false,
+      0,
+      null,
+      1,
+      addonPrice: null,
+      rebuyPrice: null,
+    );
   }
 
   bool validateAndSave() {
@@ -422,6 +449,27 @@ class NewTournamentState extends State<NewTournament> {
               ),
             ],
           ),
+          returnPadding(),
+          rebuyPrice(),
+          Padding(
+            padding:
+                EdgeInsets.only(left: 4.0, right: 4.0, bottom: 18.0, top: 18.0),
+            child: new CheckboxListTile(
+                title: new Text(
+                  "Same price as buyin?",
+                  style: new TextStyle(color: UIData.blackOrWhite),
+                ),
+                subtitle: new Text(
+                  "If the price for rebuy's and addon's is the same as the price for buyin then check this box",
+                  style: new TextStyle(color: Colors.grey[600]),
+                ),
+                value: sameAsBuyin,
+                onChanged: (val) {
+                  sameAsBuyin = val;
+                  showRebuyPrice = !val;
+                  setState(() {});
+                }),
+          ),
           padded(
               child: new TextFormField(
             keyboardType: TextInputType.number,
@@ -512,6 +560,65 @@ class NewTournamentState extends State<NewTournament> {
         ],
       ),
     );
+  }
+
+  bool showRebuyPrice = false;
+
+  Widget returnPadding() {
+    if (showRebuyPrice) {
+      return Padding(
+        padding: EdgeInsets.only(top: 18.0),
+      );
+    } else {
+      return Container();
+    }
+  }
+
+  Widget rebuyPrice() {
+    if (showRebuyPrice) {
+      return new Row(
+        children: <Widget>[
+          new Container(
+            width: 120.0,
+            child: new TextFormField(
+              keyboardType: TextInputType.number,
+              keyboardAppearance: Brightness.dark,
+              style: new TextStyle(color: UIData.blackOrWhite),
+              key: new Key('rebuy price'),
+              decoration: new InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: "Rebuy price",
+                  labelStyle: new TextStyle(color: Colors.grey[600])),
+              autocorrect: false,
+              onSaved: (val) => val.isEmpty
+                  ? game.rebuyPrice = game.buyin
+                  : game.rebuyPrice = int.tryParse(val),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(20.0),
+          ),
+          new Container(
+            width: 120.0,
+            child: new TextFormField(
+                keyboardType: TextInputType.number,
+                keyboardAppearance: Brightness.dark,
+                style: new TextStyle(color: UIData.blackOrWhite),
+                key: new Key('addon price'),
+                decoration: new InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: "Addon price",
+                    labelStyle: new TextStyle(color: Colors.grey[600])),
+                autocorrect: false,
+                onSaved: (val) => val.isEmpty
+                    ? game.addonPrice = game.buyin
+                    : game.addonPrice = int.tryParse(val)),
+          ),
+        ],
+      );
+    } else {
+      return new Container();
+    }
   }
 
   bool showDisabledNotifications = false;

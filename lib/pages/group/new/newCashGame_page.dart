@@ -76,7 +76,8 @@ class NewCashGameState extends State<NewCashGame> {
         widget.user.currency,
         false,
         0,
-        moneyOnTable);
+        moneyOnTable,
+        0);
     game.setDate("Not set");
     game.setTime("Not set");
   }

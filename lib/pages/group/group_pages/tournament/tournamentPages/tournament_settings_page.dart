@@ -51,6 +51,9 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
 
   // New game
 
+  bool sameAsBuyin = true;
+  bool showRebuyPrice = false;
+
   bool isLoading = false;
 
   CollectionReference fromCollectionPlayers;
@@ -67,9 +70,16 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
     super.initState();
     _tabController = new TabController(vsync: this, length: 2);
 
-    currentUserId = widget.user.id;
+    currentUserId = widget.user.id; 
     currentUserName = widget.user.userName;
     groupId = widget.group.id;
+    if (widget.game.rebuy > 0 || widget.game.addon > 0) {
+      showRebuyPrice = true;
+    }
+    if (widget.game.rebuyPrice != widget.game.buyin ||
+        widget.game.addonPrice != widget.game.buyin) {
+      sameAsBuyin = false;
+    }
     if (widget.history == true) {
       tournamentActiveOrHistory = "tournamenthistory";
     }
@@ -518,6 +528,23 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                             ),
                           ],
                         ),
+                        returnPadding(),
+                        rebuyPrice(),
+                        new CheckboxListTile(
+                            title: new Text(
+                              "Same price as buyin?",
+                              style: new TextStyle(color: UIData.blackOrWhite),
+                            ),
+                            subtitle: new Text(
+                              "If the price for rebuy's and addon's is the same as the price for buyin then check this box",
+                              style: new TextStyle(color: Colors.grey[600]),
+                            ),
+                            value: sameAsBuyin,
+                            onChanged: (val) {
+                              sameAsBuyin = val;
+                              showRebuyPrice = !val;
+                              setState(() {});
+                            }),
                         new TextFormField(
                           keyboardType: TextInputType.numberWithOptions(),
                           initialValue: widget.game.startingChips,
@@ -580,6 +607,67 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
         ));
   }
 
+  Widget returnPadding() {
+    if (showRebuyPrice) {
+      return Padding(
+        padding: EdgeInsets.only(top: 18.0),
+      );
+    } else {
+      return Container();
+    }
+  }
+
+  Widget rebuyPrice() {
+    if (showRebuyPrice) {
+      return new Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          new Container(
+            width: 120.0,
+            child: new TextFormField(
+              keyboardType: TextInputType.number,
+              keyboardAppearance: Brightness.dark,
+              style: new TextStyle(color: UIData.blackOrWhite),
+              key: new Key('rebuy price'),
+              decoration: new InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: "Rebuy price",
+                  labelStyle: new TextStyle(color: Colors.grey[600])),
+              autocorrect: false,
+              onSaved: (val) => val.isEmpty
+                  ? widget.game.rebuyPrice = widget.game.buyin
+                  : widget.game.rebuyPrice = int.tryParse(val),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(20.0),
+          ),
+          new Container(
+            width: 120.0,
+            child: new TextFormField(
+                keyboardType: TextInputType.number,
+                keyboardAppearance: Brightness.dark,
+                style: new TextStyle(color: UIData.blackOrWhite),
+                key: new Key('addon price'),
+                decoration: new InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: "Addon price",
+                    labelStyle: new TextStyle(color: Colors.grey[600])),
+                autocorrect: false,
+                onSaved: (val) => val.isEmpty
+                    ? widget.game.addonPrice = widget.game.buyin
+                    : widget.game.addonPrice = int.tryParse(val)),
+          ),
+          Padding(
+            padding: EdgeInsets.only(bottom: 18.0),
+          ),
+        ],
+      );
+    } else {
+      return new Container();
+    }
+  }
+
   Widget markAsFinishedList() {
     if (widget.history != true && widget.game.isRunning == false) {
       return new ListTile(
@@ -634,13 +722,17 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
     }
   }
 
-  int calculateProfits(int payout, int rebuy, int addon) {
+  int calculateProfits(
+    int payout,
+    int rebuy,
+    int addon,
+  ) {
     int profit = -widget.game.buyin;
     for (int i = 0; i < rebuy; i++) {
-      profit -= widget.game.buyin;
+      profit -= widget.game.rebuyPrice;
     }
     for (int i = 0; i < addon; i++) {
-      profit -= widget.game.buyin;
+      profit -= widget.game.addonPrice;
     }
     int finalProfit;
     if (payout != null) {
@@ -659,7 +751,7 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
     }
     await firestoreInstance.runTransaction((Transaction tx) async {
       QuerySnapshot qSnap = await firestoreInstance
-          .collection("$pathToTournament/activeplayers")
+          .collection("$pathToTournament/players")
           .getDocuments();
       qSnap.documents.forEach((DocumentSnapshot doc) {
         if (doc.data["id"] != null) {
@@ -684,7 +776,7 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
             "currency": widget.game.currency,
             "orderbytime": widget.game.orderByTime,
             "prizepool": widget.game.totalPrizePool,
-            "public": widget.group.shareResults
+            "share": widget.group.shareResults
           });
         }
       });

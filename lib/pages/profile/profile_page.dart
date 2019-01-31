@@ -512,9 +512,9 @@ class ProfilePageState extends State<ProfilePage>
     Color color;
     String name = document.data["groupname"];
     String currency = document.data["currency"];
-    String profit = document.data["profit"];
+    String profit = document.data["profit"].toString();
 
-    if (int.tryParse(document.data["profit"]).isNegative) {
+    if (int.tryParse(profit).isNegative) {
       color = Colors.red;
     } else {
       color = Colors.green;

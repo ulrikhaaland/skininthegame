@@ -1,27 +1,27 @@
 class ResultGame {
   ResultGame(
-    this.addon,
-    this.buyin,
-    this.currency,
-    this.gameName,
-    this.gameType,
-    this.groupName,
-    this.orderByTime,
-    this.payout,
-    this.placing,
-    this.playerAmount,
-    this.prizePool,
-    this.profit,
-    this.rebuy,
-    this.time,
-    // this.year,
-    // this.day,
-    // this.month,
-    this.bBlind,
-    this.sBlind,
-    this.date,
-    this.share,
-  );
+      this.addon,
+      this.buyin,
+      this.currency,
+      this.gameName,
+      this.gameType,
+      this.groupName,
+      this.orderByTime,
+      this.payout,
+      this.placing,
+      this.playerAmount,
+      this.prizePool,
+      this.profit,
+      this.rebuy,
+      this.time,
+      // this.year,
+      // this.day,
+      // this.month,
+      this.bBlind,
+      this.sBlind,
+      this.date,
+      this.share,
+      this.type);
 
   final int addon;
   final int buyin;
@@ -34,6 +34,7 @@ class ResultGame {
   // final int day;
   final int sBlind;
   final int bBlind;
+  final int type;
 
   final DateTime date;
   final bool share;
@@ -73,6 +74,7 @@ class ResultGame {
         map["day"],
       ),
       map["share"],
+      map["type"],
     );
   }
 }
