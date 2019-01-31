@@ -19,4 +19,9 @@ class ProfilePicture {
     var ref = FirebaseStorage.instance.ref().child(uid).getDownloadURL();
     return ref;
   }
+
+  Future<Null> deleteFile(String fileName) async {
+    final StorageReference ref = FirebaseStorage.instance.ref().child(fileName);
+    await ref.delete();
+  }
 }

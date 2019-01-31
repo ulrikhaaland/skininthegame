@@ -54,6 +54,7 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
   void initState() {
     super.initState();
     userFound = true;
+    _image = widget.user.image;
   }
 
   void loadImage() async {
@@ -106,16 +107,22 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
                 Padding(
                   padding: EdgeInsets.only(top: 16),
                 ),
-                new Align(
-                  alignment: Alignment.centerLeft,
-                  child: new Padding(
-                    padding: EdgeInsets.only(left: 16),
-                    child: GestureDetector(
-                      onTap: () => getImage(),
-                      child: addImage(),
+                new Row(
+                  children: <Widget>[
+                    new Align(
+                      alignment: Alignment.centerLeft,
+                      child: new Padding(
+                        padding: EdgeInsets.only(left: 16),
+                        child: GestureDetector(
+                          onTap: () => getImage(),
+                          child: addImage(),
+                        ),
+                      ),
                     ),
-                  ),
+                    deleteImage(),
+                  ],
                 ),
+
                 new Container(
                   // color: UIData.darkest,
                   child: ListTile(
@@ -256,6 +263,27 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
     );
   }
 
+  Widget deleteImage() {
+    if (widget.user.profilePicURL != null) {
+      return new FlatButton(
+        color: UIData.dark,
+        child: new Text(
+          "Delete picture",
+          style: new TextStyle(color: UIData.blackOrWhite),
+        ),
+        onPressed: () {
+          setState(() {
+            ProfilePicture().deleteFile(widget.user.id);
+            widget.user.profilePicURL = null;
+            widget.user.image = null;
+          });
+        },
+      );
+    } else {
+      return Container();
+    }
+  }
+
   void postData() async {
     if (validateAndSave()) {
       widget.setBGSize();
@@ -311,8 +339,7 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
         backgroundImage: FileImage(_image),
         backgroundColor: Colors.grey[600],
       );
-    }
-    if (widget.user.profilePicURL == null) {
+    } else if (widget.user.profilePicURL == null) {
       return new CircleAvatar(
         radius: 35,
         child: Icon(Icons.add_a_photo),

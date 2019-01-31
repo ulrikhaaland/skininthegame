@@ -427,6 +427,14 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
               style: new TextStyle(
                   fontSize: UIData.fontSize20, color: UIData.blackOrWhite),
             ),
+            onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ProfilePage(
+                            user: widget.user,
+                            profileId: widget.playerId,
+                          )),
+                ),
           ),
           divider(),
           placing(),
