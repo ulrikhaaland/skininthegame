@@ -1,20 +1,22 @@
+import 'dart:io';
+
 class User {
   User(
-    this.email,
-    this.id,
-    this.userName,
-    this.fcm,
-    this.bio,
-    this.nightMode,
-    this.shareResults,
-    this.following,
-    this.followers,
-    this.hasProfilePic,
-    this.profilePicURL,
-    this.currency,
-    this.appVersion,
-    this.subLevel,
-  );
+      this.email,
+      this.id,
+      this.userName,
+      this.fcm,
+      this.bio,
+      this.nightMode,
+      this.shareResults,
+      this.following,
+      this.followers,
+      this.hasProfilePic,
+      this.profilePicURL,
+      this.currency,
+      this.appVersion,
+      this.subLevel,
+      {this.image});
 
   final String userName;
   final String id;
@@ -30,6 +32,7 @@ class User {
   double appVersion;
   bool hasProfilePic;
   int subLevel;
+  File image;
 
   String getToken() {
     return this.fcm;

@@ -56,6 +56,7 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
   int newPlayerBuyinAmount;
   int oldPayout;
   int newPayout;
+  String sessionOrTotal = "Session";
 
   String activeOrHistory = "cashgameactive";
   String gamePath;
@@ -68,8 +69,11 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
     currentUserName = widget.user.getName();
     oldPlayerBuyinAmount = widget.buyinAmount;
     oldPayout = widget.payout;
-    if (widget.history == true) {
+    if (widget.history) {
       activeOrHistory = "cashgamehistory";
+    }
+    if (widget.fromAll) {
+      sessionOrTotal = "Total";
     }
     gamePath =
         "groups/${widget.group.id}/games/type/$activeOrHistory/${widget.game.id}";
@@ -219,11 +223,11 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
             });
           });
         }
-        widget.onUpdate();
         setState(() {
           isLoading = false;
         });
       }
+      widget.onUpdate();
     }
 
     Navigator.pop(context);
@@ -266,7 +270,7 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
               initialValue: oldPlayerBuyinAmount.toString(),
               decoration: InputDecoration(
                 labelStyle: new TextStyle(color: Colors.grey[600]),
-                labelText: "Total buyin amount",
+                labelText: "$sessionOrTotal buyin amount",
               ),
               onSaved: (val) => val.isEmpty
                   ? newPlayerBuyinAmount = 0

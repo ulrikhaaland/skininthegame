@@ -15,22 +15,24 @@ import 'package:yadda/utils/layout.dart';
 import 'package:yadda/pages/inAppPurchase/subscription.dart';
 
 class CashGameSettingsPage extends StatefulWidget {
-  CashGameSettingsPage({
-    Key key,
-    this.group,
-    this.user,
-    this.callBack,
-    this.history,
-    this.auth,
-    this.game,
-    this.updateState,
-  }) : super(key: key);
+  CashGameSettingsPage(
+      {Key key,
+      this.group,
+      this.user,
+      this.callBack,
+      this.history,
+      this.auth,
+      this.game,
+      this.updateState,
+      this.moneyInPlay})
+      : super(key: key);
   final BaseAuth auth;
   final Group group;
   final User user;
   final Game game;
   final VoidCallback callBack;
   final VoidCallback updateState;
+  final VoidCallback moneyInPlay;
 
   final bool history;
   @override
@@ -645,6 +647,7 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
               color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
         ),
         onTap: () {
+          widget.moneyInPlay();
           firestoreInstance.document(pathToCashGame).updateData({
             "isrunning": true,
           });

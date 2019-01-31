@@ -347,7 +347,13 @@ class GamePageState extends State<GamePage> {
   }
 
   Widget addImage() {
-    if (widget.user.profilePicURL == null) {
+    if (widget.user.image != null) {
+      return new CircleAvatar(
+        radius: 35,
+        backgroundImage: FileImage(widget.user.image),
+        backgroundColor: Colors.grey[600],
+      );
+    } else if (widget.user.profilePicURL == null) {
       return new CircleAvatar(
         radius: 35,
         child: Icon(

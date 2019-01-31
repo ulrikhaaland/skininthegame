@@ -455,6 +455,11 @@ class TournamentPageState extends State<TournamentPage>
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: UIData.blackOrWhite),
                     ),
+                    new Text(
+                      "Currency: ${game.currency}",
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: UIData.blackOrWhite),
+                    ),
                     new Padding(
                       padding: EdgeInsets.all(15.0),
                     ),

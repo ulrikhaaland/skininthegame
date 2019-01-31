@@ -172,7 +172,7 @@ class CashGamePageState extends State<CashGamePage>
         Tab(
           icon: Icon(
             Icons.group,
-            color: UIData.yellow,
+            color: UIData.yellowOrWhite,
             size: 30.0,
           ),
           text: "Totals",
@@ -181,6 +181,7 @@ class CashGamePageState extends State<CashGamePage>
     } else {
       return [
         Tab(
+          
           icon: Icon(
             Icons.info,
             color: UIData.blackOrWhite,
@@ -245,6 +246,7 @@ class CashGamePageState extends State<CashGamePage>
         body: new Stack(
           children: <Widget>[
             new TabBarView(
+              
               controller: _tabController,
               children: [
                 ListView(
@@ -289,10 +291,11 @@ class CashGamePageState extends State<CashGamePage>
                       style: TextStyle(color: UIData.blackOrWhite),
                     ),
                     new Text(
-                      "Money in play: ${game.moneyOnTable}",
+                      "Currency: ${game.currency}",
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: UIData.blackOrWhite),
                     ),
+                    moneyInPlay(),
                     new Padding(
                       padding: EdgeInsets.all(12.0),
                     ),
@@ -311,6 +314,18 @@ class CashGamePageState extends State<CashGamePage>
             secondLoading(),
           ],
         ));
+  }
+
+  moneyInPlay() {
+    if (game.showMoneyOnTable) {
+      return new Text(
+        "Money in play: ${game.moneyOnTable}${game.currency}",
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(color: UIData.blackOrWhite),
+      );
+    } else {
+      return new Container();
+    }
   }
 
   setJoin() {
@@ -583,6 +598,7 @@ class CashGamePageState extends State<CashGamePage>
                       updateState: () => updateState(),
                       callBack: () => checkIfFull(),
                       history: widget.history,
+                      moneyInPlay: () => updateMoneyOnTable(),
                     )),
           );
         },

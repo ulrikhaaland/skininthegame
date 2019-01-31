@@ -260,9 +260,9 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
     if (validateAndSave()) {
       widget.setBGSize();
       if (_image != null) {
-        setState(() {
-          widget.loading = true;
-        });
+        widget.user.image = _image;
+        Navigator.pop(context);
+
         if (widget.user.profilePicURL != null) {
           await CachedNetworkImageProvider(
             widget.user.profilePicURL,
@@ -288,11 +288,7 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
             "profilepicurl": widget.user.profilePicURL,
           });
         });
-        setState(() {
-          widget.loading = false;
-        });
       }
-      Navigator.pop(context);
       await firestoreInstace.runTransaction((Transaction tx) async {
         await firestoreInstace.document("users/${widget.user.id}").updateData({
           'shareresults': widget.user.shareResults,

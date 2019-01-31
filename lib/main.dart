@@ -14,8 +14,8 @@ class MyApp extends StatelessWidget {
       color: UIData.darkest,
       title: 'Flutter Login',
       theme: new ThemeData(
-        scaffoldBackgroundColor: UIData.dark,
-        buttonColor: Colors.yellow[700],
+          scaffoldBackgroundColor: UIData.dark,
+          buttonColor: Colors.yellow[700],
       ),
       home: new RootPage(auth: new Auth()),
       routes: <String, WidgetBuilder>{

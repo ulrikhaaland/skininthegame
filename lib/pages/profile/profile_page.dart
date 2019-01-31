@@ -313,6 +313,13 @@ class ProfilePageState extends State<ProfilePage>
   }
 
   Widget addImage() {
+    if (widget.user.image != null) {
+      return new CircleAvatar(
+        radius: 35,
+        backgroundImage: FileImage(widget.user.image),
+        backgroundColor: Colors.grey[600],
+      );
+    }
     if (userProfile.profilePicURL == null) {
       return new CircleAvatar(
         radius: 35,
