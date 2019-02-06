@@ -75,14 +75,16 @@ class UserPageInvitesState extends State<UserPageInvites> {
       ),
       secondaryActions: <Widget>[
         new IconSlideAction(
-          caption: 'Delete',
-          color: UIData.red,
-          icon: Icons.delete,
-          onTap: () => Firestore.instance
-              .document(
-                  "users/$currentUserId/grouprequests/${document.documentID}")
-              .delete(),
-        ),
+            caption: 'Delete',
+            color: UIData.red,
+            icon: Icons.delete,
+            onTap: () {
+              Firestore.instance
+                  .document(
+                      "users/$currentUserId/grouprequests/${document.documentID}")
+                  .delete();
+              widget.user.notifications -= 1;
+            }),
       ],
     );
   }

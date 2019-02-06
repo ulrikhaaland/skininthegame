@@ -307,7 +307,8 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
           cashgameResults[i] = exchange(cashgameResults[i]);
         }
       }
-      if (!cashgameResults[i].share) {
+      if (!cashgameResults[i].share &&
+          widget.user.id != widget.currentUser.id) {
         cashgameResults.removeAt(i);
       }
       if (!cashgameResults[i].profit.isNegative) {
@@ -353,7 +354,8 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
           tournamentResults[i] = exchange(tournamentResults[i]);
         }
       }
-      if (!tournamentResults[i].share) {
+      if (!tournamentResults[i].share &&
+          widget.user.id != widget.currentUser.id) {
         tournamentResults.removeAt(i);
       }
       if (tournamentResults[i].payout > 0) {

@@ -70,7 +70,7 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
     super.initState();
     _tabController = new TabController(vsync: this, length: 2);
 
-    currentUserId = widget.user.id; 
+    currentUserId = widget.user.id;
     currentUserName = widget.user.userName;
     groupId = widget.group.id;
     if (widget.game.rebuy > 0 || widget.game.addon > 0) {
@@ -690,6 +690,8 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
             widget.game.isRunning = true;
           });
           showSnackBar("Game has started!");
+          Log().postLogToCollection("${widget.user.userName} started the game",
+              "$pathToTournament/log", "Start");
         },
       );
     } else if (widget.history != true && widget.game.isRunning == true) {
@@ -933,10 +935,8 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
             setState(() {
               isLoading = true;
             });
-            Log().postLogToCollection(
-                "$currentUserName marked game as finished",
-                "$pathToTournament/log",
-                "Finished");
+            Log().postLogToCollection("${widget.user.userName} ended game",
+                "$pathToTournament/log", "Finished");
             moveGameToHistory();
           },
           child: new Text(

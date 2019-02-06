@@ -16,7 +16,8 @@ class User {
       this.currency,
       this.appVersion,
       this.subLevel,
-      {this.image});
+      {this.image,
+      this.notifications});
 
   final String userName;
   final String id;
@@ -33,6 +34,7 @@ class User {
   bool hasProfilePic;
   int subLevel;
   File image;
+  int notifications;
 
   String getToken() {
     return this.fcm;
@@ -64,5 +66,6 @@ class User {
         'currency': this.currency,
         'appversion': this.appVersion,
         'sublevel': this.subLevel,
+        'notifications': this.notifications,
       };
 }

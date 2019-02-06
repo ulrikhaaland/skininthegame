@@ -16,7 +16,12 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(
           scaffoldBackgroundColor: UIData.dark,
           buttonColor: Colors.yellow[700],
+          inputDecorationTheme: InputDecorationTheme(
+            counterStyle: TextStyle(color: Colors.grey[600]),
+          )
+          
       ),
+      
       home: new RootPage(auth: new Auth()),
       routes: <String, WidgetBuilder>{
         "/login": (BuildContext context) => GamePage(),

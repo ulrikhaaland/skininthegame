@@ -138,7 +138,13 @@ class RootPageState extends State<RootPage> {
 
   Future<String> getUserId() async {
     currentUser = await widget.auth.currentUser();
-    await getUserInfo();
+    if (authStatus == AuthStatus.signedIn || currentUser != null) {
+      await getUserInfo();
+    } else {
+      setState(() {
+        authStatus = AuthStatus.notSignedIn;
+      });
+    }
     return currentUser;
   }
 
@@ -147,6 +153,10 @@ class RootPageState extends State<RootPage> {
       DocumentSnapshot docSnap =
           await firestoreInstance.document("users/$currentUser").get();
       if (docSnap.exists) {
+        QuerySnapshot qSnap = await firestoreInstance
+            .collection("users/${docSnap.data["id"]}/grouprequests")
+            .getDocuments();
+
         user = new User(
           docSnap.data["email"],
           docSnap.data["id"],
@@ -161,7 +171,8 @@ class RootPageState extends State<RootPage> {
           docSnap.data["profilepicurl"],
           docSnap.data["currency"],
           docSnap.data["appversion"],
-          1,
+          2,
+          notifications: qSnap.documents.length,
           // await SubLevel().getSubLevel(),
         );
         double version = 0;

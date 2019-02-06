@@ -97,6 +97,8 @@ class CashGamePageState extends State<CashGamePage>
 
   Game game;
 
+  bool isScrollable = false;
+
   initState() {
     super.initState();
     currentUserId = widget.user.getId();
@@ -105,8 +107,8 @@ class CashGamePageState extends State<CashGamePage>
     isAdmin = widget.group.admin;
 
     if (isAdmin == true) {
-      _tabController = new TabController(vsync: this, length: 5);
-
+      _tabController = new TabController(vsync: this, length: 6);
+      isScrollable = true;
       _formType = FormType.edit;
     } else {
       _tabController = new TabController(vsync: this, length: 4);
@@ -177,6 +179,14 @@ class CashGamePageState extends State<CashGamePage>
           ),
           text: "Totals",
         ),
+        Tab(
+          icon: Icon(
+            Icons.notification_important,
+            color: UIData.red,
+            size: 30.0,
+          ),
+          text: "Requests",
+        ),
       ];
     } else {
       return [
@@ -236,6 +246,7 @@ class CashGamePageState extends State<CashGamePage>
           ],
           backgroundColor: UIData.appBarColor,
           bottom: TabBar(
+            isScrollable: isScrollable,
             controller: _tabController,
             tabs: tabs(),
           ),
@@ -510,31 +521,30 @@ class CashGamePageState extends State<CashGamePage>
           await firestoreInstance.document("$gamePath").get();
       if (docSnap.data.isNotEmpty) {
         game = new Game(
-          "0",
-          0,
-          docSnap.data["id"],
-          docSnap.data["info"],
-          docSnap.data["name"],
-          docSnap.data["fittedname"],
-          docSnap.data["adress"],
-          docSnap.data["bblind"],
-          0,
-          docSnap.data["date"],
-          docSnap.data["gametype"],
-          docSnap.data["maxplayers"],
-          docSnap.data["orderbytime"],
-          0,
-          docSnap.data["registeredplayers"],
-          docSnap.data["sblind"],
-          "0",
-          docSnap.data["time"],
-          docSnap.data["calculatepayouts"],
-          docSnap.data["currency"],
-          docSnap.data["isrunning"],
-          docSnap.data["moneyontable"],
-          docSnap.data["showmoneyontable"],
-          0
-        );
+            "0",
+            0,
+            docSnap.data["id"],
+            docSnap.data["info"],
+            docSnap.data["name"],
+            docSnap.data["fittedname"],
+            docSnap.data["adress"],
+            docSnap.data["bblind"],
+            0,
+            docSnap.data["date"],
+            docSnap.data["gametype"],
+            docSnap.data["maxplayers"],
+            docSnap.data["orderbytime"],
+            0,
+            docSnap.data["registeredplayers"],
+            docSnap.data["sblind"],
+            "0",
+            docSnap.data["time"],
+            docSnap.data["calculatepayouts"],
+            docSnap.data["currency"],
+            docSnap.data["isrunning"],
+            docSnap.data["moneyontable"],
+            docSnap.data["showmoneyontable"],
+            0);
 
         if (game.calculatePayouts == true && widget.history == true) {
           queueOrCalculateIcon = Icons.attach_money;

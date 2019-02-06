@@ -32,8 +32,7 @@ class LoginState extends State<Login> {
 
   final myController = new TextEditingController();
 
-  final CollectionReference collectionReference =
-      Firestore.instance.collection('users');
+  Firestore firestoreInstance = Firestore.instance;
 
   String finalUsername;
 
@@ -120,7 +119,7 @@ class LoginState extends State<Login> {
         });
       } catch (e) {
         setState(() {
-          _authHint = 'Sign In Error${e.toString()}';
+          _authHint = e.details.toString();
           duration();
 
           loading = false;
@@ -135,13 +134,15 @@ class LoginState extends State<Login> {
     }
   }
 
-  void saveUserData() {
+  void saveUserData() async {
     User user = new User(_email, uid, _username, widget.messagingToken, "",
-        true, true, 0, 0, false, null, "EURO", 1.5, null);
-    DocumentReference docRef = Firestore.instance.document("users/$uid");
-    Firestore.instance.runTransaction((Transaction tx) async {
-      await docRef.setData(user.toJson());
+        true, true, 0, 0, false, null, "EURO", 1.5, null,
+        notifications: 0);
+    firestoreInstance.document("usernames/$uid").setData({
+      "name": _username,
     });
+    DocumentReference docRef = firestoreInstance.document("users/$uid");
+    await docRef.setData(user.toJson());
   }
 
   void moveToRegister() {
@@ -188,9 +189,9 @@ class LoginState extends State<Login> {
 
   void checkUsername() async {
     _username = myController.text.trim().toLowerCase();
-    Firestore.instance
-        .collection("users")
-        .where("username", isEqualTo: _username)
+    firestoreInstance
+        .collection("usernames")
+        .where("name", isEqualTo: _username)
         .getDocuments()
         .then((string) {
       if (string.documents.isEmpty) {
@@ -220,12 +221,13 @@ class LoginState extends State<Login> {
           new ListTile(
             title: padded(
                 child: new TextFormField(
-              // maxLength: 18,
+              maxLength: 18,
               maxLengthEnforced: true,
               style: new TextStyle(
                   color: UIData.blackOrWhite, fontSize: UIData.fontSize18),
               key: new Key('username'),
               decoration: new InputDecoration(
+                  // counterStyle:TextStyle(color: Colors.grey) ,
                   border: OutlineInputBorder(),
                   labelText: 'Username (maximum 18 characters)',
                   fillColor: UIData.white,

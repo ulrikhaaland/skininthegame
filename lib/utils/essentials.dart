@@ -21,6 +21,17 @@ class Essentials extends StatelessWidget {
     }
   }
 
+  showSnackBar(String message, BuildContext context) {
+    Scaffold.of(context).showSnackBar(new SnackBar(
+      backgroundColor: UIData.yellow,
+      content: new Text(
+        message,
+        textAlign: TextAlign.center,
+        style: new TextStyle(color: Colors.black),
+      ),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

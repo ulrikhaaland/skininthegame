@@ -13,6 +13,7 @@ import 'package:yadda/utils/delete.dart';
 import 'package:yadda/auth.dart';
 import 'package:yadda/utils/layout.dart';
 import 'package:yadda/pages/inAppPurchase/subscription.dart';
+import 'package:yadda/utils/essentials.dart';
 
 class CashGameSettingsPage extends StatefulWidget {
   CashGameSettingsPage(
@@ -705,14 +706,7 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
   }
 
   showSnackBar(String message) {
-    Scaffold.of(formKey.currentState.context).showSnackBar(new SnackBar(
-      backgroundColor: UIData.yellow,
-      content: new Text(
-        message,
-        textAlign: TextAlign.center,
-        style: new TextStyle(color: Colors.black),
-      ),
-    ));
+    Essentials().showSnackBar(message, formKey.currentState.context);
   }
 
   void calculatePayouts(bool calculate, bool moveGame) async {

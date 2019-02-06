@@ -44,7 +44,7 @@ class NewTournamentState extends State<NewTournament> {
 
   bool isLoading = false;
 
-  bool notifyMembers = true;
+  bool notifyMembers = false;
 
   Game game;
 
@@ -90,7 +90,9 @@ class NewTournamentState extends State<NewTournament> {
     super.initState();
     currentUserId = widget.user.id;
     groupId = widget.group.id;
-
+    if (widget.user.subLevel > 0) {
+      notifyMembers = true;
+    }
     game = new Game(
       "",
       0,
@@ -521,9 +523,8 @@ class NewTournamentState extends State<NewTournament> {
             onSaved: (val) =>
                 val.isEmpty ? game.setInfo("No info") : game.setInfo(val),
           )),
-          disabledNotifications(),
           Padding(
-            padding: EdgeInsets.only(left: 4.0, right: 4.0, bottom: 18.0),
+            padding: EdgeInsets.only(left: 4.0, right: 4.0),
             child: new CheckboxListTile(
                 title: new Text(
                   "Notify members?",
@@ -557,6 +558,10 @@ class NewTournamentState extends State<NewTournament> {
                   setState(() {});
                 }),
           ),
+          disabledNotifications(),
+          Padding(
+            padding: EdgeInsets.only(bottom: 48.0),
+          )
         ],
       ),
     );
@@ -577,6 +582,7 @@ class NewTournamentState extends State<NewTournament> {
   Widget rebuyPrice() {
     if (showRebuyPrice) {
       return new Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           new Container(
             width: 120.0,
@@ -625,7 +631,7 @@ class NewTournamentState extends State<NewTournament> {
   Widget disabledNotifications() {
     if (showDisabledNotifications) {
       return new Padding(
-          padding: EdgeInsets.all(18.0),
+          padding: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 18.0),
           child: Text(
             "Your current subscription does not include notifications",
             style: new TextStyle(color: Colors.red),

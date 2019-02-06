@@ -274,6 +274,9 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
         onPressed: () {
           setState(() {
             ProfilePicture().deleteFile(widget.user.id);
+            firestoreInstace.document("users/${widget.user.id}").updateData({
+              "profilepicurl": null,
+            });
             widget.user.profilePicURL = null;
             widget.user.image = null;
           });

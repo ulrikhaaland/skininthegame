@@ -196,12 +196,17 @@ class GamePageState extends State<GamePage> {
                         Icon(Icons.mail_outline, size: 30, color: Colors.grey),
                     onPressed: null,
                   ),
-                  title: new Text(
-                    "Invites",
-                    style: new TextStyle(
-                      fontSize: UIData.fontSize18,
-                      color: UIData.blackOrWhite,
-                    ),
+                  title: new Row(
+                    children: <Widget>[
+                      new Text(
+                        "Invites ",
+                        style: new TextStyle(
+                          fontSize: UIData.fontSize18,
+                          color: UIData.blackOrWhite,
+                        ),
+                      ),
+                      notificationAmount(),
+                    ],
                   ),
                   onTap: () =>
                       // widget.onSignOut(),
@@ -296,10 +301,18 @@ class GamePageState extends State<GamePage> {
           ],
           leading: new IconButton(
             iconSize: UIData.iconSizeAppBar,
-            icon: Icon(
-              Icons.person,
-              color: Colors.grey[600],
-            ),
+            icon: new Stack(children: <Widget>[
+              Icon(
+                Icons.person,
+                color: Colors.grey[600],
+              ),
+              new Positioned(
+                // draw a red marble
+                top: 0.0,
+                right: 0.0,
+                child: notificationAmount(),
+              )
+            ]),
             onPressed: () => _key.currentState.openDrawer(),
           ),
           centerTitle: true,
@@ -371,6 +384,20 @@ class GamePageState extends State<GamePage> {
         ),
         backgroundColor: UIData.darkest,
       );
+    }
+  }
+
+  Widget notificationAmount() {
+    if (widget.user.notifications > 0) {
+      return new CircleAvatar(
+        backgroundColor: UIData.red,
+        maxRadius: 10,
+        child: Text(
+          "${widget.user.notifications}",
+        ),
+      );
+    } else {
+      return new Container();
     }
   }
 

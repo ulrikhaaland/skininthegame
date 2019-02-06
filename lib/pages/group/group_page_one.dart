@@ -150,11 +150,10 @@ class GroupDashboardState extends State<GroupDashboard> {
       );
 
   // Check how many players is in this group.
-  _numberOfMembers() {
+  _numberOfMembers() async   {
     CollectionReference cRef1 =
         fireStoreInstance.collection("groups/$groupId/members");
     DocumentReference docRef1 = fireStoreInstance.document("groups/$groupId");
-    fireStoreInstance.runTransaction((Transaction tx) async {
       QuerySnapshot qSnap1 = await cRef1.getDocuments();
       if (qSnap1.documents.isEmpty) {
         numberOfMembers = 0;
@@ -168,7 +167,6 @@ class GroupDashboardState extends State<GroupDashboard> {
           "members": numberOfMembers,
         });
       }
-    });
   }
 
   checkIfMemberAndGetUserInfo() {
@@ -254,6 +252,10 @@ class GroupDashboardState extends State<GroupDashboard> {
               });
 
               addMemberToGroup();
+              QuerySnapshot qSnap = await fireStoreInstance
+                  .collection("users/${widget.user.id}/grouprequests")
+                  .getDocuments();
+              widget.user.notifications = qSnap.documents.length;
               Scaffold.of(formKey.currentState.context)
                   .showSnackBar(new SnackBar(
                 backgroundColor: UIData.yellow,

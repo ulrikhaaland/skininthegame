@@ -593,7 +593,7 @@ class TournamentPageState extends State<TournamentPage>
           leading: addImage(document.data["profilepicurl"]),
           title: new Text(
             document.data["name"],
-            style: new TextStyle(fontSize: 25.0),
+            style: new TextStyle(fontSize: 24.0, color: UIData.blackOrWhite),
             overflow: TextOverflow.ellipsis,
           ),
           onTap: () {

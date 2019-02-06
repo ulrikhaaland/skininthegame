@@ -40,6 +40,9 @@ class ProfilePageState extends State<ProfilePage>
 
   double profileBGSize = 180;
 
+  QuerySnapshot qSnapCash;
+  QuerySnapshot qSnapTournament;
+
   @override
   void initState() {
     super.initState();
@@ -52,6 +55,18 @@ class ProfilePageState extends State<ProfilePage>
       followOrEdit = "Results";
     }
     getUserInfo();
+  }
+
+  Future<QuerySnapshot> cashStream() async {
+    qSnapCash = await Firestore.instance
+        .collection("users/${userProfile.id}/cashgameresults")
+        .orderBy("orderbytime", descending: true)
+        .getDocuments();
+    qSnapTournament = await Firestore.instance
+        .collection("users/${userProfile.id}/tournamentresults")
+        .orderBy("orderbytime", descending: true)
+        .getDocuments();
+    return qSnapCash;
   }
 
   void getUserInfo() async {
@@ -80,11 +95,9 @@ class ProfilePageState extends State<ProfilePage>
           null,
           docSnap.data["sublevel"],
         );
-        setState(() {
-          userFound = true;
-        });
       });
     }
+    await cashStream();
     setState(() {
       userFound = true;
     });
@@ -492,20 +505,28 @@ class ProfilePageState extends State<ProfilePage>
   }
 
   Widget cashGameStream() {
-    return StreamBuilder(
-        stream: Firestore.instance
-            .collection("users/${userProfile.id}/cashgameresults")
-            .orderBy("orderbytime", descending: true)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return new Text("...");
-          return ListView.builder(
-            itemExtent: 50.0,
-            itemCount: snapshot.data.documents.length,
-            itemBuilder: (context, index) =>
-                cashGameList(context, snapshot.data.documents[index]),
-          );
-        });
+    if (qSnapCash != null) {
+      if (qSnapCash.documents.isEmpty) {
+        return new Text("...");
+      } else {
+        List<DocumentSnapshot> list = qSnapCash.documents;
+        List<DocumentSnapshot> finalList = new List();
+        for (var item in list) {
+          if (item.data["share"] == true) {
+            finalList.add(item);
+          }
+        }
+
+        return ListView.builder(
+          itemExtent: 50.0,
+          itemCount: finalList.length,
+          itemBuilder: (context, index) =>
+              cashGameList(context, finalList[index]),
+        );
+      }
+    } else {
+      return new Container();
+    }
   }
 
   Widget tournamentList(BuildContext context, DocumentSnapshot document) {
@@ -589,19 +610,27 @@ class ProfilePageState extends State<ProfilePage>
   }
 
   Widget tournamentStream() {
-    return StreamBuilder(
-        stream: Firestore.instance
-            .collection("users/${userProfile.id}/tournamentresults")
-            .orderBy("orderbytime", descending: true)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return new Text("...");
-          return ListView.builder(
-            itemExtent: 50.0,
-            itemCount: snapshot.data.documents.length,
-            itemBuilder: (context, index) =>
-                tournamentList(context, snapshot.data.documents[index]),
-          );
-        });
+    if (qSnapTournament != null) {
+      if (qSnapTournament.documents.isEmpty) {
+        return new Text("...");
+      } else {
+        List<DocumentSnapshot> list = qSnapTournament.documents;
+        List<DocumentSnapshot> finalList = new List();
+        for (var item in list) {
+          if (item.data["share"] == true) {
+            finalList.add(item);
+          }
+        }
+
+        return ListView.builder(
+          itemExtent: 50.0,
+          itemCount: finalList.length,
+          itemBuilder: (context, index) =>
+              tournamentList(context, finalList[index]),
+        );
+      }
+    } else {
+      return new Container();
+    }
   }
 }

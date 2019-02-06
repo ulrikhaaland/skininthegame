@@ -8,6 +8,8 @@ import 'package:yadda/utils/log.dart';
 import 'package:yadda/pages/profile/profile_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:yadda/objects/game.dart';
+import 'package:yadda/utils/essentials.dart';
+import 'package:yadda/widgets/primary_button.dart';
 
 class CashGamePlayerPage extends StatefulWidget {
   CashGamePlayerPage({
@@ -356,9 +358,115 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
             height: .0,
             color: Colors.black,
           ),
+          requestBuyin(),
+          buyinText(),
+          requestPayout()
         ],
       );
     }
+  }
+
+  Widget requestPayout() {
+    if (!widget.history &&
+        widget.playerId == widget.user.id &&
+        widget.game.isRunning) {
+      return new Column(
+        children: <Widget>[
+          new Padding(
+              padding: EdgeInsets.only(top: 24, bottom: 12),
+              child: new PrimaryButton(
+                text: "Request payout",
+                onPressed: () {
+                  Log().postLogToCollection(
+                      "${widget.user.userName} has requested a payout",
+                      "$gamePath/log",
+                      "Request");
+
+                  Essentials().showSnackBar("Your payout request has been sent",
+                      formKey.currentState.context);
+                  firestoreInstance.collection("$gamePath/requests").add(
+                      {"name": widget.user.userName, "id": widget.user.id});
+                },
+              )),
+          new Padding(
+              padding: EdgeInsets.only(left: 16),
+              child: new Text(
+                "Lets floor know you are done playing and wish to be payed out",
+                style: new TextStyle(
+                    fontSize: UIData.fontSize12, color: Colors.grey[600]),
+                textAlign: TextAlign.center,
+              )),
+        ],
+      );
+    } else {
+      return new Container();
+    }
+  }
+
+  Widget buyinText() {
+    String text;
+    oldPlayerBuyinAmount != 0
+        ? text = "Request more chips"
+        : text = "Request a buyin";
+    if (!widget.history && widget.playerId == widget.user.id)
+      return Padding(
+          padding: EdgeInsets.only(top: 12),
+          child: new Text(
+            text,
+            style: new TextStyle(
+                fontSize: UIData.fontSize12, color: Colors.grey[600]),
+            textAlign: TextAlign.center,
+          ));
+    else
+      return new Container();
+  }
+
+  Widget requestBuyin() {
+    String text;
+    oldPlayerBuyinAmount != 0 ? text = "Additional buyin" : text = "Buyin";
+    int buyin;
+    if (!widget.history && widget.playerId == widget.user.id)
+      return new ListTile(
+        title: new TextField(
+          style: new TextStyle(color: UIData.blackOrWhite),
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+              labelText: text,
+              labelStyle: new TextStyle(color: Colors.grey[600])),
+          onChanged: (val) => buyin = int.tryParse(val),
+        ),
+        trailing: new RaisedButton(
+          shape: new RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10.0))),
+          child: new Text("Request"),
+          onPressed: () {
+            Log().postLogToCollection(
+                "${widget.user.userName} has requested a buyin of $buyin",
+                "$gamePath/log",
+                "Request");
+            Essentials().showSnackBar(
+                "Your request has been sent", formKey.currentState.context);
+            firestoreInstance.collection("$gamePath/requests").add({
+              "name": widget.user.userName,
+              "buyin": buyin,
+              "id": widget.user.id
+            });
+          },
+        ),
+      );
+    // return new Padding(
+    //     padding: EdgeInsets.fromLTRB(24, 12, 0, 12),
+    //     child: new Row(
+    //       children: <Widget>[
+    //         new Text(
+    //           "Request new buyin:",
+    //           style: new TextStyle(
+    //               fontSize: UIData.fontSize20, color: UIData.blackOrWhite),
+    //         ),
+    //       ],
+    //     ));
+    else
+      return new Container();
   }
 
   Widget addImage(String url) {
