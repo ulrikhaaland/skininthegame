@@ -10,6 +10,7 @@ import 'package:yadda/utils/log.dart';
 import 'package:yadda/objects/game.dart';
 import 'package:yadda/utils/delete.dart';
 import 'package:yadda/pages/inAppPurchase/subscription.dart';
+import 'package:yadda/utils/layout.dart';
 
 class TournamentSettingsPage extends StatefulWidget {
   TournamentSettingsPage({
@@ -65,6 +66,9 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
   DateTime _date;
   TimeOfDay _time;
 
+  IconData regIcon;
+  String regText;
+
   @override
   initState() {
     super.initState();
@@ -84,6 +88,7 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
       tournamentActiveOrHistory = "tournamenthistory";
     }
 
+    setReg();
     _date = new DateTime(
         int.tryParse(widget.game.orderByTime.toString().substring(0, 4)),
         int.tryParse(widget.game.orderByTime.toString().substring(4, 6)),
@@ -111,6 +116,16 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
   @override
   Widget build(BuildContext context) {
     return page();
+  }
+
+  void setReg() {
+    if (widget.game.stopReg) {
+      regIcon = Icons.lock_open;
+      regText = "Open Registrations";
+    } else {
+      regIcon = Icons.lock_outline;
+      regText = "Close Registrations";
+    }
   }
 
   bool validateAndSave() {
@@ -267,10 +282,7 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                                         )));
                           },
                         ),
-                        new Divider(
-                          height: .0,
-                          color: Colors.black,
-                        ),
+                        Layout().divider(),
                         markAsFinishedList(),
                         divider(),
                         new ListTile(
@@ -287,10 +299,9 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                           ),
                           onTap: () => _deleteAlert(),
                         ),
-                        new Divider(
-                          height: .0,
-                          color: Colors.black,
-                        ),
+                        Layout().divider(),
+                        showReg(),
+                        Layout().divider(),
                         Padding(
                           padding: EdgeInsets.only(top: 16),
                         ),
@@ -595,6 +606,9 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                           autocorrect: false,
                           onSaved: (val) => widget.game.setInfo(val),
                         ),
+                        Padding(
+                          padding: EdgeInsets.only(bottom: 18.0),
+                        )
                       ],
                     ),
                   ),
@@ -605,6 +619,34 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
             loadingTwo(),
           ],
         ));
+  }
+
+  Widget showReg() {
+    if (!widget.history) {
+      return new ListTile(
+        leading: new Icon(
+          regIcon,
+          size: 40.0,
+          color: UIData.yellow,
+        ),
+        title: new Text(
+          regText,
+          style: new TextStyle(
+              color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
+        ),
+        onTap: () async {
+          widget.game.stopReg = !widget.game.stopReg;
+          setState(() {
+            setReg();
+          });
+          firestoreInstance.document(pathToTournament).updateData({
+            "stopreg": widget.game.stopReg,
+          });
+        },
+      );
+    } else {
+      return new Container();
+    }
   }
 
   Widget returnPadding() {

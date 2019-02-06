@@ -41,8 +41,8 @@ class NewTournamentState extends State<NewTournament> {
 
   bool gameIdAvailable = false;
   bool sameAsBuyin = true;
-
-  bool isLoading = false;
+  List<User> adminsList = new List();
+  bool isLoading = true;
 
   bool notifyMembers = false;
 
@@ -125,6 +125,7 @@ class NewTournamentState extends State<NewTournament> {
       addonPrice: null,
       rebuyPrice: null,
     );
+    getAdmins();
   }
 
   bool validateAndSave() {
@@ -238,6 +239,35 @@ class NewTournamentState extends State<NewTournament> {
     );
   }
 
+  void getAdmins() async {
+    QuerySnapshot qSnap = await firestoreInstance
+        .collection("groups/${widget.group.id}/members")
+        .getDocuments();
+
+    qSnap.documents.forEach((doc) {
+      if (doc.data["admin"]) {
+        adminsList.add(new User(
+            null,
+            doc.data["uid"],
+            doc.data["username"],
+            doc.data["fcm"],
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null));
+      }
+    });
+    setState(() {
+      isLoading = false;
+    });
+  }
+
   Widget page() {
     return new SingleChildScrollView(
       child: Column(
@@ -245,7 +275,6 @@ class NewTournamentState extends State<NewTournament> {
           Layout().padded(
             child: new TextFormField(
               initialValue: "${game.getName()}",
-              autofocus: true,
               textCapitalization: TextCapitalization.sentences,
               style: new TextStyle(color: UIData.blackOrWhite),
               key: new Key('name'),
@@ -466,8 +495,7 @@ class NewTournamentState extends State<NewTournament> {
           returnPadding(),
           rebuyPrice(),
           Padding(
-            padding:
-                EdgeInsets.only(left: 4.0, right: 4.0, bottom: 18.0, top: 18.0),
+            padding: EdgeInsets.only(bottom: 18.0, top: 18.0),
             child: new CheckboxListTile(
                 title: new Text(
                   "Same price as buyin?",
@@ -536,40 +564,87 @@ class NewTournamentState extends State<NewTournament> {
                 val.isEmpty ? game.setInfo("No info") : game.setInfo(val),
           )),
           Padding(
-            padding: EdgeInsets.only(left: 4.0, right: 4.0),
-            child: new CheckboxListTile(
-                title: new Text(
-                  "Notify members?",
-                  style: new TextStyle(color: UIData.blackOrWhite),
-                ),
-                subtitle: new Text(
-                  "Send a notification to members of the group",
-                  style: new TextStyle(color: Colors.grey[600]),
-                ),
-                value: notifyMembers,
-                onChanged: (val) {
-                  if (widget.user.subLevel == 0) {
-                    showDisabledNotifications = true;
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Subscription(
-                                  user: widget.user,
-                                  info: true,
-                                  title:
-                                      "Your current subscription does not include notifications",
-                                )));
-                  } else {
-                    if (val == true) {
-                      notifyMembers = true;
-                    } else {
-                      notifyMembers = false;
+            padding: EdgeInsets.only(bottom: 16),
+            child: ListTile(
+              subtitle: new Text(
+                "The user in charge of this game",
+                style: new TextStyle(color: Colors.grey[600]),
+              ),
+              title: new Text(
+                "Floor",
+                style: new TextStyle(color: UIData.blackOrWhite),
+              ),
+              trailing: Theme(
+                data:
+                    Theme.of(context).copyWith(canvasColor: UIData.appBarColor),
+                child: new Container(
+                    child: new DropdownButton<User>(
+                  style: TextStyle(color: UIData.blackOrWhite),
+                  hint: new Text(
+                    game.floorName,
+                    style: new TextStyle(
+                        color: UIData.blackOrWhite,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  items: adminsList.map((User user) {
+                    return new DropdownMenuItem<User>(
+                      value: user,
+                      child: new Text(
+                        user.userName,
+                        style: new TextStyle(color: UIData.blackOrWhite),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (_) {
+                    if (game.floorName != _.userName) {
+                      setState(() {
+                        game.floorName = _.userName;
+                        for (var user in adminsList) {
+                          if (user.userName == _.userName) {
+                            game.floor = user.id;
+                            game.floorFCM = user.fcm;
+                            game.floorName = user.userName;
+                          }
+                        }
+                      });
                     }
-                  }
-
-                  setState(() {});
-                }),
+                  },
+                )),
+              ),
+            ),
           ),
+          new CheckboxListTile(
+              title: new Text(
+                "Notify members?",
+                style: new TextStyle(color: UIData.blackOrWhite),
+              ),
+              subtitle: new Text(
+                "Send a notification to members of the group",
+                style: new TextStyle(color: Colors.grey[600]),
+              ),
+              value: notifyMembers,
+              onChanged: (val) {
+                if (widget.user.subLevel == 0) {
+                  showDisabledNotifications = true;
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Subscription(
+                                user: widget.user,
+                                info: true,
+                                title:
+                                    "Your current subscription does not include notifications",
+                              )));
+                } else {
+                  if (val == true) {
+                    notifyMembers = true;
+                  } else {
+                    notifyMembers = false;
+                  }
+                }
+
+                setState(() {});
+              }),
           disabledNotifications(),
           Padding(
             padding: EdgeInsets.only(bottom: 48.0),

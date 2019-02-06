@@ -342,7 +342,7 @@ class CashGamePageState extends State<CashGamePage>
   }
 
   moneyInPlay() {
-    if (game.showMoneyOnTable) {
+    if (game.showMoneyOnTable && game.isRunning) {
       return new Text(
         "Money in play: ${game.moneyOnTable}${game.currency}",
         overflow: TextOverflow.ellipsis,

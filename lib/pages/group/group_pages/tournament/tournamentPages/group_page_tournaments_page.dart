@@ -210,6 +210,7 @@ class GroupTournamentsState extends State<GroupTournaments>
                         user: widget.user,
                         group: widget.group,
                         gameId: gameId,
+                        history: false,
                       )),
             );
           },
