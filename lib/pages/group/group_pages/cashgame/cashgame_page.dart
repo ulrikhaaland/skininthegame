@@ -15,6 +15,7 @@ import 'package:yadda/objects/game.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:yadda/pages/profile/profile_page.dart';
+import 'package:yadda/utils/essentials.dart';
 
 class CashGamePage extends StatefulWidget {
   CashGamePage(
@@ -253,76 +254,79 @@ class CashGamePageState extends State<CashGamePage>
         ),
         backgroundColor: UIData.dark,
         floatingActionButton: floatingActionButton(),
-        body: new Stack(
-          children: <Widget>[
-            new TabBarView(
-              controller: _tabController,
-              children: [
-                ListView(
-                  padding: EdgeInsets.all(10.0),
-                  children: <Widget>[
-                    new Text(
-                      "${game.name}",
-                      style: TextStyle(color: UIData.blackOrWhite),
-                      overflow: TextOverflow.ellipsis,
+        body: new Form(
+            key: formKey,
+            child: Stack(
+              children: <Widget>[
+                new TabBarView(
+                  controller: _tabController,
+                  children: [
+                    ListView(
+                      padding: EdgeInsets.all(10.0),
+                      children: <Widget>[
+                        new Text(
+                          "${game.name}",
+                          style: TextStyle(color: UIData.blackOrWhite),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        new Padding(
+                          padding: EdgeInsets.all(15.0),
+                        ),
+                        new Text(
+                          "Gametype: ${game.gameType}",
+                          style: TextStyle(color: UIData.blackOrWhite),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        new Text(
+                          "Adress: ${game.adress}",
+                          style: TextStyle(color: UIData.blackOrWhite),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        new Text(
+                          "Max players: ${game.maxPlayers}",
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: UIData.blackOrWhite),
+                        ),
+                        new Text(
+                          "Blinds: ${game.sBlind}/${game.bBlind}",
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: UIData.blackOrWhite),
+                        ),
+                        new Text(
+                          "Starting Date: ${game.date}",
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: UIData.blackOrWhite),
+                        ),
+                        new Text(
+                          "Starting Time: ${game.time}",
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: UIData.blackOrWhite),
+                        ),
+                        new Text(
+                          "Currency: ${game.currency}",
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: UIData.blackOrWhite),
+                        ),
+                        moneyInPlay(),
+                        new Padding(
+                          padding: EdgeInsets.all(12.0),
+                        ),
+                        new Text(
+                          "${game.info}",
+                          style: new TextStyle(color: UIData.blackOrWhite),
+                        ),
+                      ],
                     ),
-                    new Padding(
-                      padding: EdgeInsets.all(15.0),
-                    ),
-                    new Text(
-                      "Gametype: ${game.gameType}",
-                      style: TextStyle(color: UIData.blackOrWhite),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    new Text(
-                      "Adress: ${game.adress}",
-                      style: TextStyle(color: UIData.blackOrWhite),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    new Text(
-                      "Max players: ${game.maxPlayers}",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: UIData.blackOrWhite),
-                    ),
-                    new Text(
-                      "Blinds: ${game.sBlind}/${game.bBlind}",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: UIData.blackOrWhite),
-                    ),
-                    new Text(
-                      "Starting Date: ${game.date}",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: UIData.blackOrWhite),
-                    ),
-                    new Text(
-                      "Starting Time: ${game.time}",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: UIData.blackOrWhite),
-                    ),
-                    new Text(
-                      "Currency: ${game.currency}",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: UIData.blackOrWhite),
-                    ),
-                    moneyInPlay(),
-                    new Padding(
-                      padding: EdgeInsets.all(12.0),
-                    ),
-                    new Text(
-                      "${game.info}",
-                      style: new TextStyle(color: UIData.blackOrWhite),
-                    ),
+                    streamOfPosts(),
+                    setPlayersOrResult(),
+                    setQueueOrPayouts(),
+                    all(),
+                    streamOfRequests(),
                   ],
                 ),
-                streamOfPosts(),
-                setPlayersOrResult(),
-                setQueueOrPayouts(),
-                all(),
+                secondLoading(),
               ],
-            ),
-            secondLoading(),
-          ],
-        ));
+            )));
   }
 
   moneyInPlay() {
@@ -476,7 +480,7 @@ class CashGamePageState extends State<CashGamePage>
     }
   }
 
-  void updateMoneyOnTable() async {
+  Future<Null> updateMoneyOnTable() async {
     if (game.isRunning) {
       int a = 0;
       QuerySnapshot qSnap = await firestoreInstance
@@ -499,9 +503,9 @@ class CashGamePageState extends State<CashGamePage>
     await firestoreInstance.document("$gamePath/activeplayers/$uid").delete();
     await firestoreInstance.document("$gamePath/queue/$uid").delete();
     checkIfFull();
-    if (full == true) {
+    if (full == true && !removed) {
       setQueue();
-    } else {
+    } else if (!removed) {
       setJoin();
     }
 
@@ -550,10 +554,12 @@ class CashGamePageState extends State<CashGamePage>
           queueOrCalculateIcon = Icons.attach_money;
           queueOrCalculateString = "Payouts";
         }
+        updateMoneyOnTable();
         checkIfFull();
         userFound = true;
         setScreen();
-      }
+      } else
+        Navigator.of(context).pop();
     });
   }
 
@@ -1164,6 +1170,88 @@ class CashGamePageState extends State<CashGamePage>
               itemCount: snapshot.data.documents.length,
               itemBuilder: (context, index) =>
                   _buildStreamOfPosts(context, snapshot.data.documents[index]),
+            );
+          }
+        });
+  }
+
+  Widget _buildStreamOfRequests(
+      BuildContext context, DocumentSnapshot document) {
+    String buyinText = " of ${document.data["addbuyin"]}${game.currency}";
+    if (document.data["type"] == "payout") {
+      buyinText = "";
+    }
+    return new Slidable(
+      delegate: new SlidableDrawerDelegate(),
+      actionExtentRatio: 0.25,
+      child: new Container(
+        child: new ListTile(
+          title: new Text(
+            "${document.data["name"]} has requested a ${document.data["type"]}$buyinText",
+            style: new TextStyle(fontSize: 18.0, color: UIData.blackOrWhite),
+          ),
+        ),
+      ),
+      secondaryActions: <Widget>[
+        new IconSlideAction(
+            caption: 'Confirm',
+            color: UIData.green,
+            icon: Icons.check_circle_outline,
+            onTap: () async {
+              if (document.data["type"] == "payout") {
+                removePlayer(document.data["id"], true, document.data["name"]);
+                Essentials().showSnackBar(
+                    "${document.data["name"]} is ready for payout and has been removed from active players",
+                    formKey.currentState.context);
+              } else {
+                int newBuyin =
+                    document.data["currentbuyin"] + document.data["addbuyin"];
+                await firestoreInstance.runTransaction((tx) async {
+                  DocumentReference docRef = firestoreInstance
+                      .document("$gamePath/players/${document.data["id"]}");
+                  DocumentSnapshot docSnap = await tx.get(docRef);
+                  await tx.update(docRef, {
+                    "buyin": docSnap.data["buyin"] + document.data["addbuyin"],
+                  });
+                });
+                firestoreInstance
+                    .document("$gamePath/activeplayers/${document.data["id"]}")
+                    .updateData({
+                  "buyin": newBuyin,
+                });
+
+                Essentials().showSnackBar(
+                    "Buyin for player ${document.data["name"]} has been updated, from ${document.data["currentbuyin"]} to $newBuyin",
+                    formKey.currentState.context);
+              }
+              firestoreInstance
+                  .document("$gamePath/requests/${document.documentID}")
+                  .delete();
+            }),
+        new IconSlideAction(
+            caption: 'Dismiss',
+            color: UIData.red,
+            icon: Icons.delete,
+            onTap: () {
+              firestoreInstance
+                  .document("$gamePath/requests/${document.documentID}")
+                  .delete();
+            }),
+      ],
+    );
+  }
+
+  Widget streamOfRequests() {
+    return StreamBuilder(
+        stream: Firestore.instance.collection("$gamePath/requests").snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData)
+            return loading();
+          else {
+            return ListView.builder(
+              itemCount: snapshot.data.documents.length,
+              itemBuilder: (context, index) => _buildStreamOfRequests(
+                  context, snapshot.data.documents[index]),
             );
           }
         });

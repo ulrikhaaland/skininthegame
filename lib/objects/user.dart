@@ -19,6 +19,7 @@ class User {
       {this.image,
       this.notifications});
 
+
   final String userName;
   final String id;
   final String email;

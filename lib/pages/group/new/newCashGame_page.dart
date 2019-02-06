@@ -43,12 +43,17 @@ class NewCashGameState extends State<NewCashGame> {
   String time = "";
   String date = "";
 
+  List<User> adminsList = new List();
+
   bool gameIdAvailable = false;
+
+  String floorName;
 
   initState() {
     super.initState();
     currentUserId = widget.user.id;
     groupId = widget.group.id;
+    floorName = widget.user.userName;
     if (widget.user.subLevel > 0) {
       notifyMembers = true;
       moneyOnTable = true;
@@ -77,9 +82,25 @@ class NewCashGameState extends State<NewCashGame> {
         false,
         0,
         moneyOnTable,
-        0);
+        0,
+        widget.user.id);
     game.setDate("Not set");
     game.setTime("Not set");
+    getAdmins();
+  }
+
+  void getAdmins() async {
+    QuerySnapshot qSnap = await firestoreInstance
+        .collection("groups/${widget.group.id}/members")
+        .getDocuments();
+
+    qSnap.documents.forEach((doc) {
+      if (doc.data["admin"]) {
+        adminsList.add(new User(null, doc.data["uid"], doc.data["username"],
+            null, null, null, null, null, null, null, null, null, null, null));
+      }
+    });
+    setState(() {});
   }
 
   @override
@@ -456,44 +477,81 @@ class NewCashGameState extends State<NewCashGame> {
                 val.isEmpty ? game.setInfo("Not Set") : game.setInfo(val),
           )),
           Padding(
-            padding: EdgeInsets.only(
-              left: 4.0,
-              right: 4.0,
+            padding: EdgeInsets.only(bottom: 16),
+            child: ListTile(
+              subtitle: new Text(
+                "The user responsible for this game",
+                style: new TextStyle(color: Colors.grey[600]),
+              ),
+              title: new Text(
+                "Floor",
+                style: new TextStyle(color: UIData.blackOrWhite),
+              ),
+              trailing: Theme(
+                data:
+                    Theme.of(context).copyWith(canvasColor: UIData.appBarColor),
+                child: new Container(
+                    child: new DropdownButton<String>(
+                  style: TextStyle(color: UIData.blackOrWhite),
+                  hint: new Text(
+                    floorName,
+                    style: new TextStyle(
+                        color: UIData.blackOrWhite,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  items: adminsList.map((User user) {
+                    return new DropdownMenuItem<String>(
+                      value: user.userName,
+                      child: new Text(
+                        user.userName,
+                        style: new TextStyle(color: UIData.blackOrWhite),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (_) {
+                    if (floorName != _) {
+                      setState(() {
+                        floorName = _;
+                      });
+                    }
+                  },
+                )),
+              ),
             ),
-            child: new CheckboxListTile(
-                subtitle: new Text(
-                  "Send a notification to members of the group",
-                  style: new TextStyle(color: Colors.grey[600]),
-                ),
-                title: new Text(
-                  "Notify members?",
-                  style: new TextStyle(color: UIData.blackOrWhite),
-                ),
-                value: notifyMembers,
-                onChanged: (val) {
-                  if (widget.user.subLevel == 0) {
-                    showDisabledNotifications = true;
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Subscription(
-                                  user: widget.user,
-                                  info: true,
-                                  title:
-                                      "Your current subscription does not include notifications",
-                                )));
-                  } else {
-                    notifyMembers = val;
-                  }
-                  setState(() {});
-                }),
           ),
+          new CheckboxListTile(
+              subtitle: new Text(
+                "Send a notification to members of the group",
+                style: new TextStyle(color: Colors.grey[600]),
+              ),
+              title: new Text(
+                "Notify members?",
+                style: new TextStyle(color: UIData.blackOrWhite),
+              ),
+              value: notifyMembers,
+              onChanged: (val) {
+                if (widget.user.subLevel == 0) {
+                  showDisabledNotifications = true;
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Subscription(
+                                user: widget.user,
+                                info: true,
+                                title:
+                                    "Your current subscription does not include notifications",
+                              )));
+                } else {
+                  notifyMembers = val;
+                }
+                setState(() {});
+              }),
           disabledNotifications(),
           Padding(
             padding: EdgeInsets.only(top: 16),
           ),
           Padding(
-            padding: EdgeInsets.only(left: 4.0, right: 4.0, bottom: 18.0),
+            padding: EdgeInsets.only(bottom: 16.0),
             child: new CheckboxListTile(
                 subtitle: new Text(
                   "Once the game is marked as finished, the app will calculate who pays who",
@@ -511,41 +569,35 @@ class NewCashGameState extends State<NewCashGame> {
                   setState(() {});
                 }),
           ),
-          Padding(
-            padding: EdgeInsets.only(
-              left: 4.0,
-              right: 4.0,
-            ),
-            child: new CheckboxListTile(
-                subtitle: new Text(
-                  "Let users see how much money is on the table",
-                  style: new TextStyle(
-                    color: Colors.grey[600],
-                  ),
+          new CheckboxListTile(
+              subtitle: new Text(
+                "Let users see how much money is on the table",
+                style: new TextStyle(
+                  color: Colors.grey[600],
                 ),
-                title: new Text(
-                  "Money on the table",
-                  style: new TextStyle(color: UIData.blackOrWhite),
-                ),
-                value: game.showMoneyOnTable,
-                onChanged: (val) {
-                  if (widget.user.subLevel == 0) {
-                    showDisabledMoneyOnTheTable = true;
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Subscription(
-                                  user: widget.user,
-                                  info: true,
-                                  title:
-                                      "Your current subscription does not include showing money on the table",
-                                )));
-                  } else {
-                    game.showMoneyOnTable = val;
-                    setState(() {});
-                  }
-                }),
-          ),
+              ),
+              title: new Text(
+                "Money on the table",
+                style: new TextStyle(color: UIData.blackOrWhite),
+              ),
+              value: game.showMoneyOnTable,
+              onChanged: (val) {
+                if (widget.user.subLevel == 0) {
+                  showDisabledMoneyOnTheTable = true;
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Subscription(
+                                user: widget.user,
+                                info: true,
+                                title:
+                                    "Your current subscription does not include showing money on the table",
+                              )));
+                } else {
+                  game.showMoneyOnTable = val;
+                  setState(() {});
+                }
+              }),
           disabledMoneyOnTheTable(),
           Padding(
             padding: EdgeInsets.only(top: 16),

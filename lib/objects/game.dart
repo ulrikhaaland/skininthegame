@@ -26,6 +26,7 @@ class Game {
       this.moneyOnTable,
       this.showMoneyOnTable,
       this.type,
+      this.floor,
       {this.addonPrice,
       this.rebuyPrice});
 
@@ -47,6 +48,7 @@ class Game {
   int addonPrice;
   int rebuyPrice;
 
+  String floor;
   String adress;
   String date;
   String gameType;
@@ -85,6 +87,7 @@ class Game {
         'addonprice': this.addonPrice,
         'rebuyprice': this.rebuyPrice,
         'type': this.type,
+        'floor': this.floor,
       };
 
   Game fromMap(Map map) {
@@ -113,6 +116,7 @@ class Game {
       moneyOnTable,
       showMoneyOnTable,
       type,
+      floor,
       rebuyPrice: this.rebuyPrice,
       addonPrice: this.addonPrice,
     );

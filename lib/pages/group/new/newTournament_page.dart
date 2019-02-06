@@ -118,6 +118,7 @@ class NewTournamentState extends State<NewTournament> {
       0,
       null,
       1,
+      widget.user.id,
       addonPrice: null,
       rebuyPrice: null,
     );

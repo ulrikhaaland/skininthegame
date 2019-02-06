@@ -385,7 +385,12 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
                   Essentials().showSnackBar("Your payout request has been sent",
                       formKey.currentState.context);
                   firestoreInstance.collection("$gamePath/requests").add(
-                      {"name": widget.user.userName, "id": widget.user.id});
+                    {
+                      "name": widget.user.userName,
+                      "id": widget.user.id,
+                      "type": "payout",
+                    },
+                  );
                 },
               )),
           new Padding(
@@ -444,12 +449,14 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
                 "${widget.user.userName} has requested a buyin of $buyin",
                 "$gamePath/log",
                 "Request");
-            Essentials().showSnackBar(
-                "Your request has been sent", formKey.currentState.context);
+            Essentials().showSnackBar("Your buyin request has been sent",
+                formKey.currentState.context);
             firestoreInstance.collection("$gamePath/requests").add({
               "name": widget.user.userName,
-              "buyin": buyin,
-              "id": widget.user.id
+              "addbuyin": buyin,
+              "currentbuyin": oldPlayerBuyinAmount,
+              "id": widget.user.id,
+              "type": "buyin"
             });
           },
         ),
