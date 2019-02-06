@@ -375,7 +375,7 @@ class CashGamePageState extends State<CashGamePage>
   }
 
   Widget floatingActionButton() {
-    if (widget.history != true) {
+    if (!widget.history && !game.stopReg) {
       return new FloatingActionButton(
         backgroundColor: color,
         tooltip: "Join",
@@ -563,7 +563,8 @@ class CashGamePageState extends State<CashGamePage>
             0,
             docSnap.data["floor"],
             docSnap.data["floorfcm"],
-            docSnap.data["floorname"]);
+            docSnap.data["floorname"],
+            docSnap.data["stopreg"]);
 
         if (game.calculatePayouts == true && widget.history == true) {
           queueOrCalculateIcon = Icons.attach_money;

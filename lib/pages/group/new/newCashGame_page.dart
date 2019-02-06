@@ -33,7 +33,7 @@ class NewCashGameState extends State<NewCashGame> {
   String groupId;
   Game game;
 
-  bool isLoading = false;
+  bool isLoading = true;
 
   bool notifyMembers = false;
   bool moneyOnTable = false;
@@ -85,7 +85,8 @@ class NewCashGameState extends State<NewCashGame> {
         0,
         widget.user.id,
         widget.user.fcm,
-        widget.user.userName);
+        widget.user.userName,
+        false);
     game.setDate("Not set");
     game.setTime("Not set");
     getAdmins();
@@ -98,11 +99,26 @@ class NewCashGameState extends State<NewCashGame> {
 
     qSnap.documents.forEach((doc) {
       if (doc.data["admin"]) {
-        adminsList.add(new User(null, doc.data["uid"], doc.data["username"],
-            doc.data["fcm"], null, null, null, null, null, null, null, null, null, null));
+        adminsList.add(new User(
+            null,
+            doc.data["uid"],
+            doc.data["username"],
+            doc.data["fcm"],
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null));
       }
     });
-    setState(() {});
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override

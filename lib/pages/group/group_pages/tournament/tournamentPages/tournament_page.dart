@@ -273,6 +273,7 @@ class TournamentPageState extends State<TournamentPage>
           docSnap.data["floor"],
           docSnap.data["floorfcm"],
           docSnap.data["floorname"],
+          docSnap.data["stopreg"],
           rebuyPrice: docSnap.data["rebuyprice"],
           addonPrice: docSnap.data["addonprice"],
         );

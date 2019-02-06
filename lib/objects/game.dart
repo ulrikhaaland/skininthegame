@@ -29,12 +29,14 @@ class Game {
       this.floor,
       this.floorFCM,
       this.floorName,
+      this.stopReg,
       {this.addonPrice,
       this.rebuyPrice});
 
   bool calculatePayouts;
   bool isRunning;
   bool showMoneyOnTable;
+  bool stopReg;
   int type;
 
   int moneyOnTable;
@@ -93,7 +95,8 @@ class Game {
         'type': this.type,
         'floor': this.floor,
         'floorfcm': this.floorFCM,
-        'floorname': this.floorName
+        'floorname': this.floorName,
+        'stopreg': this.stopReg,
       };
 
   Game fromMap(Map map) {
@@ -125,6 +128,7 @@ class Game {
       floor,
       floorFCM,
       floorName,
+      stopReg,
       rebuyPrice: this.rebuyPrice,
       addonPrice: this.addonPrice,
     );

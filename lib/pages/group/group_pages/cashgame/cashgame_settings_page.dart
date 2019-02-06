@@ -104,6 +104,9 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
 
   // New game
 
+  IconData regIcon;
+  String regText;
+
   bool isLoading = false;
 
   CollectionReference fromCollectionPlayers;
@@ -125,6 +128,7 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
     currentUserId = widget.user.id;
     currentUserName = widget.user.userName;
     groupId = widget.group.id;
+    setReg();
     if (widget.history == true) {
       cashgameActiveOrHistory = "cashgamehistory";
     }
@@ -154,6 +158,16 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
     super.dispose();
   }
 
+  void setReg() {
+    if (widget.game.stopReg) {
+      regIcon = Icons.lock_open;
+      regText = "Open Registrations";
+    } else {
+      regIcon = Icons.lock_outline;
+      regText = "Close Registrations";
+    }
+  }
+
   void getAdmins() async {
     QuerySnapshot qSnap = await firestoreInstance
         .collection("groups/${widget.group.id}/members")
@@ -161,8 +175,21 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
     adminsList.removeAt(0);
     qSnap.documents.forEach((doc) {
       if (doc.data["admin"]) {
-        adminsList.add(new User(null, doc.data["uid"], doc.data["username"],
-            doc.data["fcm"], null, null, null, null, null, null, null, null, null, null));
+        adminsList.add(new User(
+            null,
+            doc.data["uid"],
+            doc.data["username"],
+            doc.data["fcm"],
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null));
       }
     });
     setState(() {});
@@ -270,10 +297,9 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
                             _deleteAlert();
                           },
                         ),
-                        new Divider(
-                          height: .0,
-                          color: Colors.black,
-                        ),
+                        Layout().divider(),
+                        showReg(),
+                        Layout().divider(),
                         Padding(
                           padding: EdgeInsets.only(top: 16),
                         ),
@@ -656,6 +682,34 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
     return false;
   }
 
+  Widget showReg() {
+    if (!widget.history) {
+      return new ListTile(
+        leading: new Icon(
+          regIcon,
+          size: 40.0,
+          color: UIData.yellow,
+        ),
+        title: new Text(
+          regText,
+          style: new TextStyle(
+              color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
+        ),
+        onTap: () async {
+          widget.game.stopReg = !widget.game.stopReg;
+          setState(() {
+            setReg();
+          });
+          firestoreInstance.document(pathToCashGame).updateData({
+            "stopreg": widget.game.stopReg,
+          });
+        },
+      );
+    } else {
+      return new Container();
+    }
+  }
+
   Widget loading() {
     return new Center(
       child: new CircularProgressIndicator(),
@@ -719,7 +773,7 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
           color: UIData.green,
         ),
         title: new Text(
-          "Start game",
+          "Start Game",
           style: new TextStyle(
               color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
         ),
@@ -743,7 +797,7 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
           color: UIData.green,
         ),
         title: new Text(
-          "End game",
+          "End Game",
           style: new TextStyle(
               color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
         ),
