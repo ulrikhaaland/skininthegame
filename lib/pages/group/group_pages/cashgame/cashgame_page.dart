@@ -311,6 +311,18 @@ class CashGamePageState extends State<CashGamePage>
                         new Padding(
                           padding: EdgeInsets.all(12.0),
                         ),
+                        // new GestureDetector(
+                        //   child: new Text(
+                        //     "FLOOR",
+                        //     style: TextStyle(
+                        //       color: UIData.blue,
+                        //       fontSize: UIData.fontSize20,
+                        //     ),
+                        //   ),
+                        // ),
+                        // new Padding(
+                        //   padding: EdgeInsets.all(12.0),
+                        // ),
                         new Text(
                           "${game.info}",
                           style: new TextStyle(color: UIData.blackOrWhite),
@@ -548,7 +560,10 @@ class CashGamePageState extends State<CashGamePage>
             docSnap.data["isrunning"],
             docSnap.data["moneyontable"],
             docSnap.data["showmoneyontable"],
-            0);
+            0,
+            docSnap.data["floor"],
+            docSnap.data["floorfcm"],
+            docSnap.data["floorname"]);
 
         if (game.calculatePayouts == true && widget.history == true) {
           queueOrCalculateIcon = Icons.attach_money;

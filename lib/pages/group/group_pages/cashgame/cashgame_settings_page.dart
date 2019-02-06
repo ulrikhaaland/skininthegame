@@ -99,6 +99,9 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
   String time;
   String date;
 
+  List<User> adminsList = new List();
+  String floorName;
+
   // New game
 
   bool isLoading = false;
@@ -116,6 +119,8 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
 
   initState() {
     super.initState();
+    adminsList.add(widget.user);
+    getAdmins();
     _tabController = new TabController(vsync: this, length: 2);
     currentUserId = widget.user.id;
     currentUserName = widget.user.userName;
@@ -147,6 +152,20 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  void getAdmins() async {
+    QuerySnapshot qSnap = await firestoreInstance
+        .collection("groups/${widget.group.id}/members")
+        .getDocuments();
+    adminsList.removeAt(0);
+    qSnap.documents.forEach((doc) {
+      if (doc.data["admin"]) {
+        adminsList.add(new User(null, doc.data["uid"], doc.data["username"],
+            doc.data["fcm"], null, null, null, null, null, null, null, null, null, null));
+      }
+    });
+    setState(() {});
   }
 
   @override
@@ -510,7 +529,64 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
                           onSaved: (val) => widget.game.setInfo(val),
                         ),
                         Padding(
-                          padding: EdgeInsets.only(bottom: 16.0),
+                          padding: EdgeInsets.only(bottom: 16),
+                          child: ListTile(
+                            subtitle: new Text(
+                              "The user in charge of this game",
+                              style: new TextStyle(color: Colors.grey[600]),
+                            ),
+                            title: new Text(
+                              "Floor",
+                              style: new TextStyle(color: UIData.blackOrWhite),
+                            ),
+                            trailing: Theme(
+                              data: Theme.of(context)
+                                  .copyWith(canvasColor: UIData.appBarColor),
+                              child: new Container(
+                                child: new DropdownButton<User>(
+                                  style: TextStyle(color: UIData.blackOrWhite),
+                                  hint: new Text(
+                                    widget.game.floorName,
+                                    style: new TextStyle(
+                                        color: UIData.blackOrWhite,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  items: adminsList.map((User user) {
+                                    return new DropdownMenuItem<User>(
+                                      value: user,
+                                      child: new Text(
+                                        user.userName,
+                                        style: new TextStyle(
+                                            color: UIData.blackOrWhite),
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (_) {
+                                    if (widget.game.floorName != _.userName) {
+                                      setState(() {
+                                        widget.game.floorName = _.userName;
+                                        for (var user in adminsList) {
+                                          if (user.userName == _.userName) {
+                                            widget.game.floor = user.id;
+                                            widget.game.floorFCM = user.fcm;
+                                            widget.game.floorName =
+                                                user.userName;
+                                          }
+                                        }
+                                      });
+                                      firestoreInstance
+                                          .document(pathToCashGame)
+                                          .updateData({
+                                        "floor": widget.game.floor,
+                                        "floorfcm": widget.game.floorFCM,
+                                        "floorname": widget.game.floorName,
+                                      });
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                         new CheckboxListTile(
                             subtitle: new Text(

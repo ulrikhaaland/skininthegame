@@ -27,6 +27,8 @@ class Game {
       this.showMoneyOnTable,
       this.type,
       this.floor,
+      this.floorFCM,
+      this.floorName,
       {this.addonPrice,
       this.rebuyPrice});
 
@@ -49,6 +51,8 @@ class Game {
   int rebuyPrice;
 
   String floor;
+  String floorFCM;
+  String floorName;
   String adress;
   String date;
   String gameType;
@@ -88,6 +92,8 @@ class Game {
         'rebuyprice': this.rebuyPrice,
         'type': this.type,
         'floor': this.floor,
+        'floorfcm': this.floorFCM,
+        'floorname': this.floorName
       };
 
   Game fromMap(Map map) {
@@ -117,6 +123,8 @@ class Game {
       showMoneyOnTable,
       type,
       floor,
+      floorFCM,
+      floorName,
       rebuyPrice: this.rebuyPrice,
       addonPrice: this.addonPrice,
     );

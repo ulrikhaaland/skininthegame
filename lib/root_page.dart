@@ -80,21 +80,25 @@ class RootPageState extends State<RootPage> {
   Future<String> updateFcmToken() async {
     if (currentUser != null) {
       messagingToken = await firebaseMessaging.getToken();
-      print(messagingToken);
-      firestoreInstance
-          .document("users/$currentUser")
-          .updateData({"fcm": messagingToken});
+      DocumentSnapshot docSnap =
+          await firestoreInstance.document("users/$currentUser").get();
+
+      if (docSnap.data["fcm"] != messagingToken) {
+        firestoreInstance
+            .document("users/$currentUser")
+            .updateData({"fcm": messagingToken});
+        QuerySnapshot qSnap = await firestoreInstance
+            .collection("users/$currentUser/groups")
+            .getDocuments();
+        qSnap.documents.forEach((DocumentSnapshot doc) {
+          firestoreInstance
+              .document("groups/${doc.data["id"]}/members/$currentUser")
+              .updateData({
+            "fcm": messagingToken,
+          });
+        });
+      }
     }
-    QuerySnapshot qSnap = await firestoreInstance
-        .collection("users/$currentUser/groups")
-        .getDocuments();
-    qSnap.documents.forEach((DocumentSnapshot doc) {
-      firestoreInstance
-          .document("groups/${doc.data["id"]}/members/$currentUser")
-          .updateData({
-        "fcm": messagingToken,
-      });
-    });
     return messagingToken;
   }
 

@@ -10,6 +10,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:yadda/objects/game.dart';
 import 'package:yadda/utils/essentials.dart';
 import 'package:yadda/widgets/primary_button.dart';
+import 'package:yadda/utils/cloudFunctions.dart';
 
 class CashGamePlayerPage extends StatefulWidget {
   CashGamePlayerPage({
@@ -391,6 +392,16 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
                       "type": "payout",
                     },
                   );
+                  CloudFunctions().groupNotification(
+                      widget.game.name,
+                      widget.group.name,
+                      widget.group.id,
+                      widget.game.id,
+                      "Cash Game!",
+                      widget.group,
+                      "Payout",
+                      "${widget.user.userName} has requested a payout",
+                      null);
                 },
               )),
           new Padding(
@@ -428,7 +439,7 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
 
   Widget requestBuyin() {
     String text;
-    oldPlayerBuyinAmount != 0 ? text = "Additional buyin" : text = "Buyin";
+    oldPlayerBuyinAmount != 0 ? text = "Rebuy" : text = "Buyin";
     int buyin;
     if (!widget.history && widget.playerId == widget.user.id)
       return new ListTile(
@@ -446,10 +457,11 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
           child: new Text("Request"),
           onPressed: () {
             Log().postLogToCollection(
-                "${widget.user.userName} has requested a buyin of $buyin",
+                "${widget.user.userName} has requested a ${text.toLowerCase()} of $buyin",
                 "$gamePath/log",
                 "Request");
-            Essentials().showSnackBar("Your buyin request has been sent",
+            Essentials().showSnackBar(
+                "Your ${text.toLowerCase()} request has been sent",
                 formKey.currentState.context);
             firestoreInstance.collection("$gamePath/requests").add({
               "name": widget.user.userName,
@@ -458,6 +470,16 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
               "id": widget.user.id,
               "type": "buyin"
             });
+            CloudFunctions().groupNotification(
+                widget.game.name,
+                widget.group.name,
+                widget.group.id,
+                widget.game.id,
+                "Cash Game!",
+                widget.group,
+                "Rebuy",
+                "${widget.user.userName} has requested a ${text.toLowerCase()} of $buyin",
+                widget.game.floorFCM);
           },
         ),
       );

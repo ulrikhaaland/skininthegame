@@ -83,7 +83,9 @@ class NewCashGameState extends State<NewCashGame> {
         0,
         moneyOnTable,
         0,
-        widget.user.id);
+        widget.user.id,
+        widget.user.fcm,
+        widget.user.userName);
     game.setDate("Not set");
     game.setTime("Not set");
     getAdmins();
@@ -97,7 +99,7 @@ class NewCashGameState extends State<NewCashGame> {
     qSnap.documents.forEach((doc) {
       if (doc.data["admin"]) {
         adminsList.add(new User(null, doc.data["uid"], doc.data["username"],
-            null, null, null, null, null, null, null, null, null, null, null));
+            doc.data["fcm"], null, null, null, null, null, null, null, null, null, null));
       }
     });
     setState(() {});
@@ -233,378 +235,397 @@ class NewCashGameState extends State<NewCashGame> {
                 )));
 
       if (notifyMembers == true) {
-        CloudFunctions().groupNotification(game.name, widget.group.name,
-            widget.group.id, game.id, "Cash Game!", widget.group);
+        CloudFunctions().groupNotification(
+            game.name,
+            widget.group.name,
+            widget.group.id,
+            game.id,
+            "Cash Game!",
+            widget.group,
+            "New Cash Game!",
+            "${widget.group.name} has invited you to join ${game.name}",
+            null);
       }
     }
   }
 
   Widget page() {
-    return new SingleChildScrollView(
-      child: Column(
-        children: <Widget>[
-          Layout().padded(
-              child: new TextFormField(
-            autofocus: true,
-            textCapitalization: TextCapitalization.sentences,
-            style: new TextStyle(color: UIData.blackOrWhite),
-            key: new Key('name'),
-            decoration: new InputDecoration(
-                labelText: 'Name',
-                labelStyle: new TextStyle(color: Colors.grey[600])),
-            autocorrect: false,
-            onSaved: (val) {
-              if (val.isEmpty) {
-                val = "Not Set";
-              }
-              if (val.length > 18) {
-                String fittedString = val.substring(0, 16);
-                game.setName(val);
-                game.setFittedName("$fittedString...");
-              } else {
-                game.setName(val);
-                game.setFittedName(val);
-              }
-            },
-          )),
-          Layout().padded(
-              child: new TextFormField(
-            textCapitalization: TextCapitalization.sentences,
-            style: new TextStyle(color: UIData.blackOrWhite),
-            key: new Key('adress'),
-            decoration: new InputDecoration(
-                labelText: 'Adress',
-                labelStyle: new TextStyle(color: Colors.grey[600])),
-            autocorrect: false,
-            onSaved: (val) =>
-                val.isEmpty ? game.setAdress("Not set") : game.setAdress(val),
-          )),
-          new Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              Layout().paddedTwo(
-                child: new ConstrainedBox(
-                  constraints:
-                      BoxConstraints.expand(height: 40.0, width: 120.0),
-                  child: new RaisedButton(
-                      child: new Text("Date",
-                          style: new TextStyle(
-                            color: Colors.black,
-                            fontSize: UIData.fontSize16,
-                          )),
-                      shape: new RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(10.0))),
-                      color: Colors.yellow[700],
-                      textColor: Colors.white,
-                      onPressed: () {
-                        _selectDate(context);
-                      }),
+    if (adminsList.length > 0)
+      return new SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            Layout().padded(
+                child: new TextFormField(
+              // autofocus: true,
+              textCapitalization: TextCapitalization.sentences,
+              style: new TextStyle(color: UIData.blackOrWhite),
+              key: new Key('name'),
+              decoration: new InputDecoration(
+                  labelText: 'Name',
+                  labelStyle: new TextStyle(color: Colors.grey[600])),
+              autocorrect: false,
+              onSaved: (val) {
+                if (val.isEmpty) {
+                  val = "Not Set";
+                }
+                if (val.length > 18) {
+                  String fittedString = val.substring(0, 16);
+                  game.setName(val);
+                  game.setFittedName("$fittedString...");
+                } else {
+                  game.setName(val);
+                  game.setFittedName(val);
+                }
+              },
+            )),
+            Layout().padded(
+                child: new TextFormField(
+              textCapitalization: TextCapitalization.sentences,
+              style: new TextStyle(color: UIData.blackOrWhite),
+              key: new Key('adress'),
+              decoration: new InputDecoration(
+                  labelText: 'Adress',
+                  labelStyle: new TextStyle(color: Colors.grey[600])),
+              autocorrect: false,
+              onSaved: (val) =>
+                  val.isEmpty ? game.setAdress("Not set") : game.setAdress(val),
+            )),
+            new Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Layout().paddedTwo(
+                  child: new ConstrainedBox(
+                    constraints:
+                        BoxConstraints.expand(height: 40.0, width: 120.0),
+                    child: new RaisedButton(
+                        child: new Text("Date",
+                            style: new TextStyle(
+                              color: Colors.black,
+                              fontSize: UIData.fontSize16,
+                            )),
+                        shape: new RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10.0))),
+                        color: Colors.yellow[700],
+                        textColor: Colors.white,
+                        onPressed: () {
+                          _selectDate(context);
+                        }),
+                  ),
                 ),
-              ),
-              Layout().paddedTwo(
-                child: new ConstrainedBox(
-                  constraints:
-                      BoxConstraints.expand(height: 40.0, width: 120.0),
-                  child: new RaisedButton(
-                      child: new Text("Time",
-                          style: new TextStyle(
-                            color: Colors.black,
-                            fontSize: UIData.fontSize16,
-                          )),
-                      shape: new RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(10.0))),
-                      color: Colors.yellow[700],
-                      textColor: Colors.white,
-                      onPressed: () {
-                        _selectTime(context);
-                      }),
+                Layout().paddedTwo(
+                  child: new ConstrainedBox(
+                    constraints:
+                        BoxConstraints.expand(height: 40.0, width: 120.0),
+                    child: new RaisedButton(
+                        child: new Text("Time",
+                            style: new TextStyle(
+                              color: Colors.black,
+                              fontSize: UIData.fontSize16,
+                            )),
+                        shape: new RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10.0))),
+                        color: Colors.yellow[700],
+                        textColor: Colors.white,
+                        onPressed: () {
+                          _selectTime(context);
+                        }),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          Layout().padded(
-              child: new TextFormField(
-                  keyboardType: TextInputType.number,
-                  maxLength: 6,
-                  style: new TextStyle(color: UIData.blackOrWhite),
-                  key: new Key('maximumplayers'),
-                  decoration: new InputDecoration(
-                      hintText: game.maxPlayers.toString(),
-                      labelText: 'Maximum players',
-                      labelStyle: new TextStyle(color: Colors.grey[600])),
-                  autocorrect: false,
-                  validator: (val) {
-                    val.isEmpty ? val = game.maxPlayers.toString() : null;
-                    if (widget.user.subLevel < 2) {
-                      String sub;
-                      if (widget.user.subLevel == 1 && int.tryParse(val) > 9) {
-                        sub =
-                            "Your current subscription only allows \n9 players per cash game";
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Subscription(
-                                      user: widget.user,
-                                      info: true,
-                                      title: sub,
-                                    )));
-                        return sub;
+              ],
+            ),
+            Layout().padded(
+                child: new TextFormField(
+                    keyboardType: TextInputType.number,
+                    maxLength: 6,
+                    style: new TextStyle(color: UIData.blackOrWhite),
+                    key: new Key('maximumplayers'),
+                    decoration: new InputDecoration(
+                        hintText: game.maxPlayers.toString(),
+                        labelText: 'Maximum players',
+                        labelStyle: new TextStyle(color: Colors.grey[600])),
+                    autocorrect: false,
+                    validator: (val) {
+                      val.isEmpty ? val = game.maxPlayers.toString() : null;
+                      if (widget.user.subLevel < 2) {
+                        String sub;
+                        if (widget.user.subLevel == 1 &&
+                            int.tryParse(val) > 9) {
+                          sub =
+                              "Your current subscription only allows \n9 players per cash game";
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Subscription(
+                                        user: widget.user,
+                                        info: true,
+                                        title: sub,
+                                      )));
+                          return sub;
+                        } else if (widget.user.subLevel == 0 &&
+                            int.tryParse(val) > 6) {
+                          sub =
+                              "Your current subscription only allows \n6 players per cash game";
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Subscription(
+                                        user: widget.user,
+                                        info: true,
+                                        title: sub,
+                                      )));
+                          return sub;
+                        }
+                      }
+                    },
+                    onSaved: (val) {
+                      if (val.isEmpty) {
+                        switch (widget.user.subLevel) {
+                          case (0):
+                            game.setMaxPlayers(6);
+                            break;
+                          case (1):
+                            game.setMaxPlayers(9);
+                            break;
+                          case (2):
+                            game.setMaxPlayers(9);
+                            break;
+                        }
+                      } else if (widget.user.subLevel == 1 &&
+                          int.tryParse(val) > 9) {
+                        game.setMaxPlayers(9);
                       } else if (widget.user.subLevel == 0 &&
                           int.tryParse(val) > 6) {
-                        sub =
-                            "Your current subscription only allows \n6 players per cash game";
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Subscription(
-                                      user: widget.user,
-                                      info: true,
-                                      title: sub,
-                                    )));
-                        return sub;
+                        game.setMaxPlayers(6);
+                      } else {
+                        game.setMaxPlayers(int.tryParse(val));
                       }
-                    }
-                  },
-                  onSaved: (val) {
-                    if (val.isEmpty) {
-                      switch (widget.user.subLevel) {
-                        case (0):
-                          game.setMaxPlayers(6);
-                          break;
-                        case (1):
-                          game.setMaxPlayers(9);
-                          break;
-                        case (2):
-                          game.setMaxPlayers(9);
-                          break;
-                      }
-                    } else if (widget.user.subLevel == 1 &&
-                        int.tryParse(val) > 9) {
-                      game.setMaxPlayers(9);
-                    } else if (widget.user.subLevel == 0 &&
-                        int.tryParse(val) > 6) {
-                      game.setMaxPlayers(6);
-                    } else {
-                      game.setMaxPlayers(int.tryParse(val));
-                    }
-                  })),
-          Layout().padded(
-              child: new TextFormField(
-                  textCapitalization: TextCapitalization.sentences,
-                  style: new TextStyle(color: UIData.blackOrWhite),
-                  key: new Key('gametype'),
-                  decoration: new InputDecoration(
-                      hintText: game.gameType,
-                      labelText: 'Gametype',
-                      labelStyle: new TextStyle(color: Colors.grey[600])),
-                  autocorrect: false,
-                  onSaved: (val) => val.isEmpty
-                      ? game.setGameType("No Limit Hold'em")
-                      : game.setGameType(val))),
-          new Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              Layout().paddedTwo(
-                child: new Container(
-                  width: 120.0,
-                  child: new TextFormField(
-                    maxLength: 4,
-                    keyboardType: TextInputType.number,
+                    })),
+            Layout().padded(
+                child: new TextFormField(
                     textCapitalization: TextCapitalization.sentences,
-                    keyboardAppearance: Brightness.dark,
                     style: new TextStyle(color: UIData.blackOrWhite),
-                    key: new Key('sblind'),
+                    key: new Key('gametype'),
                     decoration: new InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: "Small Blind",
+                        hintText: game.gameType,
+                        labelText: 'Gametype',
                         labelStyle: new TextStyle(color: Colors.grey[600])),
                     autocorrect: false,
                     onSaved: (val) => val.isEmpty
-                        ? game.setSBlind(0)
-                        : game.setSBlind(int.tryParse(val)),
-                  ),
-                ),
-              ),
-              Layout().paddedTwo(
-                child: new Container(
-                  width: 120.0,
-                  child: new TextFormField(
+                        ? game.setGameType("No Limit Hold'em")
+                        : game.setGameType(val))),
+            new Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Layout().paddedTwo(
+                  child: new Container(
+                    width: 120.0,
+                    child: new TextFormField(
                       maxLength: 4,
                       keyboardType: TextInputType.number,
+                      textCapitalization: TextCapitalization.sentences,
                       keyboardAppearance: Brightness.dark,
                       style: new TextStyle(color: UIData.blackOrWhite),
-                      key: new Key('bblind'),
+                      key: new Key('sblind'),
                       decoration: new InputDecoration(
                           border: OutlineInputBorder(),
-                          labelText: "Big Blind",
-                          labelStyle: new TextStyle(
-                            color: Colors.grey[600],
-                          )),
+                          labelText: "Small Blind",
+                          labelStyle: new TextStyle(color: Colors.grey[600])),
                       autocorrect: false,
                       onSaved: (val) => val.isEmpty
-                          ? game.setBBlind(0)
-                          : game.setBBlind(int.tryParse(val))),
+                          ? game.setSBlind(0)
+                          : game.setSBlind(int.tryParse(val)),
+                    ),
+                  ),
+                ),
+                Layout().paddedTwo(
+                  child: new Container(
+                    width: 120.0,
+                    child: new TextFormField(
+                        maxLength: 4,
+                        keyboardType: TextInputType.number,
+                        keyboardAppearance: Brightness.dark,
+                        style: new TextStyle(color: UIData.blackOrWhite),
+                        key: new Key('bblind'),
+                        decoration: new InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: "Big Blind",
+                            labelStyle: new TextStyle(
+                              color: Colors.grey[600],
+                            )),
+                        autocorrect: false,
+                        onSaved: (val) => val.isEmpty
+                            ? game.setBBlind(0)
+                            : game.setBBlind(int.tryParse(val))),
+                  ),
+                ),
+              ],
+            ),
+            Layout().padded(
+                child: new TextFormField(
+                    textCapitalization: TextCapitalization.sentences,
+                    style: new TextStyle(color: UIData.blackOrWhite),
+                    key: new Key('currency'),
+                    decoration: new InputDecoration(
+                        hintText: widget.user.currency,
+                        labelText: 'Currency',
+                        labelStyle: new TextStyle(color: Colors.grey[600])),
+                    autocorrect: false,
+                    onSaved: (val) => val.isEmpty
+                        ? game.setCurrency(widget.user.currency)
+                        : game.setCurrency(val))),
+            Layout().padded(
+                child: new TextFormField(
+              textCapitalization: TextCapitalization.sentences,
+              maxLines: 3,
+              style: new TextStyle(color: UIData.blackOrWhite),
+              key: new Key('info'),
+              decoration: new InputDecoration(
+                  labelText: 'Additional information',
+                  labelStyle: new TextStyle(color: Colors.grey[600])),
+              autocorrect: false,
+              onSaved: (val) =>
+                  val.isEmpty ? game.setInfo("Not Set") : game.setInfo(val),
+            )),
+            Padding(
+              padding: EdgeInsets.only(bottom: 16),
+              child: ListTile(
+                subtitle: new Text(
+                  "The user in charge of this game",
+                  style: new TextStyle(color: Colors.grey[600]),
+                ),
+                title: new Text(
+                  "Floor",
+                  style: new TextStyle(color: UIData.blackOrWhite),
+                ),
+                trailing: Theme(
+                  data: Theme.of(context)
+                      .copyWith(canvasColor: UIData.appBarColor),
+                  child: new Container(
+                      child: new DropdownButton<String>(
+                    style: TextStyle(color: UIData.blackOrWhite),
+                    hint: new Text(
+                      floorName,
+                      style: new TextStyle(
+                          color: UIData.blackOrWhite,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    items: adminsList.map((User user) {
+                      return new DropdownMenuItem<String>(
+                        value: user.userName,
+                        child: new Text(
+                          user.userName,
+                          style: new TextStyle(color: UIData.blackOrWhite),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (_) {
+                      if (floorName != _) {
+                        setState(() {
+                          floorName = _;
+                          for (var user in adminsList) {
+                            if (user.userName == _) {
+                              game.floor = user.id;
+                              game.floorFCM = user.fcm;
+                              game.floorName = user.userName;
+                            }
+                          }
+                        });
+                      }
+                    },
+                  )),
                 ),
               ),
-            ],
-          ),
-          Layout().padded(
-              child: new TextFormField(
-                  textCapitalization: TextCapitalization.sentences,
-                  style: new TextStyle(color: UIData.blackOrWhite),
-                  key: new Key('currency'),
-                  decoration: new InputDecoration(
-                      hintText: widget.user.currency,
-                      labelText: 'Currency',
-                      labelStyle: new TextStyle(color: Colors.grey[600])),
-                  autocorrect: false,
-                  onSaved: (val) => val.isEmpty
-                      ? game.setCurrency(widget.user.currency)
-                      : game.setCurrency(val))),
-          Layout().padded(
-              child: new TextFormField(
-            textCapitalization: TextCapitalization.sentences,
-            maxLines: 3,
-            style: new TextStyle(color: UIData.blackOrWhite),
-            key: new Key('info'),
-            decoration: new InputDecoration(
-                labelText: 'Additional information',
-                labelStyle: new TextStyle(color: Colors.grey[600])),
-            autocorrect: false,
-            onSaved: (val) =>
-                val.isEmpty ? game.setInfo("Not Set") : game.setInfo(val),
-          )),
-          Padding(
-            padding: EdgeInsets.only(bottom: 16),
-            child: ListTile(
-              subtitle: new Text(
-                "The user responsible for this game",
-                style: new TextStyle(color: Colors.grey[600]),
-              ),
-              title: new Text(
-                "Floor",
-                style: new TextStyle(color: UIData.blackOrWhite),
-              ),
-              trailing: Theme(
-                data:
-                    Theme.of(context).copyWith(canvasColor: UIData.appBarColor),
-                child: new Container(
-                    child: new DropdownButton<String>(
-                  style: TextStyle(color: UIData.blackOrWhite),
-                  hint: new Text(
-                    floorName,
-                    style: new TextStyle(
-                        color: UIData.blackOrWhite,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  items: adminsList.map((User user) {
-                    return new DropdownMenuItem<String>(
-                      value: user.userName,
-                      child: new Text(
-                        user.userName,
-                        style: new TextStyle(color: UIData.blackOrWhite),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (_) {
-                    if (floorName != _) {
-                      setState(() {
-                        floorName = _;
-                      });
-                    }
-                  },
-                )),
-              ),
             ),
-          ),
-          new CheckboxListTile(
-              subtitle: new Text(
-                "Send a notification to members of the group",
-                style: new TextStyle(color: Colors.grey[600]),
-              ),
-              title: new Text(
-                "Notify members?",
-                style: new TextStyle(color: UIData.blackOrWhite),
-              ),
-              value: notifyMembers,
-              onChanged: (val) {
-                if (widget.user.subLevel == 0) {
-                  showDisabledNotifications = true;
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => Subscription(
-                                user: widget.user,
-                                info: true,
-                                title:
-                                    "Your current subscription does not include notifications",
-                              )));
-                } else {
-                  notifyMembers = val;
-                }
-                setState(() {});
-              }),
-          disabledNotifications(),
-          Padding(
-            padding: EdgeInsets.only(top: 16),
-          ),
-          Padding(
-            padding: EdgeInsets.only(bottom: 16.0),
-            child: new CheckboxListTile(
+            new CheckboxListTile(
                 subtitle: new Text(
-                  "Once the game is marked as finished, the app will calculate who pays who",
+                  "Send a notification to members of the group",
+                  style: new TextStyle(color: Colors.grey[600]),
+                ),
+                title: new Text(
+                  "Notify members?",
+                  style: new TextStyle(color: UIData.blackOrWhite),
+                ),
+                value: notifyMembers,
+                onChanged: (val) {
+                  if (widget.user.subLevel == 0) {
+                    showDisabledNotifications = true;
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Subscription(
+                                  user: widget.user,
+                                  info: true,
+                                  title:
+                                      "Your current subscription does not include notifications",
+                                )));
+                  } else {
+                    notifyMembers = val;
+                  }
+                  setState(() {});
+                }),
+            disabledNotifications(),
+            Padding(
+              padding: EdgeInsets.only(top: 16),
+            ),
+            Padding(
+              padding: EdgeInsets.only(bottom: 16.0),
+              child: new CheckboxListTile(
+                  subtitle: new Text(
+                    "Once the game is marked as finished, the app will calculate who pays who",
+                    style: new TextStyle(
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  title: new Text(
+                    "Calculate payouts",
+                    style: new TextStyle(color: UIData.blackOrWhite),
+                  ),
+                  value: game.calculatePayouts,
+                  onChanged: (val) {
+                    game.setCalculatePayouts(val);
+                    setState(() {});
+                  }),
+            ),
+            new CheckboxListTile(
+                subtitle: new Text(
+                  "Let users see how much money is on the table",
                   style: new TextStyle(
                     color: Colors.grey[600],
                   ),
                 ),
                 title: new Text(
-                  "Calculate payouts",
+                  "Money on the table",
                   style: new TextStyle(color: UIData.blackOrWhite),
                 ),
-                value: game.calculatePayouts,
+                value: game.showMoneyOnTable,
                 onChanged: (val) {
-                  game.setCalculatePayouts(val);
-                  setState(() {});
+                  if (widget.user.subLevel == 0) {
+                    showDisabledMoneyOnTheTable = true;
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Subscription(
+                                  user: widget.user,
+                                  info: true,
+                                  title:
+                                      "Your current subscription does not include showing money on the table",
+                                )));
+                  } else {
+                    game.showMoneyOnTable = val;
+                    setState(() {});
+                  }
                 }),
-          ),
-          new CheckboxListTile(
-              subtitle: new Text(
-                "Let users see how much money is on the table",
-                style: new TextStyle(
-                  color: Colors.grey[600],
-                ),
-              ),
-              title: new Text(
-                "Money on the table",
-                style: new TextStyle(color: UIData.blackOrWhite),
-              ),
-              value: game.showMoneyOnTable,
-              onChanged: (val) {
-                if (widget.user.subLevel == 0) {
-                  showDisabledMoneyOnTheTable = true;
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => Subscription(
-                                user: widget.user,
-                                info: true,
-                                title:
-                                    "Your current subscription does not include showing money on the table",
-                              )));
-                } else {
-                  game.showMoneyOnTable = val;
-                  setState(() {});
-                }
-              }),
-          disabledMoneyOnTheTable(),
-          Padding(
-            padding: EdgeInsets.only(top: 16),
-          ),
-        ],
-      ),
-    );
+            disabledMoneyOnTheTable(),
+            Padding(
+              padding: EdgeInsets.only(top: 16),
+            ),
+          ],
+        ),
+      );
+    else
+      return Container();
   }
 
   bool showDisabledNotifications = false;

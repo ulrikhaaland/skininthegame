@@ -119,6 +119,8 @@ class NewTournamentState extends State<NewTournament> {
       null,
       1,
       widget.user.id,
+      widget.user.fcm,
+      widget.user.userName,
       addonPrice: null,
       rebuyPrice: null,
     );
@@ -207,8 +209,16 @@ class NewTournamentState extends State<NewTournament> {
                 )));
 
       if (notifyMembers == true) {
-        CloudFunctions().groupNotification(game.name, widget.group.name,
-            widget.group.id, game.id, "Tournament!", widget.group);
+        CloudFunctions().groupNotification(
+            game.name,
+            widget.group.name,
+            widget.group.id,
+            game.id,
+            "Tournament!",
+            widget.group,
+            "New Tournament!",
+            "${widget.group.name} has invited you to join ${game.name}",
+            null);
       }
     }
   }
