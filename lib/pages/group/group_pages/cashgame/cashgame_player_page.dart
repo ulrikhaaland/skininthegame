@@ -378,34 +378,45 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
           new Padding(
               padding: EdgeInsets.only(top: 24, bottom: 12),
               child: new PrimaryButton(
-                text: "Request payout",
-                onPressed: () {
-                  Log().postLogToCollection(
-                      "${widget.user.userName} has requested a payout",
-                      "$gamePath/log",
-                      "Request");
+                  text: "Request payout",
+                  onPressed: () async {
+                    DocumentSnapshot docSnap = await firestoreInstance
+                        .document("$gamePath/requests/${widget.user.id}p")
+                        .get();
+                    if (!docSnap.exists) {
+                      Log().postLogToCollection(
+                          "${widget.user.userName} has requested a payout",
+                          "$gamePath/log",
+                          "Request");
 
-                  Essentials().showSnackBar("Your payout request has been sent",
-                      formKey.currentState.context);
-                  firestoreInstance.collection("$gamePath/requests").add(
-                    {
-                      "name": widget.user.userName,
-                      "id": widget.user.id,
-                      "type": "payout",
-                    },
-                  );
-                  CloudFunctions().groupNotification(
-                      widget.game.name,
-                      widget.group.name,
-                      widget.group.id,
-                      widget.game.id,
-                      "Cash Game!",
-                      widget.group,
-                      "Payout",
-                      "${widget.user.userName} has requested a payout",
-                      null);
-                },
-              )),
+                      Essentials().showSnackBar(
+                          "Your payout request has been sent",
+                          formKey.currentState.context);
+                      firestoreInstance
+                          .document("$gamePath/requests/${widget.user.id}p")
+                          .setData(
+                        {
+                          "name": widget.user.userName,
+                          "id": widget.user.id,
+                          "type": "payout",
+                        },
+                      );
+                      CloudFunctions().groupNotification(
+                          widget.game.name,
+                          widget.group.name,
+                          widget.group.id,
+                          widget.game.id,
+                          "Cash Game!",
+                          widget.group,
+                          "${widget.game.name.toUpperCase()} - PAYOUT",
+                          "${widget.user.userName} has requested a payout",
+                          null);
+                    } else {
+                      Essentials().showSnackBar(
+                          "A payout request has already been sent",
+                          formKey.currentState.context);
+                    }
+                  })),
           new Padding(
               padding: EdgeInsets.only(left: 16),
               child: new Text(
@@ -442,7 +453,7 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
   Widget requestBuyin() {
     String text;
     oldPlayerBuyinAmount != 0 ? text = "Rebuy" : text = "Buyin";
-    int buyin;
+    int buyin = 0;
     if (!widget.history && widget.playerId == widget.user.id)
       return new ListTile(
         title: new TextField(
@@ -454,36 +465,52 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
           onChanged: (val) => buyin = int.tryParse(val),
         ),
         trailing: new RaisedButton(
-          shape: new RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10.0))),
-          child: new Text("Request"),
-          onPressed: () {
-            Log().postLogToCollection(
-                "${widget.user.userName} has requested a ${text.toLowerCase()} of $buyin",
-                "$gamePath/log",
-                "Request");
-            Essentials().showSnackBar(
-                "Your ${text.toLowerCase()} request has been sent",
-                formKey.currentState.context);
-            firestoreInstance.collection("$gamePath/requests").add({
-              "name": widget.user.userName,
-              "addbuyin": buyin,
-              "currentbuyin": oldPlayerBuyinAmount,
-              "id": widget.user.id,
-              "type": text.toLowerCase(),
-            });
-            CloudFunctions().groupNotification(
-                widget.game.name,
-                widget.group.name,
-                widget.group.id,
-                widget.game.id,
-                "Cash Game!",
-                widget.group,
-                text,
-                "${widget.user.userName} has requested a ${text.toLowerCase()} of $buyin",
-                widget.game.floorFCM);
-          },
-        ),
+            shape: new RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10.0))),
+            child: new Text("Request"),
+            onPressed: () async {
+              DocumentSnapshot docSnap = await firestoreInstance
+                  .document("$gamePath/requests/${widget.user.id}r")
+                  .get();
+              if (!docSnap.exists) {
+                if (buyin > 0) {
+                  Log().postLogToCollection(
+                      "${widget.user.userName} has requested a ${text.toLowerCase()} of $buyin",
+                      "$gamePath/log",
+                      "Request");
+                  Essentials().showSnackBar(
+                      "Your ${text.toLowerCase()} request has been sent",
+                      formKey.currentState.context);
+                  firestoreInstance
+                      .document("$gamePath/requests/${widget.user.id}r")
+                      .setData({
+                    "name": widget.user.userName,
+                    "addbuyin": buyin,
+                    "currentbuyin": oldPlayerBuyinAmount,
+                    "id": widget.user.id,
+                    "type": text.toLowerCase(),
+                  });
+                  CloudFunctions().groupNotification(
+                      widget.game.name,
+                      widget.group.name,
+                      widget.group.id,
+                      widget.game.id,
+                      "Cash Game!",
+                      widget.group,
+                      "${widget.game.name} - ${text.toUpperCase()}",
+                      "${widget.user.userName} has requested a ${text.toLowerCase()} of $buyin",
+                      widget.game.floorFCM);
+                } else {
+                  Essentials().showSnackBar(
+                      "Buyin amount must be greater than 0",
+                      formKey.currentState.context);
+                }
+              } else {
+                Essentials().showSnackBar(
+                    "A buyin request has already been sent",
+                    formKey.currentState.context);
+              }
+            }),
       );
     // return new Padding(
     //     padding: EdgeInsets.fromLTRB(24, 12, 0, 12),

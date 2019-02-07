@@ -11,6 +11,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:yadda/utils/layout.dart';
 import 'package:yadda/objects/game.dart';
 import 'package:yadda/utils/essentials.dart';
+import 'package:yadda/utils/cloudFunctions.dart';
 
 class TournamentPlayerPage extends StatefulWidget {
   TournamentPlayerPage(
@@ -440,52 +441,63 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
   }
 
   Widget request(String type) {
-    if (type == "addon" && widget.playerId == widget.user.id) {
-      if (widget.oldAddon < widget.game.addon) {
-        return new RaisedButton(
-          shape: new RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10.0))),
-          child: new Text("Request"),
-          onPressed: () {
-            Essentials().showSnackBar(
-                "An addon request has been sent", formKey.currentState.context);
-
-            Log().postLogToCollection(
-                "${widget.user.userName} has requested an addon",
-                "$gamePath/log",
-                "Request");
-            firestoreInstance
-                .document("$gamePath/requests/${widget.user.id}a")
-                .setData({
-              "type": "addon",
-              "name": widget.user.userName,
-              "id": widget.user.id,
-            });
-          },
-        );
-      }
-    } else if (widget.oldRebuy < widget.game.rebuy &&
-        widget.playerId == widget.user.id) {
-      return new RaisedButton(
+    RaisedButton rBtn = new RaisedButton(
         shape: new RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(10.0))),
         child: new Text("Request"),
-        onPressed: () {
-          Essentials().showSnackBar(
-              "A rebuy request has been sent", formKey.currentState.context);
-          Log().postLogToCollection(
-              "${widget.user.userName} has requested an rebuy",
-              "$gamePath/log",
-              "Request");
-          firestoreInstance
+        onPressed: () async {
+          DocumentSnapshot docSnapA = await firestoreInstance
+              .document("$gamePath/requests/${widget.user.id}a")
+              .get();
+          DocumentSnapshot docSnapR = await firestoreInstance
               .document("$gamePath/requests/${widget.user.id}r")
-              .setData({
-            "type": "rebuy",
-            "name": widget.user.userName,
-            "id": widget.user.id,
-          });
-        },
-      );
+              .get();
+          String an;
+          String a;
+          if (type == "addon") {
+            an = "An";
+            a = "a";
+          } else {
+            an = "A";
+            a = "r";
+          }
+          if (type == "addon" && !docSnapA.exists ||
+              type == "rebuy" && !docSnapR.exists) {
+            String body =
+                "${widget.user.userName} has requested ${an.toLowerCase()} $type";
+            Essentials().showSnackBar("$an $type request has been sent",
+                formKey.currentState.context);
+
+            Log().postLogToCollection(body, "$gamePath/log", "Request");
+            firestoreInstance
+                .document("$gamePath/requests/${widget.user.id}$a")
+                .setData({
+              "type": type,
+              "name": widget.user.userName,
+              "id": widget.user.id,
+            });
+            CloudFunctions().groupNotification(
+                widget.game.name,
+                widget.group.name,
+                widget.group.id,
+                widget.game.id,
+                "Cash Game!",
+                widget.group,
+                "${widget.game.name.toUpperCase()} - ${type.toUpperCase()}",
+                body,
+                widget.game.floorFCM);
+          } else {
+            Essentials().showSnackBar("You have already requested ${an.toLowerCase()} $type",
+                formKey.currentState.context);
+          }
+        });
+    if (type == "addon" && widget.playerId == widget.user.id) {
+      if (widget.oldAddon < widget.game.addon) {
+        return rBtn;
+      }
+    } else if (widget.oldRebuy < widget.game.rebuy &&
+        widget.playerId == widget.user.id) {
+      return rBtn;
     } else
       return null;
   }
