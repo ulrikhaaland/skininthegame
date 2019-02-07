@@ -8,6 +8,9 @@ import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/log.dart';
 import 'package:yadda/pages/profile/profile_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:yadda/utils/layout.dart';
+import 'package:yadda/objects/game.dart';
+import 'package:yadda/utils/essentials.dart';
 
 class TournamentPlayerPage extends StatefulWidget {
   TournamentPlayerPage(
@@ -23,10 +26,12 @@ class TournamentPlayerPage extends StatefulWidget {
       this.group,
       this.url,
       this.callback,
+      this.game,
       this.gameId})
       : super(key: key);
   final User user;
   final Group group;
+  final Game game;
   final String playerId;
   final String playerUserName;
   final String url;
@@ -61,12 +66,11 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
   int newPlacing;
   int newPayout;
 
-  String logPath;
-
   int oldAddon;
   int oldRebuy;
   int oldPlacing;
   int oldPayout;
+  String gamePath;
 
   String activeOrHistory = "tournamentactive";
 
@@ -78,14 +82,13 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
     currentUserName = widget.user.getName();
     groupName = widget.group.name;
     groupId = widget.group.id;
-    logPath =
-        "groups/$groupId/games/type/$activeOrHistory/${widget.gameId}/log";
 
     if (widget.history == true) {
       activeOrHistory = "tournamenthistory";
-      logPath =
-          "groups/$groupId/games/type/$activeOrHistory/${widget.gameId}/log";
     }
+
+    gamePath = "groups/$groupId/games/type/$activeOrHistory/${widget.gameId}";
+
     if (widget.oldAddon == null) {
       oldAddon = 0;
     } else {
@@ -202,40 +205,29 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
         "placing": newPlacing,
         "payout": newPayout,
       });
-      if (widget.history != true) {
-        firestoreInstance
-            .document(
-                "groups/$groupId/games/type/$activeOrHistory/${widget.gameId}/activeplayers/${widget.playerId}")
-            .updateData({
-          "addon": newAddon,
-          "rebuy": newRebuy,
-          "placing": newPlacing,
-          "payout": newPayout,
-        });
-      }
 
       if (newAddon != widget.oldAddon) {
         Log().postLogToCollection(
             "$currentUserName changed ${widget.playerUserName} addon from ${widget.oldAddon} to $newAddon",
-            logPath,
+            "$gamePath/log",
             "Addon");
       }
       if (newRebuy != widget.oldRebuy) {
         Log().postLogToCollection(
             "$currentUserName changed ${widget.playerUserName} rebuy from ${widget.oldRebuy} to $newRebuy",
-            logPath,
+            "$gamePath/log",
             "Rebuy");
       }
       if (newPayout != widget.oldPayout) {
         Log().postLogToCollection(
             "$currentUserName changed ${widget.playerUserName} payout from ${widget.oldPayout} to $newPayout",
-            logPath,
+            "$gamePath/log",
             "Payout");
       }
       if (newPlacing != widget.oldPlacing) {
         Log().postLogToCollection(
             "$currentUserName changed ${widget.playerUserName} placing from ${widget.oldPlacing} to $newPlacing",
-            logPath,
+            "$gamePath/log",
             "Placing");
       }
 
@@ -267,7 +259,7 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
   }
 
   Widget page() {
-    if (widget.group.admin == true) {
+    if (widget.group.admin) {
       return ListView(
         padding: EdgeInsets.all(16),
         children: <Widget>[
@@ -288,44 +280,6 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
                           )),
                 ),
           ),
-          // new Divider(
-          //   height: 10.0,
-          //   color: Colors.black,
-          // ),
-          // new ListTile(
-          //   leading: new Icon(
-          //     Icons.delete,
-          //     size: 40.0,
-          //     color: UIData.red,
-          //   ),
-          //   // title: new Text(
-          //   //   "Remove Player",
-          //   //   style: new TextStyle(
-          //   //       color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
-          //   // ),
-          //   // onTap: () {
-          //   //   widget.callback();
-          //   //   String players = "activeplayers";
-
-          //   //   if (widget.history == true) {
-          //   //     players = "players";
-          //   //   }
-          //   //   firestoreInstance
-          //   //       .document(
-          //   //           "groups/$groupId/games/type/$activeOrHistory/${widget.gameId}/$players/${widget.playerId}")
-          //   //       .delete();
-          //   //   Log().postLogToCollection(
-          //   //       "$currentUserName removed ${widget.playerUserName} from game",
-          //   //       logPath,
-          //   //       "Remove");
-
-          //   //   Navigator.pop(context);
-          //   // },
-          // ),
-          // new Divider(
-          //   height: 10.0,
-          //   color: Colors.black,
-          // ),
           new ListTile(
             leading: new Icon(
               FontAwesomeIcons.award,
@@ -438,10 +392,7 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
           ),
           divider(),
           placing(),
-          new Divider(
-            height: .0,
-            color: Colors.black,
-          ),
+          Layout().divider(),
           new ListTile(
             leading: new Icon(
               Icons.attach_money,
@@ -456,44 +407,108 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
             ),
             onTap: null,
           ),
-          new Divider(
-            height: .0,
-            color: Colors.black,
-          ),
-          new ListTile(
-            leading: new Icon(
-              Icons.refresh,
-              size: 40.0,
-              color: UIData.blackOrWhite,
-            ),
-            title: new Text(
-              "Rebuys: ${widget.oldRebuy}",
-              style: new TextStyle(
-                  fontSize: UIData.fontSize20, color: UIData.blackOrWhite),
-              overflow: TextOverflow.ellipsis,
-            ),
-            onTap: null,
-          ),
-          new Divider(
-            height: .0,
-            color: Colors.black,
-          ),
-          new ListTile(
-            leading: new Icon(
-              Icons.add,
-              size: 40.0,
-              color: Colors.grey[600],
-            ),
-            title: new Text(
-              "Addons: ${widget.oldAddon}",
-              style: new TextStyle(
-                  fontSize: UIData.fontSize20, color: UIData.blackOrWhite),
-              overflow: TextOverflow.ellipsis,
-            ),
-            onTap: null,
-          ),
+          Layout().divider(),
+          rebuys(),
+          Layout().divider(),
+          addons(),
+          Layout().divider(),
         ],
       );
+    }
+  }
+
+  Widget addons() {
+    if (widget.game.addon > 0) {
+      return new ListTile(
+        leading: new Icon(
+          Icons.add,
+          size: 40.0,
+          color: Colors.grey[600],
+        ),
+        title: new Text(
+          "Addons: ${widget.oldAddon}",
+          style: new TextStyle(
+              fontSize: UIData.fontSize20, color: UIData.blackOrWhite),
+          overflow: TextOverflow.ellipsis,
+        ),
+        trailing: request("addon"),
+        onTap: null,
+      );
+    } else {
+      return Container();
+    }
+  }
+
+  Widget request(String type) {
+    if (type == "addon" && widget.playerId == widget.user.id) {
+      if (widget.oldAddon < widget.game.addon) {
+        return new RaisedButton(
+          shape: new RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10.0))),
+          child: new Text("Request"),
+          onPressed: () {
+            Essentials().showSnackBar(
+                "An addon request has been sent", formKey.currentState.context);
+
+            Log().postLogToCollection(
+                "${widget.user.userName} has requested an addon",
+                "$gamePath/log",
+                "Request");
+            firestoreInstance
+                .document("$gamePath/requests/${widget.user.id}a")
+                .setData({
+              "type": "addon",
+              "name": widget.user.userName,
+              "id": widget.user.id,
+            });
+          },
+        );
+      }
+    } else if (widget.oldRebuy < widget.game.rebuy &&
+        widget.playerId == widget.user.id) {
+      return new RaisedButton(
+        shape: new RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10.0))),
+        child: new Text("Request"),
+        onPressed: () {
+          Essentials().showSnackBar(
+              "A rebuy request has been sent", formKey.currentState.context);
+          Log().postLogToCollection(
+              "${widget.user.userName} has requested an rebuy",
+              "$gamePath/log",
+              "Request");
+          firestoreInstance
+              .document("$gamePath/requests/${widget.user.id}r")
+              .setData({
+            "type": "rebuy",
+            "name": widget.user.userName,
+            "id": widget.user.id,
+          });
+        },
+      );
+    } else
+      return null;
+  }
+
+  Widget rebuys() {
+    if (widget.game.rebuy > 0) {
+      return new ListTile(
+        leading: new Icon(
+          Icons.refresh,
+          size: 40.0,
+          color: UIData.blackOrWhite,
+        ),
+        title: new Text(
+          "Rebuys: ${widget.oldRebuy}",
+          style: new TextStyle(
+              fontSize: UIData.fontSize20, color: UIData.blackOrWhite),
+          overflow: TextOverflow.ellipsis,
+        ),
+        trailing: request("rebuy"),
+        onTap: null,
+      );
+    } else {
+      return new Container();
     }
   }
 

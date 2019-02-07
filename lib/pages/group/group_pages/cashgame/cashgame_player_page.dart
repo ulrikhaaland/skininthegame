@@ -192,9 +192,11 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
       } else {
         int buyinAmount = 0;
         int payoutAmount = 0;
-        firestoreInstance
-            .document("$gamePath/activeplayers/${widget.playerId}")
-            .updateData({"buyin": newPlayerBuyinAmount, 'payout': newPayout});
+        if (!widget.history) {
+          firestoreInstance
+              .document("$gamePath/activeplayers/${widget.playerId}")
+              .updateData({"buyin": newPlayerBuyinAmount, 'payout': newPayout});
+        }
         // firestoreInstance
         //     .document(
         //         "$gamePath/activeplayers/${widget.playerId}")
@@ -468,7 +470,7 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
               "addbuyin": buyin,
               "currentbuyin": oldPlayerBuyinAmount,
               "id": widget.user.id,
-              "type": "buyin"
+              "type": text.toLowerCase(),
             });
             CloudFunctions().groupNotification(
                 widget.game.name,
@@ -477,7 +479,7 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
                 widget.game.id,
                 "Cash Game!",
                 widget.group,
-                "Rebuy",
+                text,
                 "${widget.user.userName} has requested a ${text.toLowerCase()} of $buyin",
                 widget.game.floorFCM);
           },

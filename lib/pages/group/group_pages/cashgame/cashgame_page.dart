@@ -108,8 +108,11 @@ class CashGamePageState extends State<CashGamePage>
     isAdmin = widget.group.admin;
 
     if (isAdmin == true) {
-      _tabController = new TabController(vsync: this, length: 6);
-      isScrollable = true;
+      if (!widget.history) {
+        _tabController = new TabController(vsync: this, length: 6);
+        isScrollable = true;
+      }
+
       _formType = FormType.edit;
     } else {
       _tabController = new TabController(vsync: this, length: 4);
@@ -138,7 +141,7 @@ class CashGamePageState extends State<CashGamePage>
   }
 
   List<Widget> tabs() {
-    if (isAdmin && widget.history == false) {
+    if (isAdmin && !widget.history) {
       return [
         Tab(
           icon: Icon(
@@ -247,6 +250,7 @@ class CashGamePageState extends State<CashGamePage>
           ],
           backgroundColor: UIData.appBarColor,
           bottom: TabBar(
+            labelColor: UIData.blackOrWhite,
             isScrollable: isScrollable,
             controller: _tabController,
             tabs: tabs(),
@@ -342,7 +346,7 @@ class CashGamePageState extends State<CashGamePage>
   }
 
   moneyInPlay() {
-    if (game.showMoneyOnTable && game.isRunning) {
+    if (game.showMoneyOnTable && game.isRunning && !widget.history) {
       return new Text(
         "Money in play: ${game.moneyOnTable}${game.currency}",
         overflow: TextOverflow.ellipsis,
@@ -720,6 +724,10 @@ class CashGamePageState extends State<CashGamePage>
   }
 
   Widget _registeredList(BuildContext context, DocumentSnapshot document) {
+    Color color = UIData.blackOrWhite;
+    if (document.documentID == widget.user.id) {
+      color = UIData.blue;
+    }
     return new Slidable(
       delegate: new SlidableDrawerDelegate(),
       actionExtentRatio: 0.25,
@@ -728,7 +736,7 @@ class CashGamePageState extends State<CashGamePage>
           leading: addImage(document.data["profilepicurl"]),
           title: new Text(
             document.data["name"],
-            style: new TextStyle(fontSize: 25.0, color: UIData.blackOrWhite),
+            style: new TextStyle(fontSize: 25.0, color: color),
             overflow: TextOverflow.ellipsis,
           ),
           // trailing: iconButtonDelete(document.documentID),
@@ -780,11 +788,15 @@ class CashGamePageState extends State<CashGamePage>
   }
 
   Widget allList(BuildContext context, DocumentSnapshot document) {
+    Color color = UIData.blackOrWhite;
+    if (document.documentID == widget.user.id) {
+      color = UIData.blue;
+    }
     return new ListTile(
       leading: addImage(document.data["profilepicurl"]),
       title: new Text(
         document.data["name"],
-        style: new TextStyle(fontSize: 25.0, color: UIData.blackOrWhite),
+        style: new TextStyle(fontSize: 25.0, color: color),
         overflow: TextOverflow.ellipsis,
       ),
       // trailing: iconButtonDelete(document.documentID),
@@ -929,6 +941,10 @@ class CashGamePageState extends State<CashGamePage>
   }
 
   Widget _queueList(BuildContext context, DocumentSnapshot document) {
+    Color color = UIData.blackOrWhite;
+    if (document.documentID == widget.user.id) {
+      color = UIData.blue;
+    }
     return new Slidable(
       delegate: new SlidableDrawerDelegate(),
       actionExtentRatio: 0.25,
@@ -937,7 +953,7 @@ class CashGamePageState extends State<CashGamePage>
             leading: addImage(document.data["profilepicurl"]),
             title: new Text(
               document.data["name"],
-              style: new TextStyle(fontSize: 25.0),
+              style: new TextStyle(fontSize: 25.0, color: color),
               overflow: TextOverflow.ellipsis,
             ),
             trailing: tapToAdd(),
@@ -1004,6 +1020,10 @@ class CashGamePageState extends State<CashGamePage>
   }
 
   Widget _resultList(BuildContext context, DocumentSnapshot document) {
+    Color colorName = UIData.blackOrWhite;
+    if (document.documentID == widget.user.id) {
+      colorName = UIData.blue;
+    }
     String result;
     Color color;
 
@@ -1028,35 +1048,23 @@ class CashGamePageState extends State<CashGamePage>
       actionExtentRatio: 0.25,
       child: new Container(
         child: new ListTile(
-          title: new Text(
-            "${document.data["name"]} ",
-            style: new TextStyle(fontSize: 24.0, color: UIData.blackOrWhite),
-            overflow: TextOverflow.ellipsis,
-          ),
-          trailing: new Text(
-            "$result",
-            style: new TextStyle(fontSize: 18.0, color: color),
-            overflow: TextOverflow.ellipsis,
-          ),
-          onTap: () {
-            setState(() {
-              isLoading = true;
-            });
-            firestoreInstance
-                .document("$gamePath/players/${document.documentID}")
-                .get()
-                .then((datasnapshot) {
-              int playerBuyin = datasnapshot.data["buyin"];
-              int payout = datasnapshot.data["payout"];
-
-              setState(() {
-                isLoading = false;
-              });
-              pushPlayerPage(document.documentID, playerBuyin, payout,
-                  document.data["name"], document.data["profilepicurl"], false);
-            });
-          },
-        ),
+            title: new Text(
+              "${document.data["name"]} ",
+              style: new TextStyle(fontSize: 24.0, color: colorName),
+              overflow: TextOverflow.ellipsis,
+            ),
+            trailing: new Text(
+              "$result",
+              style: new TextStyle(fontSize: 18.0, color: color),
+              overflow: TextOverflow.ellipsis,
+            ),
+            onTap: () => pushPlayerPage(
+                document.documentID,
+                document.data["buyin"],
+                document.data["payout"],
+                document.data["name"],
+                document.data["profilepicurl"],
+                false)),
       ),
       secondaryActions: <Widget>[
         new IconSlideAction(
@@ -1214,11 +1222,14 @@ class CashGamePageState extends State<CashGamePage>
             color: UIData.green,
             icon: Icons.check_circle_outline,
             onTap: () async {
+              String logText;
               if (document.data["type"] == "payout") {
                 removePlayer(document.data["id"], true, document.data["name"]);
                 Essentials().showSnackBar(
                     "${document.data["name"]} is ready for payout and has been removed from active players",
                     formKey.currentState.context);
+                logText =
+                    "${widget.user.userName} has granted ${document.data["name"]} a payout";
               } else {
                 int newBuyin =
                     document.data["currentbuyin"] + document.data["addbuyin"];
@@ -1239,7 +1250,11 @@ class CashGamePageState extends State<CashGamePage>
                 Essentials().showSnackBar(
                     "Buyin for player ${document.data["name"]} has been updated, from ${document.data["currentbuyin"]} to $newBuyin",
                     formKey.currentState.context);
+
+                logText =
+                    "${widget.user.userName} has granted ${document.data["name"]} a ${document.data["type"]} of ${document.data["addbuyin"]}";
               }
+              Log().postLogToCollection(logText, "$gamePath/log", "Request");
               firestoreInstance
                   .document("$gamePath/requests/${document.documentID}")
                   .delete();
@@ -1252,6 +1267,11 @@ class CashGamePageState extends State<CashGamePage>
               firestoreInstance
                   .document("$gamePath/requests/${document.documentID}")
                   .delete();
+
+              Log().postLogToCollection(
+                  "${widget.user.userName} has dismissed a ${document.data["type"]} request from ${document.data["name"]}",
+                  "$gamePath/log",
+                  "Request");
             }),
       ],
     );

@@ -150,6 +150,7 @@ class TournamentCreatePlayerPageState
             "payout": 0,
             "rebuy": 0,
             "addon": 0,
+            "active": true,
           });
         });
         if (widget.history != true) {

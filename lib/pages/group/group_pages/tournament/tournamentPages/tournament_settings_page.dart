@@ -608,7 +608,7 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                         ),
                         Padding(
                           padding: EdgeInsets.only(bottom: 18.0),
-                        )
+                        ),
                       ],
                     ),
                   ),

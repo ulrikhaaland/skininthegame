@@ -36,6 +36,8 @@ enum FormType { edit, normal }
 
 class TournamentPageState extends State<TournamentPage>
     with TickerProviderStateMixin {
+  static final formKey = new GlobalKey<FormState>();
+
   final Firestore firestoreInstance = Firestore.instance;
   FormType _formType = FormType.normal;
   TabController _tabController;
@@ -51,15 +53,16 @@ class TournamentPageState extends State<TournamentPage>
   String host;
   String joinLeave = "";
 
-  bool admin = false;
+  bool isAdmin = false;
   bool userFound = false;
   bool full = false;
   bool isLoading = false;
   bool hasJoined;
+  bool isScrollable = false;
 
   IconData playerOrResultsIcon = Icons.people;
   double playerOrResultsIconSize = 30;
-  String playerOrResultsString = "Players";
+  String playerOrResultsString = "Active";
   String tournamentActiveOrHistory = "tournamentactive";
 
   Color color;
@@ -68,8 +71,6 @@ class TournamentPageState extends State<TournamentPage>
   Color blue = UIData.blue;
 
   Game game;
-
-  String activeOrNot = "activeplayers";
 
   @override
   initState() {
@@ -80,13 +81,19 @@ class TournamentPageState extends State<TournamentPage>
     currentUserName = widget.user.userName;
     groupId = widget.group.id;
 
-    admin = widget.group.admin;
+    isAdmin = widget.group.admin;
 
-    if (admin == true) {
+    if (isAdmin == true) {
+      if (!widget.history) {
+        _tabController = new TabController(vsync: this, length: 6);
+        isScrollable = true;
+      }
+
       _formType = FormType.edit;
+    } else {
+      _tabController = new TabController(vsync: this, length: 4);
     }
     if (widget.history == true) {
-      activeOrNot = "players";
       playerOrResultsIcon = FontAwesomeIcons.trophy;
       playerOrResultsIconSize = 25;
       playerOrResultsString = "Results";
@@ -138,7 +145,7 @@ class TournamentPageState extends State<TournamentPage>
         child: Text(joinLeave),
         onPressed: () {
           if (hasJoined == true) {
-            removePlayer();
+            removePlayer(widget.user.id, false, widget.user.userName);
           } else if (hasJoined == false &&
               game.registeredPlayers < game.maxPlayers) {
             addPlayer();
@@ -149,93 +156,99 @@ class TournamentPageState extends State<TournamentPage>
     return null;
   }
 
-  checkIfFull() {
+  checkIfFull() async {
     if (game != null) {
       try {
-        firestoreInstance.runTransaction((Transaction tx) async {
-          QuerySnapshot qSnap = await firestoreInstance
-              .collection("$gamePath/$activeOrNot")
-              .getDocuments();
-          if (qSnap.documents.isNotEmpty) {
-            game.setRegisteredPlayers(qSnap.documents.length);
-          } else {
-            game.setRegisteredPlayers(0);
-          }
-          game.setGameRegisteredPlayers(gamePath);
-          checkPlayerGameStatus();
-        });
+        QuerySnapshot qSnap = await firestoreInstance
+            .collection("$gamePath/players")
+            .getDocuments();
+        if (qSnap.documents.isNotEmpty) {
+          int p = 0;
+          qSnap.documents.forEach((doc) {
+            if (doc.data["active"]) {
+              p += 1;
+            }
+          });
+          game.setRegisteredPlayers(p);
+        } else {
+          game.setRegisteredPlayers(0);
+        }
+        game.setGameRegisteredPlayers(gamePath);
+        checkPlayerGameStatus();
       } catch (e) {}
     }
   }
 
-  checkPlayerGameStatus() {
-    firestoreInstance.runTransaction((Transaction tx) async {
-      DocumentSnapshot dSnap = await firestoreInstance
-          .document("$gamePath/activeplayers/$currentUserId")
-          .get();
-      if (dSnap.exists) {
-        hasJoined = true;
-        setLeave();
-      } else if (hasJoined != true &&
-          game.registeredPlayers >= game.maxPlayers) {
-        full = true;
-        setFull();
-      } else {
-        hasJoined = false;
-        setJoin();
-      }
-    });
+  checkPlayerGameStatus() async {
+    DocumentSnapshot dSnap = await firestoreInstance
+        .document("$gamePath/players/$currentUserId")
+        .get();
+    if (dSnap.exists && dSnap.data["active"]) {
+      hasJoined = true;
+      setLeave();
+    } else if (hasJoined != true && game.registeredPlayers >= game.maxPlayers) {
+      full = true;
+      setFull();
+    } else {
+      hasJoined = false;
+      setJoin();
+    }
   }
 
-  addPlayer() {
+  addPlayer() async {
     hasJoined = true;
     setLeave();
-    firestoreInstance.runTransaction((Transaction tx) async {
-      await firestoreInstance
-          .document("$gamePath/activeplayers/$currentUserId")
-          .setData({
-        'name': currentUserName,
-        'id': currentUserId,
-        "placing": game.maxPlayers,
-        "profilepicurl": widget.user.profilePicURL,
-      });
-      checkIfFull();
-    });
-    firestoreInstance.runTransaction((Transaction tx) async {
-      DocumentSnapshot docSnap = await firestoreInstance
-          .document("$gamePath/players/$currentUserId")
-          .get();
-      if (!docSnap.exists) {
-        firestoreInstance.runTransaction((Transaction tx) async {
-          await firestoreInstance
-              .document("$gamePath/players/$currentUserId")
-              .setData({
-            'name': currentUserName,
-            'id': currentUserId,
-            "placing": game.maxPlayers,
-            'payout': 0,
-            'rebuy': 0,
-            'addon': 0,
-            "profilepicurl": widget.user.profilePicURL,
-          });
+    checkIfFull();
+    DocumentReference docRef =
+        firestoreInstance.document("$gamePath/players/$currentUserId");
+    DocumentSnapshot docSnap = await docRef.get();
+    if (!docSnap.exists) {
+      firestoreInstance.runTransaction((Transaction tx) async {
+        await firestoreInstance
+            .document("$gamePath/players/$currentUserId")
+            .setData({
+          'name': currentUserName,
+          'id': currentUserId,
+          "placing": game.maxPlayers,
+          'payout': 0,
+          'rebuy': 0,
+          'addon': 0,
+          "profilepicurl": widget.user.profilePicURL,
+          "active": true,
         });
-      }
-    });
-
+      });
+    } else {
+      docRef.updateData({
+        "active": true,
+      });
+    }
     Log()
         .postLogToCollection("$currentUserName joined game", logPath, "Joined");
   }
 
-  removePlayer() {
+  removePlayer(String uid, bool removed, String userName) async {
+    String removedType;
+    String removedText;
+    if (removed) {
+      removedType = "Removed";
+      removedText = "$userName has been removed from the game";
+    } else {
+      removedType = "Left";
+      removedText = "$userName has left the game";
+    }
     hasJoined = false;
     setJoin();
-    firestoreInstance.runTransaction((Transaction tx) async {
-      await firestoreInstance
-          .document("$gamePath/activeplayers/$currentUserId")
-          .delete();
-      checkIfFull();
-    });
-    Log().postLogToCollection("$currentUserName left game", logPath, "Leave");
+    DocumentReference docRef =
+        firestoreInstance.document("$gamePath/players/$uid");
+    if (!game.isRunning) {
+      await docRef.delete();
+    } else {
+      docRef.updateData({
+        "active": false,
+      });
+    }
+    checkIfFull();
+    Log().postLogToCollection(removedText, logPath, removedType);
   }
 
 // Check if player has registered the tournament, add and delete player to/from tournament.
@@ -285,7 +298,7 @@ class TournamentPageState extends State<TournamentPage>
   }
 
   Widget newPostButton() {
-    if (admin == true) {
+    if (isAdmin) {
       return new IconButton(
         icon: new Icon(
           Icons.message,
@@ -313,7 +326,7 @@ class TournamentPageState extends State<TournamentPage>
   }
 
   Widget settingsButton() {
-    if (admin == true) {
+    if (isAdmin) {
       return new IconButton(
         icon: new Icon(
           Icons.settings,
@@ -363,41 +376,9 @@ class TournamentPageState extends State<TournamentPage>
             ],
             backgroundColor: UIData.appBarColor,
             bottom: TabBar(
+              isScrollable: isScrollable,
               controller: _tabController,
-              tabs: [
-                Tab(
-                  icon: Icon(
-                    Icons.info,
-                    color: UIData.blackOrWhite,
-                    size: 30,
-                  ),
-                  text: "Info",
-                ),
-                Tab(
-                  icon: Icon(
-                    Icons.message,
-                    color: Colors.grey[600],
-                    size: 30,
-                  ),
-                  text: "Posts",
-                ),
-                Tab(
-                  icon: Icon(
-                    playerOrResultsIcon,
-                    color: Colors.blue,
-                    size: playerOrResultsIconSize,
-                  ),
-                  text: playerOrResultsString,
-                ),
-                Tab(
-                  icon: Icon(
-                    Icons.attach_money,
-                    size: 30,
-                    color: UIData.green,
-                  ),
-                  text: "Payouts",
-                ),
-              ],
+              tabs: tabs(),
             ),
             title: new Align(
                 alignment: Alignment.center,
@@ -406,86 +387,180 @@ class TournamentPageState extends State<TournamentPage>
                   style: new TextStyle(
                       color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
                 ))),
-        body: Stack(
-          children: <Widget>[
-            TabBarView(
-              controller: _tabController,
-              children: [
-                ListView(
-                  padding: EdgeInsets.all(10.0),
-                  children: <Widget>[
-                    new Text(
-                      game.name,
-                      style: TextStyle(color: UIData.blackOrWhite),
-                      overflow: TextOverflow.ellipsis,
+        body: new Form(
+            key: formKey,
+            child: Stack(
+              children: <Widget>[
+                TabBarView(
+                  controller: _tabController,
+                  children: [
+                    ListView(
+                      padding: EdgeInsets.all(10.0),
+                      children: <Widget>[
+                        new Text(
+                          game.name,
+                          style: TextStyle(color: UIData.blackOrWhite),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        new Padding(
+                          padding: EdgeInsets.all(15.0),
+                        ),
+                        new Text(
+                          "Gametype: ${game.gameType}",
+                          style: TextStyle(color: UIData.blackOrWhite),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        new Text(
+                          "Adress: ${game.adress}",
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: UIData.blackOrWhite),
+                        ),
+                        new Text(
+                          "Buy-in: ${game.buyin}",
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: UIData.blackOrWhite),
+                        ),
+                        rebuy(),
+                        addon(),
+                        new Text(
+                          "Starting stack: ${game.startingChips}",
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: UIData.blackOrWhite),
+                        ),
+                        new Text(
+                          "Starting date: ${game.date}",
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: UIData.blackOrWhite),
+                        ),
+                        new Text(
+                          "Starting time: ${game.time}",
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: UIData.blackOrWhite),
+                        ),
+                        new Text(
+                          "Currency: ${game.currency}",
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: UIData.blackOrWhite),
+                        ),
+                        new Padding(
+                          padding: EdgeInsets.all(15.0),
+                        ),
+                        new Text(
+                          game.info,
+                          overflow: TextOverflow.ellipsis,
+                          style: new TextStyle(color: UIData.blackOrWhite),
+                        ),
+                      ],
                     ),
-                    new Padding(
-                      padding: EdgeInsets.all(15.0),
+                    streamOfPosts(),
+                    setPlayersOrResult(),
+                    Container(
+                      padding: EdgeInsets.all(10.0),
+                      child: new Text(
+                        "Prize Pool:\n\n${game.totalPrizePool}",
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: UIData.blackOrWhite),
+                      ),
                     ),
-                    new Text(
-                      "Gametype: ${game.gameType}",
-                      style: TextStyle(color: UIData.blackOrWhite),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    new Text(
-                      "Adress: ${game.adress}",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: UIData.blackOrWhite),
-                    ),
-                    new Text(
-                      "Buy-in: ${game.buyin}",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: UIData.blackOrWhite),
-                    ),
-                    rebuy(),
-                    addon(),
-                    new Text(
-                      "Starting stack: ${game.startingChips}",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: UIData.blackOrWhite),
-                    ),
-                    new Text(
-                      "Starting date: ${game.date}",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: UIData.blackOrWhite),
-                    ),
-                    new Text(
-                      "Starting time: ${game.time}",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: UIData.blackOrWhite),
-                    ),
-                    new Text(
-                      "Currency: ${game.currency}",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: UIData.blackOrWhite),
-                    ),
-                    new Padding(
-                      padding: EdgeInsets.all(15.0),
-                    ),
-                    new Text(
-                      game.info,
-                      overflow: TextOverflow.ellipsis,
-                      style: new TextStyle(color: UIData.blackOrWhite),
-                    ),
+                    playerList(),
+                    streamOfRequests(),
                   ],
                 ),
-                streamOfPosts(),
-                setPlayersOrResult(),
-                Container(
-                  padding: EdgeInsets.all(10.0),
-                  child: new Text(
-                    "Prize Pool:\n\n${game.totalPrizePool}",
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: UIData.blackOrWhite),
-                  ),
-                ),
+                secondLoading(),
               ],
-            ),
-            secondLoading(),
-          ],
-        ));
+            )));
+  }
+
+  List<Widget> tabs() {
+    if (isAdmin && !widget.history) {
+      return [
+        Tab(
+          icon: Icon(
+            Icons.info,
+            color: UIData.blackOrWhite,
+            size: 30,
+          ),
+          text: "Info",
+        ),
+        Tab(
+          icon: Icon(
+            Icons.message,
+            color: Colors.grey[600],
+            size: 30,
+          ),
+          text: "Posts",
+        ),
+        Tab(
+          icon: Icon(
+            playerOrResultsIcon,
+            color: Colors.blue,
+            size: playerOrResultsIconSize,
+          ),
+          text: playerOrResultsString,
+        ),
+        Tab(
+          icon: Icon(
+            Icons.attach_money,
+            size: 30,
+            color: UIData.green,
+          ),
+          text: "Payouts",
+        ),
+        Tab(
+          icon: Icon(
+            Icons.group,
+            color: UIData.yellowOrWhite,
+            size: 30.0,
+          ),
+          text: "All",
+        ),
+        Tab(
+          icon: Icon(
+            Icons.notification_important,
+            color: UIData.red,
+            size: 30.0,
+          ),
+          text: "Requests",
+        ),
+      ];
+    } else {
+      return [
+        Tab(
+          icon: Icon(
+            Icons.info,
+            color: UIData.blackOrWhite,
+            size: 30,
+          ),
+          text: "Info",
+        ),
+        Tab(
+          icon: Icon(
+            Icons.message,
+            color: Colors.grey[600],
+            size: 30,
+          ),
+          text: "Posts",
+        ),
+        Tab(
+          icon: Icon(
+            playerOrResultsIcon,
+            color: Colors.blue,
+            size: playerOrResultsIconSize,
+          ),
+          text: playerOrResultsString,
+        ),
+        Tab(
+          icon: Icon(
+            Icons.attach_money,
+            size: 30,
+            color: UIData.green,
+          ),
+          text: "Payouts",
+        ),
+      ];
+    }
   }
 
   Widget rebuy() {
@@ -543,7 +618,7 @@ class TournamentPageState extends State<TournamentPage>
     if (widget.history == true) {
       return resultStream();
     } else {
-      return playerList();
+      return activePlayerList();
     }
   }
 
@@ -553,6 +628,7 @@ class TournamentPageState extends State<TournamentPage>
       context,
       MaterialPageRoute(
           builder: (context) => TournamentPlayerPage(
+                game: game,
                 url: url,
                 user: widget.user,
                 playerId: id,
@@ -588,7 +664,12 @@ class TournamentPageState extends State<TournamentPage>
     }
   }
 
-  Widget _playerListItems(BuildContext context, DocumentSnapshot document) {
+  Widget _activePlayerListItems(
+      BuildContext context, DocumentSnapshot document) {
+    Color color = UIData.blackOrWhite;
+    if (document.documentID == widget.user.id) {
+      color = UIData.blue;
+    }
     return new Slidable(
       delegate: new SlidableDrawerDelegate(),
       actionExtentRatio: 0.25,
@@ -597,34 +678,17 @@ class TournamentPageState extends State<TournamentPage>
           leading: addImage(document.data["profilepicurl"]),
           title: new Text(
             document.data["name"],
-            style: new TextStyle(fontSize: 24.0, color: UIData.blackOrWhite),
+            style: new TextStyle(fontSize: 24.0, color: color),
             overflow: TextOverflow.ellipsis,
           ),
-          onTap: () {
-            setState(() {
-              isLoading = true;
-            });
-            firestoreInstance
-                .document("$gamePath/players/${document.documentID}")
-                .get()
-                .then((datasnapshot) {
-              int playerAddon = datasnapshot.data["addon"];
-              int playerRebuy = datasnapshot.data["rebuy"];
-              int playerPlacing = datasnapshot.data["placing"];
-              int playerPayout = datasnapshot.data["payout"];
-              setState(() {
-                isLoading = false;
-              });
-              pushPlayerPage(
-                  document.documentID,
-                  playerPlacing,
-                  playerAddon,
-                  playerRebuy,
-                  playerPayout,
-                  document.data["name"],
-                  document.data["profilepicurl"]);
-            });
-          },
+          onTap: () => pushPlayerPage(
+              document.documentID,
+              document.data["placing"],
+              document.data["addon"],
+              document.data["rebuy"],
+              document.data["payout"],
+              document.data["name"],
+              document.data["profilepicurl"]),
         ),
       ),
       secondaryActions: <Widget>[
@@ -633,20 +697,64 @@ class TournamentPageState extends State<TournamentPage>
             color: UIData.red,
             icon: Icons.delete,
             onTap: () {
-              getGroup();
-              String players = "activeplayers";
-
-              if (widget.history == true) {
-                players = "players";
-              }
-              firestoreInstance
-                  .document("$gamePath/$players/${document.documentID}")
-                  .delete();
-              Log().postLogToCollection(
-                  "$currentUserName removed ${document.data["name"]} from the game",
-                  logPath,
-                  "Remove");
+              removePlayer(document.documentID, true, document.data["name"]);
             }),
+      ],
+    );
+  }
+
+  Widget activePlayerList() {
+    return StreamBuilder(
+        stream: firestoreInstance
+            .collection("$gamePath/players")
+            .where("active", isEqualTo: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return loading();
+          return ListView.builder(
+            itemExtent: 60.0,
+            itemCount: snapshot.data.documents.length,
+            itemBuilder: (context, index) =>
+                _activePlayerListItems(context, snapshot.data.documents[index]),
+          );
+        });
+  }
+
+  Widget _playerListItems(BuildContext context, DocumentSnapshot document) {
+    Color color = UIData.blackOrWhite;
+    if (document.documentID == widget.user.id) {
+      color = UIData.blue;
+    }
+    return new Slidable(
+      delegate: new SlidableDrawerDelegate(),
+      actionExtentRatio: 0.25,
+      child: new Container(
+        child: new ListTile(
+          leading: addImage(document.data["profilepicurl"]),
+          title: new Text(
+            document.data["name"],
+            style: new TextStyle(fontSize: 24.0, color: color),
+            overflow: TextOverflow.ellipsis,
+          ),
+          onTap: () => pushPlayerPage(
+              document.documentID,
+              document.data["placing"],
+              document.data["addon"],
+              document.data["rebuy"],
+              document.data["payout"],
+              document.data["name"],
+              document.data["profilepicurl"]),
+        ),
+      ),
+      secondaryActions: <Widget>[
+        new IconSlideAction(
+          caption: 'Remove',
+          color: UIData.red,
+          icon: Icons.delete,
+          onTap: () => firestoreInstance
+              .document("$gamePath/players/${document.documentID}")
+              .delete(),
+        ),
       ],
     );
   }
@@ -654,7 +762,7 @@ class TournamentPageState extends State<TournamentPage>
   Widget playerList() {
     return StreamBuilder(
         stream: firestoreInstance
-            .collection("$gamePath/activeplayers")
+            .collection("$gamePath/players")
             .orderBy("name")
             .snapshots(),
         builder: (context, snapshot) {
@@ -669,47 +777,34 @@ class TournamentPageState extends State<TournamentPage>
   }
 
   Widget _resultList(BuildContext context, DocumentSnapshot document) {
+    Color color = UIData.blackOrWhite;
+    if (document.documentID == widget.user.id) {
+      color = UIData.blue;
+    }
     return ListTile(
       leading: new Text(
         "${document.data["placing"]}.",
-        style: new TextStyle(fontSize: 24.0, color: UIData.blackOrWhite),
+        style: new TextStyle(fontSize: 24.0, color: color),
         overflow: TextOverflow.ellipsis,
       ),
       title: new Text(
         "${document.data["name"]} ",
-        style: new TextStyle(fontSize: 24.0, color: UIData.blackOrWhite),
+        style: new TextStyle(fontSize: 24.0, color: color),
         overflow: TextOverflow.ellipsis,
       ),
       trailing: new Text(
         "Payout: ${document.data["payout"]}",
-        style: new TextStyle(fontSize: 18.0, color: UIData.blackOrWhite),
+        style: new TextStyle(fontSize: 18.0, color: color),
         overflow: TextOverflow.ellipsis,
       ),
-      onTap: () {
-        setState(() {
-          isLoading = true;
-        });
-        firestoreInstance
-            .document("$gamePath/players/${document.documentID}")
-            .get()
-            .then((datasnapshot) {
-          int playerAddon = datasnapshot.data["addon"];
-          int playerRebuy = datasnapshot.data["rebuy"];
-          int playerPlacing = datasnapshot.data["placing"];
-          int playerPayout = datasnapshot.data["payout"];
-          setState(() {
-            isLoading = false;
-          });
-          pushPlayerPage(
-              document.documentID,
-              playerPlacing,
-              playerAddon,
-              playerRebuy,
-              playerPayout,
-              document.data["name"],
-              document.data["profilepicurl"]);
-        });
-      },
+      onTap: () => pushPlayerPage(
+          document.documentID,
+          document.data["placing"],
+          document.data["addon"],
+          document.data["rebuy"],
+          document.data["payout"],
+          document.data["name"],
+          document.data["profilepicurl"]),
     );
   }
 
@@ -815,6 +910,78 @@ class TournamentPageState extends State<TournamentPage>
               itemCount: snapshot.data.documents.length,
               itemBuilder: (context, index) =>
                   _buildStreamOfPosts(context, snapshot.data.documents[index]),
+            );
+          }
+        });
+  }
+
+  Widget _buildStreamOfRequests(
+      BuildContext context, DocumentSnapshot document) {
+    String an;
+    document.data["type"] == "addon" ? an = "an" : an = "a";
+    return new Slidable(
+      delegate: new SlidableDrawerDelegate(),
+      actionExtentRatio: 0.25,
+      child: new Container(
+        child: new ListTile(
+          title: new Text(
+            "${document.data["name"]} has requested $an ${document.data["type"]}",
+            style: new TextStyle(fontSize: 18.0, color: UIData.blackOrWhite),
+          ),
+        ),
+      ),
+      secondaryActions: <Widget>[
+        new IconSlideAction(
+            caption: 'Confirm',
+            color: UIData.green,
+            icon: Icons.check_circle_outline,
+            onTap: () async {
+              firestoreInstance
+                  .document("$gamePath/requests/${document.documentID}")
+                  .delete();
+              Log().postLogToCollection(
+                  "${widget.user.userName} granted ${document.data["name"]} $an ${document.data["type"]}",
+                  "$gamePath/log",
+                  "Request");
+              await firestoreInstance.runTransaction((tx) async {
+                DocumentReference docRef = firestoreInstance
+                    .document("$gamePath/players/${document.data["id"]}");
+                DocumentSnapshot docSnap = await tx.get(docRef);
+                await tx.update(docRef, {
+                  document.data["type"]:
+                      docSnap.data["${document.data["type"]}"] + 1,
+                });
+              });
+            }),
+        new IconSlideAction(
+            caption: 'Dismiss',
+            color: UIData.red,
+            icon: Icons.delete,
+            onTap: () {
+              firestoreInstance
+                  .document("$gamePath/requests/${document.documentID}")
+                  .delete();
+
+              Log().postLogToCollection(
+                  "${widget.user.userName} has dismissed $an ${document.data["type"]} from ${document.data["name"]}",
+                  "$gamePath/log",
+                  "Request");
+            }),
+      ],
+    );
+  }
+
+  Widget streamOfRequests() {
+    return StreamBuilder(
+        stream: Firestore.instance.collection("$gamePath/requests").snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData)
+            return loading();
+          else {
+            return ListView.builder(
+              itemCount: snapshot.data.documents.length,
+              itemBuilder: (context, index) => _buildStreamOfRequests(
+                  context, snapshot.data.documents[index]),
             );
           }
         });
