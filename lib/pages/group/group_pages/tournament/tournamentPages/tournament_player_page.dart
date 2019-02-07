@@ -487,7 +487,8 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
                 body,
                 widget.game.floorFCM);
           } else {
-            Essentials().showSnackBar("You have already requested ${an.toLowerCase()} $type",
+            Essentials().showSnackBar(
+                "You have already requested ${an.toLowerCase()} $type",
                 formKey.currentState.context);
           }
         });

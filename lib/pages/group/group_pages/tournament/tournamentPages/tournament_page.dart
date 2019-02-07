@@ -32,14 +32,11 @@ class TournamentPage extends StatefulWidget {
   TournamentPageState createState() => TournamentPageState();
 }
 
-enum FormType { edit, normal }
-
 class TournamentPageState extends State<TournamentPage>
     with TickerProviderStateMixin {
   static final formKey = new GlobalKey<FormState>();
 
   final Firestore firestoreInstance = Firestore.instance;
-  FormType _formType = FormType.normal;
   TabController _tabController;
 
   String currentUserId;
@@ -88,8 +85,6 @@ class TournamentPageState extends State<TournamentPage>
         _tabController = new TabController(vsync: this, length: 6);
         isScrollable = true;
       }
-
-      _formType = FormType.edit;
     } else {
       _tabController = new TabController(vsync: this, length: 4);
     }
@@ -826,9 +821,12 @@ class TournamentPageState extends State<TournamentPage>
   }
 
   Widget _buildStreamOfPosts(BuildContext context, DocumentSnapshot document) {
-    switch (_formType) {
-      case FormType.normal:
-        return new ListTile(
+    return new Slidable(
+      enabled: isAdmin,
+      delegate: new SlidableDrawerDelegate(),
+      actionExtentRatio: 0.25,
+      child: new Container(
+        child: new ListTile(
           dense: true,
           title: new Row(
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -855,45 +853,25 @@ class TournamentPageState extends State<TournamentPage>
                 fontSize: UIData.fontSize16,
                 letterSpacing: .50),
           ),
-        );
-      case FormType.edit:
-        return new ListTile(
-          trailing: new IconButton(
-              icon: new Icon(
-                Icons.delete,
-                size: 40.0,
-                color: UIData.red,
-              ),
-              onPressed: () {
-                Firestore.instance
-                    .document("$gamePath/posts/${document.documentID}")
-                    .delete();
-                Log().postLogToCollection(
-                    "$currentUserName deleted a post", logPath, "Post");
-              }),
-          dense: true,
-          title: new Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              new Text(
-                "${document.data["name"]}",
-                style: new TextStyle(color: UIData.blue, fontSize: 20.0),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-          contentPadding: EdgeInsets.all(10.0),
-          subtitle: new Text(
-            "${document.data["body"]}",
-            // overflow: TextOverflow.ellipsis,
-            style: new TextStyle(
-                color: UIData.blackOrWhite,
-                fontSize: UIData.fontSize16,
-                letterSpacing: .50),
-          ),
-        );
-    }
+        ),
+      ),
+      secondaryActions: <Widget>[
+        new IconSlideAction(
+            caption: 'Delete',
+            color: UIData.red,
+            icon: Icons.delete,
+            onTap: () {
+              firestoreInstance
+                  .document("$gamePath/posts/${document.documentID}")
+                  .delete();
+
+              Log().postLogToCollection(
+                  "${widget.user.userName} has deleted post: ${document.data["body"]}",
+                  "$gamePath/log",
+                  "Post");
+            }),
+      ],
+    );
   }
 
   Widget streamOfPosts() {
