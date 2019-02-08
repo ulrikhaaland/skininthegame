@@ -104,11 +104,9 @@ class CashGamePageState extends State<CashGamePage>
     groupId = widget.group.id;
     isAdmin = widget.group.admin;
 
-    if (isAdmin == true) {
-      if (!widget.history) {
-        _tabController = new TabController(vsync: this, length: 6);
-        isScrollable = true;
-      }
+    if (isAdmin == true && !widget.history) {
+      _tabController = new TabController(vsync: this, length: 6);
+      isScrollable = true;
     } else {
       _tabController = new TabController(vsync: this, length: 4);
     }
@@ -259,85 +257,173 @@ class CashGamePageState extends State<CashGamePage>
               children: <Widget>[
                 new TabBarView(
                   controller: _tabController,
-                  children: [
-                    ListView(
-                      padding: EdgeInsets.all(10.0),
-                      children: <Widget>[
-                        new Text(
-                          "${game.name}",
-                          style: TextStyle(color: UIData.blackOrWhite),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        new Padding(
-                          padding: EdgeInsets.all(15.0),
-                        ),
-                        new Text(
-                          "Gametype: ${game.gameType}",
-                          style: TextStyle(color: UIData.blackOrWhite),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        new Text(
-                          "Adress: ${game.adress}",
-                          style: TextStyle(color: UIData.blackOrWhite),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        new Text(
-                          "Max players: ${game.maxPlayers}",
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: UIData.blackOrWhite),
-                        ),
-                        new Text(
-                          "Blinds: ${game.sBlind}/${game.bBlind}",
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: UIData.blackOrWhite),
-                        ),
-                        new Text(
-                          "Starting Date: ${game.date}",
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: UIData.blackOrWhite),
-                        ),
-                        new Text(
-                          "Starting Time: ${game.time}",
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: UIData.blackOrWhite),
-                        ),
-                        new Text(
-                          "Currency: ${game.currency}",
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: UIData.blackOrWhite),
-                        ),
-                        moneyInPlay(),
-                        new Padding(
-                          padding: EdgeInsets.all(12.0),
-                        ),
-                        // new GestureDetector(
-                        //   child: new Text(
-                        //     "FLOOR",
-                        //     style: TextStyle(
-                        //       color: UIData.blue,
-                        //       fontSize: UIData.fontSize20,
-                        //     ),
-                        //   ),
-                        // ),
-                        // new Padding(
-                        //   padding: EdgeInsets.all(12.0),
-                        // ),
-                        new Text(
-                          "${game.info}",
-                          style: new TextStyle(color: UIData.blackOrWhite),
-                        ),
-                      ],
-                    ),
-                    streamOfPosts(),
-                    setPlayersOrResult(),
-                    setQueueOrPayouts(),
-                    all(),
-                    streamOfRequests(),
-                  ],
+                  children: setAll(),
                 ),
                 secondLoading(),
               ],
             )));
+  }
+
+  List<Widget> setAll() {
+    if (isAdmin && !widget.history) {
+      return [
+        ListView(
+          padding: EdgeInsets.all(10.0),
+          children: <Widget>[
+            new Text(
+              "${game.name}",
+              style: TextStyle(color: UIData.blackOrWhite),
+              overflow: TextOverflow.ellipsis,
+            ),
+            new Padding(
+              padding: EdgeInsets.all(15.0),
+            ),
+            new Text(
+              "Gametype: ${game.gameType}",
+              style: TextStyle(color: UIData.blackOrWhite),
+              overflow: TextOverflow.ellipsis,
+            ),
+            new Text(
+              "Adress: ${game.adress}",
+              style: TextStyle(color: UIData.blackOrWhite),
+              overflow: TextOverflow.ellipsis,
+            ),
+            new Text(
+              "Max players: ${game.maxPlayers}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            new Text(
+              "Blinds: ${game.sBlind}/${game.bBlind}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            new Text(
+              "Starting Date: ${game.date}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            new Text(
+              "Starting Time: ${game.time}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            new Text(
+              "Currency: ${game.currency}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            moneyInPlay(),
+            new Padding(
+              padding: EdgeInsets.all(12.0),
+            ),
+            // new GestureDetector(
+            //   child: new Text(
+            //     "FLOOR",
+            //     style: TextStyle(
+            //       color: UIData.blue,
+            //       fontSize: UIData.fontSize20,
+            //     ),
+            //   ),
+            // ),
+            // new Padding(
+            //   padding: EdgeInsets.all(12.0),
+            // ),
+            new Text(
+              "${game.info}",
+              style: new TextStyle(color: UIData.blackOrWhite),
+            ),
+          ],
+        ),
+        streamOfPosts(),
+        setPlayersOrResult(),
+        setQueueOrPayouts(),
+        all(),
+        streamOfRequests(),
+      ];
+    } else {
+      return [
+        ListView(
+          padding: EdgeInsets.all(10.0),
+          children: <Widget>[
+            new Text(
+              "${game.name}",
+              style: TextStyle(color: UIData.blackOrWhite),
+              overflow: TextOverflow.ellipsis,
+            ),
+            new Padding(
+              padding: EdgeInsets.all(15.0),
+            ),
+            new Text(
+              "Gametype: ${game.gameType}",
+              style: TextStyle(color: UIData.blackOrWhite),
+              overflow: TextOverflow.ellipsis,
+            ),
+            new Text(
+              "Adress: ${game.adress}",
+              style: TextStyle(color: UIData.blackOrWhite),
+              overflow: TextOverflow.ellipsis,
+            ),
+            new Text(
+              "Max players: ${game.maxPlayers}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            new Text(
+              "Blinds: ${game.sBlind}/${game.bBlind}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            new Text(
+              "Starting Date: ${game.date}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            new Text(
+              "Starting Time: ${game.time}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            new Text(
+              "Currency: ${game.currency}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            moneyInPlay(),
+            new Padding(
+              padding: EdgeInsets.all(12.0),
+            ),
+            // new GestureDetector(
+            //   child: new Text(
+            //     "FLOOR",
+            //     style: TextStyle(
+            //       color: UIData.blue,
+            //       fontSize: UIData.fontSize20,
+            //     ),
+            //   ),
+            // ),
+            // new Padding(
+            //   padding: EdgeInsets.all(12.0),
+            // ),
+            new Text(
+              "${game.info}",
+              style: new TextStyle(color: UIData.blackOrWhite),
+            ),
+          ],
+        ),
+        streamOfPosts(),
+        setPlayersOrResult(),
+        setQueueOrPayouts(),
+      ];
+    }
+  }
+
+  Widget setRequests() {
+    if (isAdmin && !widget.history) {
+      return streamOfRequests();
+    } else {
+      return null;
+    }
   }
 
   moneyInPlay() {

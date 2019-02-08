@@ -99,7 +99,7 @@ class InviteUserPageState extends State<InviteUserPage> {
                 icon: new Icon(
                   Icons.supervised_user_circle,
                   size: 40.0,
-                  color: Colors.grey[600],
+                  color: UIData.blue
                 ),
               ),
               onChanged: (String value) {
@@ -184,50 +184,54 @@ class InviteUserPageState extends State<InviteUserPage> {
   }
 
   Widget buildSearch(BuildContext context, DocumentSnapshot document) {
-    return ListTile(
-        contentPadding: EdgeInsets.all(3.0),
-        title: new Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Expanded(
-                child: Container(
-              padding: EdgeInsets.all(10.0),
-              decoration: new BoxDecoration(
-                  border: Border.all(color: Colors.grey[600]),
-                  borderRadius:
-                      new BorderRadius.all(const Radius.circular(8.0))),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text(document['name'],
-                      overflow: TextOverflow.ellipsis,
-                      style: new TextStyle(color: UIData.blackOrWhite)),
-                  new Padding(
-                    padding: EdgeInsets.all(1.0),
-                  ),
-                  new Row(children: <Widget>[
-                    // new Text(document['members']),
-                    new Icon(
-                      Icons.person_add,
-                      color: Colors.blue,
+    if (document.documentID != widget.user.id) {
+      return ListTile(
+          contentPadding: EdgeInsets.all(3.0),
+          title: new Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                  child: Container(
+                padding: EdgeInsets.all(10.0),
+                decoration: new BoxDecoration(
+                    border: Border.all(color: Colors.grey[600]),
+                    borderRadius:
+                        new BorderRadius.all(const Radius.circular(8.0))),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(document['name'],
+                        overflow: TextOverflow.ellipsis,
+                        style: new TextStyle(color: UIData.blackOrWhite)),
+                    new Padding(
+                      padding: EdgeInsets.all(1.0),
                     ),
-                  ]),
-                ],
+                    new Row(children: <Widget>[
+                      // new Text(document['members']),
+                      new Icon(
+                        Icons.person_add,
+                        color: Colors.blue,
+                      ),
+                    ]),
+                  ],
+                ),
+              )),
+            ],
+          ),
+          onTap: () {
+            addUserToGroup(document["id"]);
+            Scaffold.of(context).showSnackBar(new SnackBar(
+              backgroundColor: UIData.yellow,
+              content: new Text(
+                'An invite to join this group has been sent to "${document["name"]}"',
+                textAlign: TextAlign.center,
+                style: new TextStyle(color: Colors.black),
               ),
-            )),
-          ],
-        ),
-        onTap: () {
-          addUserToGroup(document["id"]);
-          Scaffold.of(context).showSnackBar(new SnackBar(
-            backgroundColor: UIData.yellow,
-            content: new Text(
-              'An invite to join this group has been sent to "${document["name"]}"',
-              textAlign: TextAlign.center,
-              style: new TextStyle(color: Colors.black),
-            ),
-          ));
-        });
+            ));
+          });
+    } else {
+      return Container();
+    }
   }
 
   void addUserToGroup(String addedUserId) {

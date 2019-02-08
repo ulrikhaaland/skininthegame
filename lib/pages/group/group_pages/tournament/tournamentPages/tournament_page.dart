@@ -388,84 +388,161 @@ class TournamentPageState extends State<TournamentPage>
               children: <Widget>[
                 TabBarView(
                   controller: _tabController,
-                  children: [
-                    ListView(
-                      padding: EdgeInsets.all(10.0),
-                      children: <Widget>[
-                        new Text(
-                          game.name,
-                          style: TextStyle(color: UIData.blackOrWhite),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        new Padding(
-                          padding: EdgeInsets.all(15.0),
-                        ),
-                        new Text(
-                          "Gametype: ${game.gameType}",
-                          style: TextStyle(color: UIData.blackOrWhite),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        new Text(
-                          "Adress: ${game.adress}",
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: UIData.blackOrWhite),
-                        ),
-                        new Text(
-                          "Buy-in: ${game.buyin}",
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: UIData.blackOrWhite),
-                        ),
-                        rebuy(),
-                        addon(),
-                        new Text(
-                          "Starting stack: ${game.startingChips}",
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: UIData.blackOrWhite),
-                        ),
-                        new Text(
-                          "Starting date: ${game.date}",
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: UIData.blackOrWhite),
-                        ),
-                        new Text(
-                          "Starting time: ${game.time}",
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: UIData.blackOrWhite),
-                        ),
-                        new Text(
-                          "Currency: ${game.currency}",
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: UIData.blackOrWhite),
-                        ),
-                        new Padding(
-                          padding: EdgeInsets.all(15.0),
-                        ),
-                        new Text(
-                          game.info,
-                          overflow: TextOverflow.ellipsis,
-                          style: new TextStyle(color: UIData.blackOrWhite),
-                        ),
-                      ],
-                    ),
-                    streamOfPosts(),
-                    setPlayersOrResult(),
-                    Container(
-                      padding: EdgeInsets.all(10.0),
-                      child: new Text(
-                        "Prize Pool:\n\n${game.totalPrizePool}",
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: UIData.blackOrWhite),
-                      ),
-                    ),
-                    playerList(),
-                    streamOfRequests(),
-                  ],
+                  children: setAll(),
                 ),
                 secondLoading(),
               ],
             )));
+  }
+
+  List<Widget> setAll() {
+    if (isAdmin && !widget.history) {
+      return [
+        ListView(
+          padding: EdgeInsets.all(10.0),
+          children: <Widget>[
+            new Text(
+              game.name,
+              style: TextStyle(color: UIData.blackOrWhite),
+              overflow: TextOverflow.ellipsis,
+            ),
+            new Padding(
+              padding: EdgeInsets.all(15.0),
+            ),
+            new Text(
+              "Gametype: ${game.gameType}",
+              style: TextStyle(color: UIData.blackOrWhite),
+              overflow: TextOverflow.ellipsis,
+            ),
+            new Text(
+              "Adress: ${game.adress}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            new Text(
+              "Buy-in: ${game.buyin}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            rebuy(),
+            addon(),
+            new Text(
+              "Starting stack: ${game.startingChips}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            new Text(
+              "Starting date: ${game.date}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            new Text(
+              "Starting time: ${game.time}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            new Text(
+              "Currency: ${game.currency}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            new Padding(
+              padding: EdgeInsets.all(15.0),
+            ),
+            new Text(
+              game.info,
+              overflow: TextOverflow.ellipsis,
+              style: new TextStyle(color: UIData.blackOrWhite),
+            ),
+          ],
+        ),
+        streamOfPosts(),
+        setPlayersOrResult(),
+        Container(
+          padding: EdgeInsets.all(10.0),
+          child: new Text(
+            "Prize Pool:\n\n${game.totalPrizePool}",
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+                fontWeight: FontWeight.bold, color: UIData.blackOrWhite),
+          ),
+        ),
+        playerList(),
+        streamOfRequests(),
+      ];
+    } else {
+      return [
+        ListView(
+          padding: EdgeInsets.all(10.0),
+          children: <Widget>[
+            new Text(
+              game.name,
+              style: TextStyle(color: UIData.blackOrWhite),
+              overflow: TextOverflow.ellipsis,
+            ),
+            new Padding(
+              padding: EdgeInsets.all(15.0),
+            ),
+            new Text(
+              "Gametype: ${game.gameType}",
+              style: TextStyle(color: UIData.blackOrWhite),
+              overflow: TextOverflow.ellipsis,
+            ),
+            new Text(
+              "Adress: ${game.adress}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            new Text(
+              "Buy-in: ${game.buyin}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            rebuy(),
+            addon(),
+            new Text(
+              "Starting stack: ${game.startingChips}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            new Text(
+              "Starting date: ${game.date}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            new Text(
+              "Starting time: ${game.time}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            new Text(
+              "Currency: ${game.currency}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: UIData.blackOrWhite),
+            ),
+            new Padding(
+              padding: EdgeInsets.all(15.0),
+            ),
+            new Text(
+              game.info,
+              overflow: TextOverflow.ellipsis,
+              style: new TextStyle(color: UIData.blackOrWhite),
+            ),
+          ],
+        ),
+        streamOfPosts(),
+        setPlayersOrResult(),
+        Container(
+          padding: EdgeInsets.all(10.0),
+          child: new Text(
+            "Prize Pool:\n\n${game.totalPrizePool}",
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+                fontWeight: FontWeight.bold, color: UIData.blackOrWhite),
+          ),
+        ),
+      ];
+    }
   }
 
   List<Widget> tabs() {

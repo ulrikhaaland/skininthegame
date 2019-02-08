@@ -106,38 +106,40 @@ class RootPageState extends State<RootPage> {
     if (user == null) {
       user = await getUserInfo();
     }
-    var gameType = getValueFromMap(message, 'gameType');
-    var groupName = getValueFromMap(message, 'groupName');
+    if (user.id == getValueFromMap(message, 'uid')) {
+      var gameType = getValueFromMap(message, 'gameType');
+      var groupName = getValueFromMap(message, 'groupName');
 
-    var fromGroupId = getValueFromMap(message, 'fromGroupId');
-    var fromGameId = getValueFromMap(message, 'fromGameId');
-    var dailyMessage = getValueFromMap(message, "dailyMessage");
-    var host = getValueFromMap(message, "host");
-    var info = getValueFromMap(message, "info");
-    var lowerCaseName = getValueFromMap(message, "lowerCaseName");
-    var docSnap = await firestoreInstance
-        .document("groups/$fromGroupId/members/${user.id}")
-        .get();
-    var admin = docSnap.data["admin"];
-    Group group = new Group(groupName, dailyMessage, host, fromGroupId, info,
-        lowerCaseName, null, null, null, admin, null, null, null);
-    if (gameType == "Tournament!") {
-      Navigator.of(context).push(new MaterialPageRoute(
-          builder: (context) => new TournamentPage(
-                user: user,
-                group: group,
-                fromNotification: true,
-                gameId: fromGameId,
-              )));
-    } else if (gameType == "Cash Game!") {
-      Navigator.of(context).push(new MaterialPageRoute(
-          builder: (context) => new CashGamePage(
-                user: user,
-                group: group,
-                fromNotification: true,
-                gameId: fromGameId,
-              )));
-    }
+      var fromGroupId = getValueFromMap(message, 'fromGroupId');
+      var fromGameId = getValueFromMap(message, 'fromGameId');
+      var dailyMessage = getValueFromMap(message, "dailyMessage");
+      var host = getValueFromMap(message, "host");
+      var info = getValueFromMap(message, "info");
+      var lowerCaseName = getValueFromMap(message, "lowerCaseName");
+      var docSnap = await firestoreInstance
+          .document("groups/$fromGroupId/members/${user.id}")
+          .get();
+      var admin = docSnap.data["admin"];
+      Group group = new Group(groupName, dailyMessage, host, fromGroupId, info,
+          lowerCaseName, null, null, null, admin, null, null, null);
+      if (gameType == "Tournament!") {
+        Navigator.of(context).push(new MaterialPageRoute(
+            builder: (context) => new TournamentPage(
+                  user: user,
+                  group: group,
+                  fromNotification: true,
+                  gameId: fromGameId,
+                )));
+      } else if (gameType == "Cash Game!") {
+        Navigator.of(context).push(new MaterialPageRoute(
+            builder: (context) => new CashGamePage(
+                  user: user,
+                  group: group,
+                  fromNotification: true,
+                  gameId: fromGameId,
+                )));
+      }
+    } else {}
   }
 
   Future<String> getUserId() async {

@@ -2,7 +2,7 @@ import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yadda/objects/group.dart';
 
-class CloudFunctions {
+class OwnCloudFunctions {
   Firestore firestoreInstance = Firestore.instance;
   var base =
       'https://us-central1-login-5a8c9.cloudfunctions.net/sendNotification2';
@@ -10,16 +10,16 @@ class CloudFunctions {
       "croX4pJoOmA:APA91bHoE85_Qe853vmo4aFzinIjyIIhh__Y-R2Z4Oudcj2QAPkLk01xsdiI2Zsks4yOakqFCZfoRBgqPDIJi37MmgOjKmnTyODGFu_c-6PZk9wXsIM92gliTuIt-tlH7sS4d8DjWb42";
 
   groupNotification(
-    String gameName,
-    String groupName,
-    String fromGroupId,
-    int fromGameId,
-    String gameType,
-    Group group,
-    String title,
-    String body,
-    String floorFCM,
-  ) async {
+      String gameName,
+      String groupName,
+      String fromGroupId,
+      int fromGameId,
+      String gameType,
+      Group group,
+      String title,
+      String body,
+      String floorFCM,
+      {String flooruid}) async {
     if (floorFCM == null) {
       await firestoreInstance.runTransaction((Transaction tx) async {
         QuerySnapshot qSnap = await Firestore.instance
@@ -29,7 +29,7 @@ class CloudFunctions {
           if (doc.data["notification"] == true && doc.data["fcm"] != null) {
             print("${doc.data["fcm"]}");
             String dataURL =
-                '$base?to=${doc.data["fcm"]}&gameName=$gameName&groupName=$groupName&fromGroupId=$fromGroupId&fromGameId=$fromGameId&gameType=$gameType&dailyMessage=${group.dailyMessage}&host=${group.host}&info=${group.info}&lowerCaseName=${group.lowerCaseName}&members=${group.members}&public=${group.public}&thumbs=${group.rating}&title=$title&body=$body';
+                '$base?to=${doc.data["fcm"]}&gameName=$gameName&groupName=$groupName&fromGroupId=$fromGroupId&fromGameId=$fromGameId&gameType=$gameType&dailyMessage=${group.dailyMessage}&host=${group.host}&info=${group.info}&lowerCaseName=${group.lowerCaseName}&members=${group.members}&public=${group.public}&thumbs=${group.rating}&title=$title&body=$body&uid=${doc.documentID}';
             print(dataURL);
 
             await http.get(dataURL);
@@ -38,7 +38,7 @@ class CloudFunctions {
       });
     } else {
       String dataURL =
-          '$base?to=$floorFCM&gameName=$gameName&groupName=$groupName&fromGroupId=$fromGroupId&fromGameId=$fromGameId&gameType=$gameType&dailyMessage=${group.dailyMessage}&host=${group.host}&info=${group.info}&lowerCaseName=${group.lowerCaseName}&members=${group.members}&public=${group.public}&thumbs=${group.rating}&title=$title&body=$body';
+          '$base?to=$floorFCM&gameName=$gameName&groupName=$groupName&fromGroupId=$fromGroupId&fromGameId=$fromGameId&gameType=$gameType&dailyMessage=${group.dailyMessage}&host=${group.host}&info=${group.info}&lowerCaseName=${group.lowerCaseName}&members=${group.members}&public=${group.public}&thumbs=${group.rating}&title=$title&body=$body&uid=$flooruid';
       await http.get(dataURL);
     }
   }

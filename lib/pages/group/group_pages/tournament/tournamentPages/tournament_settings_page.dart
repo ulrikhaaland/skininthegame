@@ -11,6 +11,7 @@ import 'package:yadda/objects/game.dart';
 import 'package:yadda/utils/delete.dart';
 import 'package:yadda/pages/inAppPurchase/subscription.dart';
 import 'package:yadda/utils/layout.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 class TournamentSettingsPage extends StatefulWidget {
   TournamentSettingsPage({
@@ -793,39 +794,37 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
     if (string != "0") {
       string = string.substring(0, 4);
     }
-    await firestoreInstance.runTransaction((Transaction tx) async {
-      QuerySnapshot qSnap = await firestoreInstance
-          .collection("$pathToTournament/players")
-          .getDocuments();
-      qSnap.documents.forEach((DocumentSnapshot doc) {
-        if (doc.data["id"] != null) {
-          firestoreInstance
-              .collection("users/${doc.data["id"]}/tournamentresults")
-              .add({
-            "gamename": widget.game.name,
-            "groupname": widget.group.name,
-            "gametype": widget.game.gameType,
-            "day": int.tryParse(widget.game.date.substring(0, 2)),
-            "month": int.tryParse(widget.game.date.substring(3)),
-            "time": widget.game.time,
-            "year": int.tryParse(string),
-            "profit": calculateProfits(
-                doc.data["payout"], doc.data["rebuy"], doc.data["addon"]),
-            "rebuy": doc.data["rebuy"],
-            "buyin": widget.game.buyin,
-            "addon": doc.data["addon"],
-            "payout": doc.data["payout"],
-            "placing": doc.data["placing"],
-            "playeramount": qSnap.documents.length,
-            "currency": widget.game.currency,
-            "orderbytime": widget.game.orderByTime,
-            "prizepool": widget.game.totalPrizePool,
-            "share": widget.group.shareResults
-          });
-        }
-      });
-      return null;
+    QuerySnapshot qSnap = await firestoreInstance
+        .collection("$pathToTournament/players")
+        .getDocuments();
+    qSnap.documents.forEach((DocumentSnapshot doc) {
+      if (doc.data["id"] != null) {
+        firestoreInstance
+            .collection("users/${doc.data["id"]}/tournamentresults")
+            .add({
+          "gamename": widget.game.name,
+          "groupname": widget.group.name,
+          "gametype": widget.game.gameType,
+          "day": int.tryParse(widget.game.date.substring(0, 2)),
+          "month": int.tryParse(widget.game.date.substring(3)),
+          "time": widget.game.time,
+          "year": int.tryParse(string),
+          "profit": calculateProfits(
+              doc.data["payout"], doc.data["rebuy"], doc.data["addon"]),
+          "rebuy": doc.data["rebuy"],
+          "buyin": widget.game.buyin,
+          "addon": doc.data["addon"],
+          "payout": doc.data["payout"],
+          "placing": doc.data["placing"],
+          "playeramount": qSnap.documents.length,
+          "currency": widget.game.currency,
+          "orderbytime": widget.game.orderByTime,
+          "prizepool": widget.game.totalPrizePool,
+          "share": widget.group.shareResults
+        });
+      }
     });
+    return null;
   }
 
   void moveGameToHistory() async {
@@ -836,46 +835,37 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
     DocumentReference fromDocument =
         firestoreInstance.document(pathToTournament);
     DocumentReference toDocument = firestoreInstance.document(historyPath);
-    firestoreInstance.runTransaction((Transaction tx) async {
-      DocumentSnapshot documentsnapshot = await fromDocument.get();
-      toDocument.setData(documentsnapshot.data);
+    DocumentSnapshot documentsnapshot = await fromDocument.get();
+    await toDocument.setData(documentsnapshot.data);
+
+    QuerySnapshot collectionSnapshotPlayers =
+        await fromCollectionPlayers.getDocuments();
+    collectionSnapshotPlayers.documents.forEach((DocumentSnapshot doc) async {
+      DocumentReference toCollection =
+          firestoreInstance.document("$historyPath/players/${doc.documentID}");
+      await toCollection.setData(doc.data);
     });
 
-    firestoreInstance.runTransaction((Transaction tx) async {
-      QuerySnapshot collectionSnapshotPlayers =
-          await fromCollectionPlayers.getDocuments();
-      collectionSnapshotPlayers.documents.forEach((DocumentSnapshot doc) {
-        DocumentReference toCollection = firestoreInstance
-            .document("$historyPath/players/${doc.documentID}");
-        toCollection.setData(doc.data);
-      });
-      Delete().deleteCollection("$pathToTournament/players", 5);
-      Delete().deleteCollection("$pathToTournament/activeplayers", 5);
+    QuerySnapshot collectionSnapshotPosts =
+        await fromCollectionPosts.getDocuments();
+    collectionSnapshotPosts.documents.forEach((DocumentSnapshot doc) async {
+      CollectionReference toCollection =
+          firestoreInstance.collection("$historyPath/posts");
+      await toCollection.add(doc.data);
     });
 
-    firestoreInstance.runTransaction((Transaction tx) async {
-      QuerySnapshot collectionSnapshotPosts =
-          await fromCollectionPosts.getDocuments();
-      collectionSnapshotPosts.documents.forEach((DocumentSnapshot doc) {
-        CollectionReference toCollection =
-            firestoreInstance.collection("$historyPath/posts");
-        toCollection.add(doc.data);
-      });
-      Delete().deleteCollection("$pathToTournament/posts", 5);
+    QuerySnapshot collectionSnapshotLog =
+        await fromCollectionLog.getDocuments();
+    collectionSnapshotLog.documents.forEach((DocumentSnapshot doc) async {
+      CollectionReference toCollection =
+          firestoreInstance.collection("$historyPath/log");
+      await toCollection.add(doc.data);
     });
-
-    firestoreInstance.runTransaction((Transaction tx) async {
-      QuerySnapshot collectionSnapshotLog =
-          await fromCollectionLog.getDocuments();
-      collectionSnapshotLog.documents.forEach((DocumentSnapshot doc) {
-        CollectionReference toCollection =
-            firestoreInstance.collection("$historyPath/log");
-        toCollection.add(doc.data);
-      });
-      Delete().deleteCollection("$pathToTournament/log", 5);
-      firestoreInstance.document(pathToTournament).delete();
-      Navigator.of(context)..pop()..pop();
+    await CloudFunctions.instance
+        .call(functionName: 'recursiveDelete', parameters: {
+      "path": pathToTournament,
     });
+    Navigator.of(context)..pop()..pop();
   }
 
   Widget _buildStreamOfLog(BuildContext context, DocumentSnapshot document) {
@@ -942,7 +932,10 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
             setState(() {
               isLoading = true;
             });
-            await Delete().deleteGame(pathToTournament, false);
+            await CloudFunctions.instance
+                .call(functionName: 'recursiveDelete', parameters: {
+              "path": pathToTournament,
+            });
             Navigator.of(context)..pop()..pop();
           },
           child: new Text(

@@ -14,6 +14,7 @@ import 'package:yadda/auth.dart';
 import 'package:yadda/utils/layout.dart';
 import 'package:yadda/pages/inAppPurchase/subscription.dart';
 import 'package:yadda/utils/essentials.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 class CashGameSettingsPage extends StatefulWidget {
   CashGameSettingsPage(
@@ -696,13 +697,19 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
               color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
         ),
         onTap: () async {
+          String regType;
           widget.game.stopReg = !widget.game.stopReg;
+          widget.game.stopReg ? regType = "closed" : regType = "opened";
           setState(() {
             setReg();
           });
           firestoreInstance.document(pathToCashGame).updateData({
             "stopreg": widget.game.stopReg,
           });
+          Log().postLogToCollection(
+              "${widget.user.userName} has $regType registrations",
+              "$pathToCashGame/log",
+              "Registration");
         },
       );
     } else {
@@ -897,9 +904,12 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
 
               personList.removeAt(i);
             }
-            setState(() {
-              isLoading = false;
-            });
+            if (widget.history) {
+              setState(() {
+                isLoading = false;
+              });
+            }
+
             showSnackBar(
               "Payouts has been updated",
             );
@@ -916,9 +926,12 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
               });
               personList.removeAt(i);
             }
-            setState(() {
-              isLoading = false;
-            });
+            if (widget.history) {
+              setState(() {
+                isLoading = false;
+              });
+            }
+
             showSnackBar(
               "Payouts has been updated",
             );
@@ -1022,36 +1035,34 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
     String string = widget.game.orderByTime.toString();
     string = string.substring(0, 4);
     string == "null" ? string = DateTime.now().year.toString() : null;
-    await firestoreInstance.runTransaction((Transaction tx) async {
-      QuerySnapshot qSnap = await firestoreInstance
-          .collection("$pathToCashGame/players")
-          .getDocuments();
-      qSnap.documents.forEach((DocumentSnapshot doc) {
-        if (doc.data["id"] != null) {
-          firestoreInstance
-              .document(
-                  "users/${doc.data["id"]}/cashgameresults/${widget.game.id}")
-              .setData({
-            "gamename": widget.game.name,
-            "groupname": widget.group.name,
-            "gametype": widget.game.gameType,
-            "day": int.tryParse(widget.game.date.substring(0, 2)),
-            "month": int.tryParse(widget.game.date.substring(3)),
-            "time": widget.game.time,
-            "year": int.tryParse(string),
-            "profit": calculateProfits(doc.data["payout"], doc.data["buyin"]),
-            "currency": widget.game.currency,
-            "buyin": doc.data["buyin"],
-            "payout": doc.data["payout"],
-            "bblind": widget.game.bBlind,
-            "sblind": widget.game.sBlind,
-            "orderbytime": widget.game.orderByTime,
-            "share": widget.group.shareResults,
-          });
-        }
-      });
-      return null;
+    QuerySnapshot qSnap = await firestoreInstance
+        .collection("$pathToCashGame/players")
+        .getDocuments();
+    qSnap.documents.forEach((DocumentSnapshot doc) {
+      if (doc.data["id"] != null) {
+        firestoreInstance
+            .document(
+                "users/${doc.data["id"]}/cashgameresults/${widget.game.id}")
+            .setData({
+          "gamename": widget.game.name,
+          "groupname": widget.group.name,
+          "gametype": widget.game.gameType,
+          "day": int.tryParse(widget.game.date.substring(0, 2)),
+          "month": int.tryParse(widget.game.date.substring(3)),
+          "time": widget.game.time,
+          "year": int.tryParse(string),
+          "profit": calculateProfits(doc.data["payout"], doc.data["buyin"]),
+          "currency": widget.game.currency,
+          "buyin": doc.data["buyin"],
+          "payout": doc.data["payout"],
+          "bblind": widget.game.bBlind,
+          "sblind": widget.game.sBlind,
+          "orderbytime": widget.game.orderByTime,
+          "share": widget.group.shareResults,
+        });
+      }
     });
+    return null;
   }
 
   moveGameToHistory() async {
@@ -1061,57 +1072,48 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
 
     DocumentReference fromDocument = firestoreInstance.document(pathToCashGame);
     DocumentReference toDocument = firestoreInstance.document(historyPath);
-    firestoreInstance.runTransaction((Transaction tx) async {
+    await firestoreInstance.runTransaction((Transaction tx) async {
       DocumentSnapshot documentsnapshot = await fromDocument.get();
-      toDocument.setData(documentsnapshot.data);
+      await toDocument.setData(documentsnapshot.data);
     });
 
-    firestoreInstance.runTransaction((Transaction tx) async {
-      QuerySnapshot collectionSnapshotPlayers =
-          await fromCollectionPlayers.getDocuments();
-      collectionSnapshotPlayers.documents.forEach((DocumentSnapshot doc) {
-        DocumentReference toCollection = firestoreInstance
-            .document("$historyPath/players/${doc.documentID}");
-        toCollection.setData(doc.data);
-      });
-      Delete().deleteCollection("$pathToCashGame/players", 5);
-      Delete().deleteCollection("$pathToCashGame/activeplayers", 5);
+    QuerySnapshot collectionSnapshotPlayers =
+        await fromCollectionPlayers.getDocuments();
+    collectionSnapshotPlayers.documents.forEach((DocumentSnapshot doc) async {
+      DocumentReference toCollection =
+          firestoreInstance.document("$historyPath/players/${doc.documentID}");
+      await toCollection.setData(doc.data);
     });
 
-    firestoreInstance.runTransaction((Transaction tx) async {
-      QuerySnapshot collectionSnapshotPosts =
-          await fromCollectionPosts.getDocuments();
-      collectionSnapshotPosts.documents.forEach((DocumentSnapshot doc) {
-        CollectionReference toCollection =
-            firestoreInstance.collection("$historyPath/posts");
-        toCollection.add(doc.data);
-      });
-      Delete().deleteCollection("$pathToCashGame/posts", 5);
+    QuerySnapshot collectionSnapshotPosts =
+        await fromCollectionPosts.getDocuments();
+    collectionSnapshotPosts.documents.forEach((DocumentSnapshot doc) async {
+      CollectionReference toCollection =
+          firestoreInstance.collection("$historyPath/posts");
+      await toCollection.add(doc.data);
     });
 
-    firestoreInstance.runTransaction((Transaction tx) async {
-      QuerySnapshot collectionSnapshotPosts =
-          await fromCollectionPayouts.getDocuments();
-      collectionSnapshotPosts.documents.forEach((DocumentSnapshot doc) {
-        CollectionReference toCollection =
-            firestoreInstance.collection("$historyPath/payouts");
-        toCollection.add(doc.data);
-      });
-      Delete().deleteCollection("$pathToCashGame/payouts", 5);
+    QuerySnapshot collectionSnapshotPayouts =
+        await fromCollectionPayouts.getDocuments();
+    collectionSnapshotPayouts.documents.forEach((DocumentSnapshot doc) async {
+      CollectionReference toCollection =
+          firestoreInstance.collection("$historyPath/payouts");
+      await toCollection.add(doc.data);
     });
 
-    firestoreInstance.runTransaction((Transaction tx) async {
-      QuerySnapshot collectionSnapshotLog =
-          await fromCollectionLog.getDocuments();
-      collectionSnapshotLog.documents.forEach((DocumentSnapshot doc) {
-        CollectionReference toCollection =
-            firestoreInstance.collection("$historyPath/log");
-        toCollection.add(doc.data);
-      });
-      Delete().deleteCollection("$pathToCashGame/log", 5);
-      firestoreInstance.document(pathToCashGame).delete();
-      Navigator.of(context)..pop()..pop();
+    QuerySnapshot collectionSnapshotLog =
+        await fromCollectionLog.getDocuments();
+    collectionSnapshotLog.documents.forEach((DocumentSnapshot doc) async {
+      CollectionReference toCollection =
+          firestoreInstance.collection("$historyPath/log");
+      await toCollection.add(doc.data);
     });
+
+    await CloudFunctions.instance
+        .call(functionName: 'recursiveDelete', parameters: {
+      "path": pathToCashGame,
+    });
+    Navigator.of(context)..pop()..pop();
   }
 
   Widget _buildStreamOfLog(BuildContext context, DocumentSnapshot document) {
@@ -1178,7 +1180,10 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
             setState(() {
               isLoading = true;
             });
-            Delete().deleteGame(pathToCashGame, true);
+            await CloudFunctions.instance
+                .call(functionName: 'recursiveDelete', parameters: {
+              "path": pathToCashGame,
+            });
             Navigator.of(context)..pop()..pop();
           },
           child: new Text(
@@ -1210,10 +1215,8 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
             });
             calculatePayouts(widget.game.calculatePayouts, true);
 
-            Log().postLogToCollection(
-                "$currentUserName marked game as finished",
-                "$pathToCashGame/log",
-                "Finished");
+            Log().postLogToCollection("$currentUserName ended the game",
+                "$pathToCashGame/log", "Finished");
             Navigator.of(context).pop();
           },
           child: new Text(

@@ -7,9 +7,9 @@ import 'package:yadda/pages/group/new/newTournament_page.dart';
 import 'package:yadda/pages/group/group_pages/tournament/tournamentPages/tournament_page.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
-import 'package:yadda/pages/inAppPurchase/consumeable.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:yadda/utils/delete.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 class GroupTournaments extends StatefulWidget {
   const GroupTournaments({
@@ -221,13 +221,12 @@ class GroupTournamentsState extends State<GroupTournaments>
             caption: 'Delete',
             color: UIData.red,
             icon: Icons.delete,
-            onTap: () {
-              setState(() {
-                enabled = false;
+            onTap: () async {
+              await CloudFunctions.instance
+                  .call(functionName: 'recursiveDelete', parameters: {
+                "path":
+                    "groups/${widget.group.id}/games/type/tournamentactive/${document.documentID}",
               });
-              Delete().deleteGame(
-                  "groups/${widget.group.id}/games/type/tournamentactive/${document.data["id"]}",
-                  false);
             }),
       ],
     );
@@ -316,13 +315,12 @@ class GroupTournamentsState extends State<GroupTournaments>
             caption: 'Delete',
             color: UIData.red,
             icon: Icons.delete,
-            onTap: () {
-              setState(() {
-                enabled = false;
+            onTap: () async {
+              await CloudFunctions.instance
+                  .call(functionName: 'recursiveDelete', parameters: {
+                "path":
+                    "groups/${widget.group.id}/games/type/tournamenthistory/${document.documentID}",
               });
-              Delete().deleteGame(
-                  "groups/${widget.group.id}/games/type/tournamenthistory/${document.data["id"]}",
-                  false);
             }),
       ],
     );

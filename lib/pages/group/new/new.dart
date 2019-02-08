@@ -6,10 +6,9 @@ import 'newInviteUser_page.dart';
 import 'newInvitationCode_page.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
-import 'package:yadda/utils/delete.dart';
 import 'package:yadda/utils/essentials.dart';
 import 'package:yadda/widgets/primary_button.dart';
-import 'package:yadda/pages/inAppPurchase/consumeable.dart';
+import 'package:yadda/utils/delete.dart';
 
 class New extends StatefulWidget {
   New(
@@ -473,7 +472,7 @@ class NewState extends State<New> {
               isLoading = true;
             });
             Navigator.pop(context);
-            await Delete().deleteGroup(widget.group.id);
+            Delete().deleteGroup(widget.group.id);
             setState(() {
               isLoading = false;
             });

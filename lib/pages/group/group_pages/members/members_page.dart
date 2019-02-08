@@ -166,6 +166,10 @@ class MembersPageState extends State<MembersPage> {
   }
 
   Widget _buildListItem(BuildContext context, DocumentSnapshot document) {
+    Color color;
+    widget.user.id == document.documentID
+        ? color = UIData.blue
+        : color = UIData.blackOrWhite;
     bool isAdmin = document.data["admin"];
     IconData adminIcon;
     String adminString;
@@ -191,7 +195,7 @@ class MembersPageState extends State<MembersPage> {
           leading: addImage(document.data["profilepicurl"]),
           title: new Text(
             document.data["username"],
-            style: new TextStyle(color: UIData.blackOrWhite),
+            style: new TextStyle(color: color),
             overflow: TextOverflow.ellipsis,
           ),
           onTap: () => Navigator.push(

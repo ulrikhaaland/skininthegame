@@ -211,7 +211,7 @@ class NewTournamentState extends State<NewTournament> {
                 )));
 
       if (notifyMembers == true) {
-        CloudFunctions().groupNotification(
+        OwnCloudFunctions().groupNotification(
             game.name,
             widget.group.name,
             widget.group.id,

@@ -476,16 +476,17 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
               "name": widget.user.userName,
               "id": widget.user.id,
             });
-            CloudFunctions().groupNotification(
+            OwnCloudFunctions().groupNotification(
                 widget.game.name,
                 widget.group.name,
                 widget.group.id,
                 widget.game.id,
-                "Cash Game!",
+                "Tournament!",
                 widget.group,
                 "${widget.game.name.toUpperCase()} - ${type.toUpperCase()}",
                 body,
-                widget.game.floorFCM);
+                widget.game.floorFCM, 
+                          flooruid: widget.game.floor);
           } else {
             Essentials().showSnackBar(
                 "You have already requested ${an.toLowerCase()} $type",

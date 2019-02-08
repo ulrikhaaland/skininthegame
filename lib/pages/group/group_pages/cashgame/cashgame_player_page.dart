@@ -401,7 +401,7 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
                           "type": "payout",
                         },
                       );
-                      CloudFunctions().groupNotification(
+                      OwnCloudFunctions().groupNotification(
                           widget.game.name,
                           widget.group.name,
                           widget.group.id,
@@ -410,7 +410,8 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
                           widget.group,
                           "${widget.game.name.toUpperCase()} - PAYOUT",
                           "${widget.user.userName} has requested a payout",
-                          null);
+                          widget.game.floorFCM,
+                          flooruid: widget.game.floor);
                     } else {
                       Essentials().showSnackBar(
                           "A payout request has already been sent",
@@ -490,7 +491,7 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
                     "id": widget.user.id,
                     "type": text.toLowerCase(),
                   });
-                  CloudFunctions().groupNotification(
+                  OwnCloudFunctions().groupNotification(
                       widget.game.name,
                       widget.group.name,
                       widget.group.id,
@@ -499,7 +500,8 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
                       widget.group,
                       "${widget.game.name} - ${text.toUpperCase()}",
                       "${widget.user.userName} has requested a ${text.toLowerCase()} of $buyin",
-                      widget.game.floorFCM);
+                      widget.game.floorFCM,
+                      flooruid: widget.game.floor);
                 } else {
                   Essentials().showSnackBar(
                       "Buyin amount must be greater than 0",

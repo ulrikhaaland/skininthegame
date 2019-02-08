@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
+import 'package:cloud_functions/cloud_functions.dart';
 
 class Delete {
   Firestore firestoreInstance = Firestore.instance;
@@ -37,18 +38,6 @@ class Delete {
           .document("users/${doc.documentID}/groups/$groupId")
           .delete();
     });
-    return true;
-  }
-
-  Future<bool> deleteGame(String path, bool cash) async {
-    await deleteCollection("$path/activeplayers", 5);
-    await deleteCollection("$path/players", 5);
-    if (cash) {
-      deleteCollection("$path/queue", 5);
-    }
-    await deleteCollection("$path/posts", 5);
-    await deleteCollection("$path/log", 5);
-    await firestoreInstance.document(path).delete();
     return true;
   }
 
@@ -107,19 +96,21 @@ class Delete {
     }
   }
 
-  deleteGroup(String groupId) async {
-    await deleteAllGroupMembers(groupId);
-    deleteAllGroupGames(groupId);
-    deleteCollection("groups/$groupId/codes/onetimegroupcode/codes", 5);
-    firestoreInstance.document("groups/$groupId/codes/admingroupcode").delete();
-    firestoreInstance
-        .document("groups/$groupId/codes/reusablegroupcode")
-        .delete();
-    deleteCollection("groups/$groupId/codes/onetimegroupcode/codes", 5);
-    deleteCollection("groups/$groupId/posts", 5);
-    deleteCollection("groups/$groupId/rating", 5);
-    deleteCollection("groups/$groupId/members", 5);
-    firestoreInstance.document("codes/$groupId").delete();
-    firestoreInstance.document("groups/$groupId").delete();
+  Future<Null> deleteGroup(String groupId) async {
+    QuerySnapshot qSnap = await firestoreInstance
+        .collection("groups/$groupId/members")
+        .getDocuments();
+    qSnap.documents.forEach((doc) async {
+      await firestoreInstance
+          .document("users/${doc.documentID}/groups/$groupId")
+          .delete();
+    });
+    await firestoreInstance.document("codes/$groupId").delete();
+    await CloudFunctions()
+        .call(functionName: "recursiveDeleteGroup", parameters: {
+      "path": "groups/$groupId",
+      "groupId": groupId,
+    });
+    return null;
   }
 }
