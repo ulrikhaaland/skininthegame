@@ -178,8 +178,8 @@ class RootPageState extends State<RootPage> {
           docSnap.data["currency"],
           docSnap.data["appversion"],
           2,
-          notifications: qSnap.documents.length,
           // await SubLevel().getSubLevel(),
+          notifications: qSnap.documents.length,
         );
         double version = 0;
         DocumentSnapshot docSnapV =

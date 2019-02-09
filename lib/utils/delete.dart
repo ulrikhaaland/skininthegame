@@ -106,11 +106,12 @@ class Delete {
           .delete();
     });
     await firestoreInstance.document("codes/$groupId").delete();
-    await CloudFunctions()
+    var resp = await CloudFunctions()
         .call(functionName: "recursiveDeleteGroup", parameters: {
       "path": "groups/$groupId",
       "groupId": groupId,
     });
+    print(resp);
     return null;
   }
 }

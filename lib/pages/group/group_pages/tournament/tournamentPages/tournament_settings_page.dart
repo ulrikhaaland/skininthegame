@@ -8,9 +8,9 @@ import 'tournament_createPlayer_page.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/log.dart';
 import 'package:yadda/objects/game.dart';
-import 'package:yadda/utils/delete.dart';
 import 'package:yadda/pages/inAppPurchase/subscription.dart';
 import 'package:yadda/utils/layout.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 
 class TournamentSettingsPage extends StatefulWidget {
@@ -78,12 +78,13 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
     currentUserId = widget.user.id;
     currentUserName = widget.user.userName;
     groupId = widget.group.id;
-    if (widget.game.rebuy > 0 || widget.game.addon > 0) {
-      showRebuyPrice = true;
-    }
-    if (widget.game.rebuyPrice != widget.game.buyin ||
+
+    if (widget.game.rebuyPrice != widget.game.buyin &&
         widget.game.addonPrice != widget.game.buyin) {
       sameAsBuyin = false;
+    }
+    if (!sameAsBuyin) {
+      showRebuyPrice = true;
     }
     if (widget.history == true) {
       tournamentActiveOrHistory = "tournamenthistory";
@@ -477,19 +478,27 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                           onSaved: (val) => widget.game.setGameType(val),
                         ),
                         new TextFormField(
-                          keyboardType: TextInputType.numberWithOptions(),
-                          initialValue: widget.game.buyin.toString(),
-                          maxLength: 10,
-                          style: new TextStyle(color: UIData.blackOrWhite),
-                          key: new Key('buyin'),
-                          decoration: new InputDecoration(
-                              labelText: 'Buyin',
-                              labelStyle:
-                                  new TextStyle(color: Colors.grey[600])),
-                          autocorrect: false,
-                          onSaved: (val) =>
-                              widget.game.setBuyin(int.tryParse(val)),
-                        ),
+                            keyboardType: TextInputType.numberWithOptions(),
+                            initialValue: widget.game.buyin.toString(),
+                            maxLength: 10,
+                            style: new TextStyle(color: UIData.blackOrWhite),
+                            key: new Key('buyin'),
+                            decoration: new InputDecoration(
+                                labelText: 'Buyin',
+                                labelStyle:
+                                    new TextStyle(color: Colors.grey[600])),
+                            autocorrect: false,
+                            onSaved: (val) {
+                              if (val.isEmpty) {
+                                widget.game.setBuyin(0);
+                              } else {
+                                widget.game.setBuyin(int.tryParse(val));
+                              }
+                              if (sameAsBuyin) {
+                                widget.game.rebuyPrice = widget.game.buyin;
+                                widget.game.addonPrice = widget.game.buyin;
+                              }
+                            }),
                         new Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
@@ -668,6 +677,7 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
           new Container(
             width: 120.0,
             child: new TextFormField(
+              initialValue: widget.game.rebuyPrice.toString(),
               keyboardType: TextInputType.number,
               keyboardAppearance: Brightness.dark,
               style: new TextStyle(color: UIData.blackOrWhite),
@@ -688,6 +698,7 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
           new Container(
             width: 120.0,
             child: new TextFormField(
+                initialValue: widget.game.addonPrice.toString(),
                 keyboardType: TextInputType.number,
                 keyboardAppearance: Brightness.dark,
                 style: new TextStyle(color: UIData.blackOrWhite),

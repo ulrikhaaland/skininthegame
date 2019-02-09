@@ -122,8 +122,8 @@ class NewTournamentState extends State<NewTournament> {
       widget.user.fcm,
       widget.user.userName,
       false,
-      addonPrice: null,
-      rebuyPrice: null,
+      addonPrice: 0,
+      rebuyPrice: 0,
     );
     getAdmins();
   }
@@ -437,18 +437,27 @@ class NewTournamentState extends State<NewTournament> {
           new Column(
             children: <Widget>[
               padded(
-                  child: new TextFormField(
-                      keyboardType: TextInputType.number,
-                      maxLength: 10,
-                      style: new TextStyle(color: UIData.blackOrWhite),
-                      key: new Key('buyin'),
-                      decoration: new InputDecoration(
-                          labelText: 'Buyin',
-                          labelStyle: new TextStyle(color: Colors.grey[600])),
-                      autocorrect: false,
-                      onSaved: (val) => val.isEmpty
-                          ? game.setBuyin(0)
-                          : game.setBuyin(int.tryParse(val)))),
+                child: new TextFormField(
+                    keyboardType: TextInputType.number,
+                    maxLength: 10,
+                    style: new TextStyle(color: UIData.blackOrWhite),
+                    key: new Key('buyin'),
+                    decoration: new InputDecoration(
+                        labelText: 'Buyin',
+                        labelStyle: new TextStyle(color: Colors.grey[600])),
+                    autocorrect: false,
+                    onSaved: (val) {
+                      if (val.isEmpty) {
+                        game.setBuyin(0);
+                      } else {
+                        game.setBuyin(int.tryParse(val));
+                      }
+                      if (sameAsBuyin) {
+                        game.rebuyPrice = game.buyin;
+                        game.addonPrice = game.buyin;
+                      }
+                    }),
+              )
             ],
           ),
           new Row(

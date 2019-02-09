@@ -127,7 +127,7 @@ class GamePageState extends State<GamePage> {
                   subtitle: new Text(
                     widget.user.email,
                     style: new TextStyle(
-                        color: Colors.grey,
+                        color: Colors.grey[600],
                         fontSize: UIData.fontSize16,
                         letterSpacing: 1),
                   ),

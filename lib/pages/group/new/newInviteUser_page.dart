@@ -96,11 +96,8 @@ class InviteUserPageState extends State<InviteUserPage> {
                 fillColor: UIData.white,
                 labelText: 'Search for users',
                 labelStyle: new TextStyle(color: Colors.grey[600]),
-                icon: new Icon(
-                  Icons.supervised_user_circle,
-                  size: 40.0,
-                  color: UIData.blue
-                ),
+                icon: new Icon(Icons.supervised_user_circle,
+                    size: 40.0, color: UIData.blue),
               ),
               onChanged: (String value) {
                 userSearchName = value.toLowerCase();

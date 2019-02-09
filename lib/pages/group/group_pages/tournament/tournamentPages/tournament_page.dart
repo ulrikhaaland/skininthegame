@@ -12,6 +12,8 @@ import 'package:yadda/utils/log.dart';
 import 'package:yadda/objects/game.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:yadda/objects/prizePool.dart';
+import 'package:yadda/widgets/primary_button.dart';
 
 class TournamentPage extends StatefulWidget {
   TournamentPage({
@@ -73,6 +75,7 @@ class TournamentPageState extends State<TournamentPage>
   initState() {
     super.initState();
     _tabController = new TabController(vsync: this, length: 4);
+    list.add(new Container());
 
     currentUserId = widget.user.id;
     currentUserName = widget.user.userName;
@@ -458,15 +461,7 @@ class TournamentPageState extends State<TournamentPage>
         ),
         streamOfPosts(),
         setPlayersOrResult(),
-        Container(
-          padding: EdgeInsets.all(10.0),
-          child: new Text(
-            "Prize Pool:\n\n${game.totalPrizePool}",
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-                fontWeight: FontWeight.bold, color: UIData.blackOrWhite),
-          ),
-        ),
+        prizePoolPage(),
         playerList(),
         streamOfRequests(),
       ];
@@ -542,6 +537,158 @@ class TournamentPageState extends State<TournamentPage>
           ),
         ),
       ];
+    }
+  }
+
+  calculatePayouts() async {
+    int totalPPAmount = 0;
+    int totalAddons = 0;
+    int totalRebuys = 0;
+    QuerySnapshot qSnap =
+        await firestoreInstance.collection("$gamePath/players").getDocuments();
+    qSnap.documents.forEach((doc) {
+      int r = doc.data["rebuy"];
+      int a = doc.data["addon"];
+      totalRebuys += r;
+      totalAddons += a;
+      int rAmount = game.rebuyPrice * r;
+      int aAmount = game.addonPrice * a;
+      totalPPAmount += rAmount + aAmount + game.buyin;
+    });
+    calcRebuys = totalRebuys;
+    calcAddons = totalAddons;
+    calcBuyins = qSnap.documents.length;
+    preCalculation();
+    allPayouts(150, 2500);
+  }
+
+  List<Widget> list = new List();
+
+  allPayouts(int count, int pp) {
+    PrizePoolList poolList = new PrizePoolList(count);
+    list = new List();
+
+    for (int i = 0; i < poolList.list.length; i++) {
+      double doobs = (poolList.list[i] / 100);
+      double doobsAmount = pp * doobs;
+      int amount = doobsAmount.round();
+      ListTile tile = new ListTile(
+        leading: new Text(
+          "${i + 1}",
+          style: new TextStyle(color: UIData.blackOrWhite, fontSize: 24),
+        ),
+        title: new TextFormField(
+          initialValue: "$amount",
+          style: new TextStyle(color: UIData.blackOrWhite),
+        ),
+
+        // new Text(
+        //   "$amount",
+        //   style: new TextStyle(color: UIData.blackOrWhite),
+        // ),
+        trailing: new Text(
+          "${poolList.list[i]}%",
+          style: new TextStyle(color: UIData.blackOrWhite),
+        ),
+      );
+      list.add(tile);
+    }
+    setState(() {});
+  }
+
+  Widget prizePoolPage() {
+    if (isAdmin) {
+      return SingleChildScrollView(
+        padding: EdgeInsets.all(12.0),
+        child: new Column(
+          children: <Widget>[
+            new Text(
+              "PRIZE POOL",
+              style: new TextStyle(
+                  color: UIData.blackOrWhite, fontSize: UIData.fontSize24),
+            ),
+            new Padding(
+              padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+              child: new PrimaryButton(
+                  text: "Calculate payouts",
+                  onPressed: () {
+                    calculatePayouts();
+                    game.calculatePayouts = true;
+                    firestoreInstance.document(gamePath).updateData({
+                      "calculatepayouts": game.calculatePayouts,
+                    });
+                  }),
+            ),
+            preCalculation(),
+            new Column(
+              children: list,
+            )
+          ],
+        ),
+      );
+    }
+  }
+
+  int calcBuyins = 0;
+  int calcRebuys = 0;
+  int calcAddons = 0;
+
+  Widget rebuyListTile() {
+    if (game.rebuy > 0) {
+      return new ListTile(
+        leading: new Text("Rebuys",
+            style: new TextStyle(color: UIData.blackOrWhite)),
+      );
+    }
+  }
+
+  Widget preCalculation() {
+    if (game.calculatePayouts) {
+      return new Container(
+          decoration: new BoxDecoration(
+              color: UIData.listColor,
+              border: Border.all(color: Colors.grey[600]),
+              borderRadius: new BorderRadius.all(const Radius.circular(8.0))),
+          child: new Padding(
+              padding: EdgeInsets.all(4.0),
+              child: new Column(
+                children: <Widget>[
+                  GridView.count(
+                    shrinkWrap: true,
+                    childAspectRatio: 4,
+                    crossAxisCount: 3,
+                    children: <Widget>[
+                      new Text(
+                        "Type",
+                        style: new TextStyle(color: UIData.blue),
+                        textAlign: TextAlign.left,
+                      ),
+                      new Text("Sum",
+                          style: new TextStyle(color: UIData.blackOrWhite),
+                          textAlign: TextAlign.center),
+                      new Text(
+                        "Amount",
+                        style: new TextStyle(color: UIData.blackOrWhite),
+                        textAlign: TextAlign.right,
+                      ),
+                      new Text(
+                        "Buyins",
+                        style: new TextStyle(color: UIData.blackOrWhite),
+                        textAlign: TextAlign.left,
+                      ),
+                      new Text("${calcBuyins * game.buyin}",
+                          style: new TextStyle(color: UIData.blackOrWhite),
+                          textAlign: TextAlign.center),
+                      new Text("$calcBuyins",
+                          style: new TextStyle(color: UIData.blackOrWhite),
+                          textAlign: TextAlign.right),
+                    ],
+                  ),
+                  rebuyListTile(),
+                ],
+              )));
+    } else {
+      return new Container();
     }
   }
 
