@@ -76,7 +76,6 @@ class TournamentPageState extends State<TournamentPage>
     super.initState();
     _tabController = new TabController(vsync: this, length: 4);
     list.add(new Container());
-
     currentUserId = widget.user.id;
     currentUserName = widget.user.userName;
     groupId = widget.group.id;
@@ -288,6 +287,7 @@ class TournamentPageState extends State<TournamentPage>
           rebuyPrice: docSnap.data["rebuyprice"],
           addonPrice: docSnap.data["addonprice"],
         );
+        populatePPList();
         checkIfFull();
         userFound = true;
         setScreen();
@@ -559,7 +559,7 @@ class TournamentPageState extends State<TournamentPage>
     calcAddons = totalAddons;
     calcBuyins = qSnap.documents.length;
     preCalculation();
-    allPayouts(150, 2500);
+    allPayouts(qSnap.documents.length, totalPPAmount);
   }
 
   List<Widget> list = new List();
@@ -574,12 +574,13 @@ class TournamentPageState extends State<TournamentPage>
       int amount = doobsAmount.round();
       ListTile tile = new ListTile(
         leading: new Text(
-          "${i + 1}",
+          "${i + 1}.",
           style: new TextStyle(color: UIData.blackOrWhite, fontSize: 24),
         ),
-        title: new TextFormField(
-          initialValue: "$amount",
+        title: new Text(
+          "$amount ${game.currency}",
           style: new TextStyle(color: UIData.blackOrWhite),
+          textAlign: TextAlign.center,
         ),
 
         // new Text(
@@ -593,7 +594,9 @@ class TournamentPageState extends State<TournamentPage>
       );
       list.add(tile);
     }
-    setState(() {});
+    setState(() {
+      populatePPList();
+    });
   }
 
   Widget prizePoolPage() {
@@ -633,13 +636,103 @@ class TournamentPageState extends State<TournamentPage>
   int calcRebuys = 0;
   int calcAddons = 0;
 
-  Widget rebuyListTile() {
+  List<Widget> prizePoolList;
+
+  void populatePPList() {
+    prizePoolList = new List();
+    prizePoolList.add(
+      new Text(
+        "Type",
+        style: new TextStyle(color: UIData.blue),
+        textAlign: TextAlign.left,
+      ),
+    );
+    prizePoolList.add(
+      new Text(
+        "Amount",
+        style: new TextStyle(color: UIData.blue),
+        textAlign: TextAlign.center,
+      ),
+    );
+    prizePoolList.add(
+      new Text("Sum",
+          style: new TextStyle(color: UIData.blue), textAlign: TextAlign.right),
+    );
+    prizePoolList.add(
+      new Text(
+        "Buy ins",
+        style: new TextStyle(color: UIData.blackOrWhite),
+        textAlign: TextAlign.left,
+      ),
+    );
+    prizePoolList.add(
+      new Text("$calcBuyins",
+          style: new TextStyle(color: UIData.blackOrWhite),
+          textAlign: TextAlign.center),
+    );
+    prizePoolList.add(
+      new Text("${calcBuyins * game.buyin}",
+          style: new TextStyle(color: UIData.blackOrWhite),
+          textAlign: TextAlign.right),
+    );
+
     if (game.rebuy > 0) {
-      return new ListTile(
-        leading: new Text("Rebuys",
-            style: new TextStyle(color: UIData.blackOrWhite)),
+      prizePoolList.add(
+        new Text(
+          "Rebuys",
+          style: new TextStyle(color: UIData.blackOrWhite),
+          textAlign: TextAlign.left,
+        ),
+      );
+      prizePoolList.add(
+        new Text("$calcRebuys",
+            style: new TextStyle(color: UIData.blackOrWhite),
+            textAlign: TextAlign.center),
+      );
+      prizePoolList.add(
+        new Text("${calcRebuys * game.rebuyPrice}",
+            style: new TextStyle(color: UIData.blackOrWhite),
+            textAlign: TextAlign.right),
       );
     }
+    if (game.addon > 0) {
+      prizePoolList.add(
+        new Text(
+          "Addons",
+          style: new TextStyle(color: UIData.blackOrWhite),
+          textAlign: TextAlign.left,
+        ),
+      );
+      prizePoolList.add(
+        new Text("$calcAddons",
+            style: new TextStyle(color: UIData.blackOrWhite),
+            textAlign: TextAlign.center),
+      );
+      prizePoolList.add(
+        new Text("${calcAddons * game.rebuyPrice}",
+            style: new TextStyle(color: UIData.blackOrWhite),
+            textAlign: TextAlign.right),
+      );
+    }
+    prizePoolList.add(
+      new Text(
+        "Totals",
+        style: new TextStyle(color: UIData.blackOrWhite),
+        textAlign: TextAlign.left,
+      ),
+    );
+    prizePoolList.add(
+      new Text("${calcAddons + calcRebuys + calcBuyins}",
+          style: new TextStyle(color: UIData.blackOrWhite),
+          textAlign: TextAlign.center),
+    );
+    prizePoolList.add(
+      new Text(
+          "${(calcAddons * game.addonPrice) + (calcRebuys * game.rebuyPrice) + (calcBuyins * game.buyin)}",
+          style: new TextStyle(color: UIData.blackOrWhite),
+          textAlign: TextAlign.right),
+    );
+    setState(() {});
   }
 
   Widget preCalculation() {
@@ -650,41 +743,14 @@ class TournamentPageState extends State<TournamentPage>
               border: Border.all(color: Colors.grey[600]),
               borderRadius: new BorderRadius.all(const Radius.circular(8.0))),
           child: new Padding(
-              padding: EdgeInsets.all(4.0),
+              padding: EdgeInsets.all(8.0),
               child: new Column(
                 children: <Widget>[
                   GridView.count(
-                    shrinkWrap: true,
-                    childAspectRatio: 4,
-                    crossAxisCount: 3,
-                    children: <Widget>[
-                      new Text(
-                        "Type",
-                        style: new TextStyle(color: UIData.blue),
-                        textAlign: TextAlign.left,
-                      ),
-                      new Text("Sum",
-                          style: new TextStyle(color: UIData.blackOrWhite),
-                          textAlign: TextAlign.center),
-                      new Text(
-                        "Amount",
-                        style: new TextStyle(color: UIData.blackOrWhite),
-                        textAlign: TextAlign.right,
-                      ),
-                      new Text(
-                        "Buyins",
-                        style: new TextStyle(color: UIData.blackOrWhite),
-                        textAlign: TextAlign.left,
-                      ),
-                      new Text("${calcBuyins * game.buyin}",
-                          style: new TextStyle(color: UIData.blackOrWhite),
-                          textAlign: TextAlign.center),
-                      new Text("$calcBuyins",
-                          style: new TextStyle(color: UIData.blackOrWhite),
-                          textAlign: TextAlign.right),
-                    ],
-                  ),
-                  rebuyListTile(),
+                      shrinkWrap: true,
+                      childAspectRatio: 4,
+                      crossAxisCount: 3,
+                      children: prizePoolList),
                 ],
               )));
     } else {

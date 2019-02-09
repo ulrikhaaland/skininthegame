@@ -52,22 +52,12 @@ class PrizePoolList {
   void thirteen() {
     list.add(70.00);
     list.add(30.00);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 
   void twenty() {
     list.add(50.00);
     list.add(30.00);
     list.add(20.00);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 
   void thirty() {
@@ -75,11 +65,6 @@ class PrizePoolList {
     list.add(30.00);
     list.add(20.00);
     list.add(10.00);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 
   void fourty() {
@@ -88,11 +73,6 @@ class PrizePoolList {
     list.add(18.00);
     list.add(10.00);
     list.add(8.00);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 
   void fifty() {
@@ -102,11 +82,6 @@ class PrizePoolList {
     list.add(10.00);
     list.add(8.00);
     list.add(6.00);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 
   void sixty() {
@@ -117,11 +92,6 @@ class PrizePoolList {
     list.add(7.50);
     list.add(5.50);
     list.add(4.50);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 
   void seventy() {
@@ -133,11 +103,6 @@ class PrizePoolList {
     list.add(5.50);
     list.add(4.50);
     list.add(3.50);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 
   void eighty() {
@@ -150,11 +115,6 @@ class PrizePoolList {
     list.add(4.25);
     list.add(3.50);
     list.add(3.00);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 
   void hundred1() {
@@ -168,11 +128,6 @@ class PrizePoolList {
     list.add(3.00);
     list.add(2.75);
     list.add(2.75);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 
   void hundred20() {
@@ -187,11 +142,6 @@ class PrizePoolList {
     list.add(2.50);
     list.add(2.50);
     list.add(2.00);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 
   void hundred40() {
@@ -208,11 +158,6 @@ class PrizePoolList {
     list.add(1.75);
     list.add(1.50);
     list.add(1.50);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 
   void hundred60() {
@@ -231,11 +176,6 @@ class PrizePoolList {
     list.add(1.50);
     list.add(1.50);
     list.add(1.50);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 
   void hundred80() {
@@ -256,11 +196,6 @@ class PrizePoolList {
     list.add(1.25);
     list.add(1.25);
     list.add(1.25);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 
   void twoHundred() {
@@ -284,11 +219,6 @@ class PrizePoolList {
     list.add(1.00);
     list.add(1.00);
     list.add(1.00);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 
   void twoHundred34() {
@@ -314,11 +244,6 @@ class PrizePoolList {
     list.add(1.00);
     list.add(1.00);
     list.add(1.00);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 
   void twoHundred67() {
@@ -347,11 +272,6 @@ class PrizePoolList {
     list.add(1.00);
     list.add(0.90);
     list.add(0.90);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 
   void threeHundred() {
@@ -383,11 +303,6 @@ class PrizePoolList {
     list.add(0.75);
     list.add(0.75);
     list.add(0.75);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 
   void threeHundred34() {
@@ -422,11 +337,6 @@ class PrizePoolList {
     list.add(0.70);
     list.add(0.70);
     list.add(0.70);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 
   void threeHundred67() {
@@ -465,11 +375,6 @@ class PrizePoolList {
     list.add(0.60);
     list.add(0.60);
     list.add(0.60);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 
   void fourHundred() {
@@ -511,11 +416,6 @@ class PrizePoolList {
     list.add(0.60);
     list.add(0.60);
     list.add(0.60);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 
   void fourHundred50() {
@@ -559,10 +459,5 @@ class PrizePoolList {
     list.add(0.50);
     list.add(0.50);
     list.add(0.50);
-    double i = 0;
-    for (var item in list) {
-      i += item;
-    }
-    print(i);
   }
 }
