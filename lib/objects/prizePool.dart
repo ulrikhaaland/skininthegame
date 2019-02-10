@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PrizePoolList {
   List<double> list;
@@ -460,4 +461,14 @@ class PrizePoolList {
     list.add(0.50);
     list.add(0.50);
   }
+}
+
+class PayoutObject {
+  ListTile tile;
+  int payout;
+  double percentage;
+  int placing;
+  PayoutObject(this.tile, this.placing, this.payout, this.percentage);
+
+  
 }

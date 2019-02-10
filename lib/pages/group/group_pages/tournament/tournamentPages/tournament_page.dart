@@ -14,6 +14,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:yadda/objects/prizePool.dart';
 import 'package:yadda/widgets/primary_button.dart';
+import 'package:yadda/utils/layout.dart';
 
 class TournamentPage extends StatefulWidget {
   TournamentPage({
@@ -40,6 +41,8 @@ class TournamentPageState extends State<TournamentPage>
 
   final Firestore firestoreInstance = Firestore.instance;
   TabController _tabController;
+
+  final myController = TextEditingController();
 
   String currentUserId;
   String currentUserName;
@@ -69,7 +72,13 @@ class TournamentPageState extends State<TournamentPage>
   Color green = UIData.green;
   Color blue = UIData.blue;
 
+  String addOrSubtractText;
+  String calculateText;
+  List<Widget> prizePoolList = new List();
+
   Game game;
+
+  bool keepList = false;
 
   @override
   initState() {
@@ -79,9 +88,9 @@ class TournamentPageState extends State<TournamentPage>
     currentUserId = widget.user.id;
     currentUserName = widget.user.userName;
     groupId = widget.group.id;
+    myController.addListener(() => calculatePayouts(false));
 
     isAdmin = widget.group.admin;
-
     if (isAdmin == true) {
       if (!widget.history) {
         _tabController = new TabController(vsync: this, length: 6);
@@ -105,12 +114,23 @@ class TournamentPageState extends State<TournamentPage>
   @override
   void dispose() {
     _tabController.dispose();
+    myController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return setScreen();
+  }
+
+  bool validateAndSave() {
+    final form = formKey.currentState;
+    if (form.validate()) {
+      form.save();
+      return true;
+    }
+    isLoading = false;
+    return false;
   }
 
   setJoin() {
@@ -286,8 +306,37 @@ class TournamentPageState extends State<TournamentPage>
           docSnap.data["stopreg"],
           rebuyPrice: docSnap.data["rebuyprice"],
           addonPrice: docSnap.data["addonprice"],
+          subOrAddPP: docSnap.data["suboraddpp"],
+          add: docSnap.data["add"],
+          placesPaid: docSnap.data["placespaid"],
         );
-        populatePPList();
+        game.add
+            ? addOrSubtractText = "added to"
+            : addOrSubtractText = "subtracted from";
+        if (game.calculatePayouts) {
+          calculateText = "The app will calculate payouts";
+        } else {
+          calculateText = "Define your own payouts";
+          QuerySnapshot qSnap = await firestoreInstance
+              .collection("$gamePath/payouts")
+              .getDocuments();
+          if (qSnap.documents.isNotEmpty) {
+            myController.text = qSnap.documents.length.toString();
+            keepList = true;
+            pObjectList = new List();
+            qSnap.documents.forEach((doc) {
+              PayoutObject payoutObject = new PayoutObject(
+                  null,
+                  doc.data["placing"],
+                  doc.data["payout"],
+                  doc.data["percentage"]);
+              pObjectList.add(payoutObject);
+            });
+            pObjectList.sort((a, b) => a.placing.compareTo(b.placing));
+          }
+        }
+        myController.text = game.placesPaid.toString();
+        calculatePayouts(false);
         checkIfFull();
         userFound = true;
         setScreen();
@@ -540,7 +589,7 @@ class TournamentPageState extends State<TournamentPage>
     }
   }
 
-  calculatePayouts() async {
+  calculatePayouts(bool keepList) async {
     int totalPPAmount = 0;
     int totalAddons = 0;
     int totalRebuys = 0;
@@ -558,16 +607,25 @@ class TournamentPageState extends State<TournamentPage>
     calcRebuys = totalRebuys;
     calcAddons = totalAddons;
     calcBuyins = qSnap.documents.length;
-    preCalculation();
-    allPayouts(qSnap.documents.length, totalPPAmount);
+
+    populatePPList();
+    game.add
+        ? totalPPAmount += game.subOrAddPP
+        : totalPPAmount -= game.subOrAddPP;
+
+    if (game.calculatePayouts) {
+      appPP(qSnap.documents.length, totalPPAmount);
+    } else if (myController.text != "") {
+      selfDefinedPP(int.tryParse(myController.text), totalPPAmount);
+    }
   }
 
   List<Widget> list = new List();
+  List<PayoutObject> pObjectList;
 
-  allPayouts(int count, int pp) {
+  appPP(int count, int pp) {
     PrizePoolList poolList = new PrizePoolList(count);
     list = new List();
-
     for (int i = 0; i < poolList.list.length; i++) {
       double doobs = (poolList.list[i] / 100);
       double doobsAmount = pp * doobs;
@@ -582,11 +640,6 @@ class TournamentPageState extends State<TournamentPage>
           style: new TextStyle(color: UIData.blackOrWhite),
           textAlign: TextAlign.center,
         ),
-
-        // new Text(
-        //   "$amount",
-        //   style: new TextStyle(color: UIData.blackOrWhite),
-        // ),
         trailing: new Text(
           "${poolList.list[i]}%",
           style: new TextStyle(color: UIData.blackOrWhite),
@@ -597,6 +650,80 @@ class TournamentPageState extends State<TournamentPage>
     setState(() {
       populatePPList();
     });
+  }
+
+  void selfDefinedPP(int count, int pp) async {
+    if (keepList && count != pObjectList.length) {
+      keepList = false;
+    }
+    list = new List();
+
+    if (!keepList) {
+      pObjectList = new List();
+    }
+    for (var i = 0; i < count; i++) {
+      PayoutObject payoutObject;
+      if (!keepList) {
+        payoutObject = new PayoutObject(null, i + 1, 0, 0);
+      } else {
+        payoutObject = pObjectList[i];
+        
+      }
+      ListTile tile = new ListTile(
+        leading: new Text(
+          "${i + 1}.",
+          style: new TextStyle(color: UIData.blackOrWhite, fontSize: 24),
+        ),
+        title: new TextFormField(
+          keyboardType: TextInputType.number,
+          initialValue: payoutObject.payout.toString(),
+          style: new TextStyle(color: UIData.blackOrWhite),
+          onSaved: (val) {
+            if (val.isNotEmpty) {
+              payoutObject.payout = int.tryParse(val);
+            } else {
+              payoutObject.payout = 0;
+            }
+            payoutObject.percentage = payoutObject.payout / pp * 100;
+            print(payoutObject.percentage);
+          },
+        ),
+        trailing: new Text(
+          "${payoutObject.percentage.toStringAsPrecision(4)}%",
+          style: new TextStyle(color: UIData.blackOrWhite),
+        ),
+      );
+      payoutObject.tile = tile;
+      if (!keepList) {
+        pObjectList.add(payoutObject);
+      }
+      if (keepList) {
+        QuerySnapshot querySnapshot = await firestoreInstance
+            .collection("$gamePath/payouts")
+            .getDocuments();
+        querySnapshot.documents.forEach((doc) {
+          if (int.tryParse(doc.documentID) > pObjectList.length) {
+            firestoreInstance
+                .document("$gamePath/payouts/${doc.documentID}")
+                .delete();
+          }
+        });
+        for (var item in pObjectList) {
+          Firestore.instance
+              .document("$gamePath/payouts/${item.placing}")
+              .setData({
+            "placing": item.placing,
+            "payout": item.payout,
+            "percentage": item.percentage,
+          });
+        }
+      }
+    }
+
+    for (var item in pObjectList) {
+      list.add(item.tile);
+    }
+    setState(() {});
   }
 
   Widget prizePoolPage() {
@@ -611,21 +738,122 @@ class TournamentPageState extends State<TournamentPage>
                   color: UIData.blackOrWhite, fontSize: UIData.fontSize24),
             ),
             new Padding(
-              padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-              child: new PrimaryButton(
-                  text: "Calculate payouts",
-                  onPressed: () {
-                    calculatePayouts();
-                    game.calculatePayouts = true;
-                    firestoreInstance.document(gamePath).updateData({
-                      "calculatepayouts": game.calculatePayouts,
-                    });
-                  }),
+              padding: EdgeInsets.only(bottom: 10),
             ),
             preCalculation(),
+            Layout().padded(
+              child: new TextFormField(
+                keyboardType: TextInputType.number,
+                initialValue: "${game.subOrAddPP}",
+                style: new TextStyle(color: UIData.blackOrWhite),
+                key: new Key('suboraddpp'),
+                decoration: new InputDecoration(
+                    labelText: 'Add or subtract money',
+                    labelStyle: new TextStyle(color: Colors.grey[600])),
+                autocorrect: false,
+                onSaved: (val) {
+                  if (val.isEmpty) {
+                    game.subOrAddPP = 0;
+                  } else {
+                    game.subOrAddPP = int.tryParse(val);
+                  }
+                  if (!game.add) {
+                    game.add = false;
+                    addOrSubtractText = "subtracted from";
+                  } else {
+                    game.add = true;
+                    addOrSubtractText = "added to";
+                  }
+                  firestoreInstance.document(gamePath).updateData({
+                    "suboraddpp": game.subOrAddPP,
+                    "add": game.add,
+                  });
+                  calculatePayouts(false);
+                  setState(() {});
+                },
+              ),
+            ),
+            new Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                new Container(
+                  width: 110,
+                  child: new RaisedButton(
+                    child: new Text(
+                      "ADD",
+                    ),
+                    shape: new RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                    onPressed: () {
+                      game.add = true;
+                      validateAndSave();
+                    },
+                  ),
+                ),
+                new Container(
+                  width: 110,
+                  child: new RaisedButton(
+                      child: new Text(
+                        "SUBTRACT",
+                      ),
+                      shape: new RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(10.0))),
+                      onPressed: () {
+                        game.add = false;
+                        validateAndSave();
+                      }),
+                ),
+              ],
+            ),
+            new Padding(
+              padding: EdgeInsets.only(bottom: 10),
+            ),
+            new Text(
+                "Money $addOrSubtractText the prize pool: ${game.subOrAddPP}",
+                style: new TextStyle(color: UIData.blue)),
+            new Padding(
+              padding: EdgeInsets.only(bottom: 10),
+            ),
+            new CheckboxListTile(
+                title: new Text(
+                  "Calculate payouts",
+                  style: new TextStyle(color: UIData.blackOrWhite),
+                ),
+                subtitle: new Text(
+                  calculateText,
+                  style: new TextStyle(color: Colors.grey[600]),
+                ),
+                value: game.calculatePayouts,
+                onChanged: (val) async {
+                  if (!game.calculatePayouts && val) {
+                    QuerySnapshot qSnap = await firestoreInstance
+                        .collection("$gamePath/payouts")
+                        .getDocuments();
+                    qSnap.documents.forEach((doc) {
+                      firestoreInstance
+                          .document("$gamePath/payouts/${doc.documentID}")
+                          .delete();
+                    });
+                  }
+                  if (val) {
+                    calculateText = "The app will calculate payouts";
+                    calculatePayouts(false);
+                  } else {
+                    calculateText = "Define your own payouts";
+                  }
+
+                  game.calculatePayouts = val;
+                  firestoreInstance.document(gamePath).updateData({
+                    "calculatepayouts": val,
+                  });
+                  setState(() {});
+                }),
+            placesPaid(),
+            buttonPP(),
             new Column(
               children: list,
-            )
+            ),
           ],
         ),
       );
@@ -636,7 +864,15 @@ class TournamentPageState extends State<TournamentPage>
   int calcRebuys = 0;
   int calcAddons = 0;
 
-  List<Widget> prizePoolList;
+  List returnlist() {
+    List<Widget> list = new List();
+    list.add(new Container());
+    if (prizePoolList.isEmpty) {
+      return list;
+    } else {
+      return prizePoolList;
+    }
+  }
 
   void populatePPList() {
     prizePoolList = new List();
@@ -714,6 +950,29 @@ class TournamentPageState extends State<TournamentPage>
             textAlign: TextAlign.right),
       );
     }
+    int negOrPos;
+    game.add == true ? negOrPos = game.subOrAddPP : negOrPos = -game.subOrAddPP;
+    if (game.subOrAddPP > 0) {
+      String text;
+      game.add ? text = "Added" : text = "Subtracted";
+      prizePoolList.add(
+        new Text(
+          text,
+          style: new TextStyle(color: UIData.blackOrWhite),
+          textAlign: TextAlign.left,
+        ),
+      );
+      prizePoolList.add(
+        new Text("1",
+            style: new TextStyle(color: UIData.blackOrWhite),
+            textAlign: TextAlign.center),
+      );
+      prizePoolList.add(
+        new Text("$negOrPos",
+            style: new TextStyle(color: UIData.blackOrWhite),
+            textAlign: TextAlign.right),
+      );
+    }
     prizePoolList.add(
       new Text(
         "Totals",
@@ -728,7 +987,7 @@ class TournamentPageState extends State<TournamentPage>
     );
     prizePoolList.add(
       new Text(
-          "${(calcAddons * game.addonPrice) + (calcRebuys * game.rebuyPrice) + (calcBuyins * game.buyin)}",
+          "${(calcAddons * game.addonPrice) + (calcRebuys * game.rebuyPrice) + (calcBuyins * game.buyin) + negOrPos}",
           style: new TextStyle(color: UIData.blackOrWhite),
           textAlign: TextAlign.right),
     );
@@ -736,23 +995,72 @@ class TournamentPageState extends State<TournamentPage>
   }
 
   Widget preCalculation() {
-    if (game.calculatePayouts) {
-      return new Container(
-          decoration: new BoxDecoration(
-              color: UIData.listColor,
-              border: Border.all(color: Colors.grey[600]),
-              borderRadius: new BorderRadius.all(const Radius.circular(8.0))),
-          child: new Padding(
-              padding: EdgeInsets.all(8.0),
-              child: new Column(
-                children: <Widget>[
-                  GridView.count(
-                      shrinkWrap: true,
-                      childAspectRatio: 4,
-                      crossAxisCount: 3,
-                      children: prizePoolList),
-                ],
-              )));
+    return new Container(
+        decoration: new BoxDecoration(
+            color: UIData.listColor,
+            border: Border.all(color: Colors.grey[600]),
+            borderRadius: new BorderRadius.all(const Radius.circular(8.0))),
+        child: new Padding(
+            padding: EdgeInsets.all(8.0),
+            child: new Column(
+              children: <Widget>[
+                GridView.count(
+                    physics: ScrollPhysics(),
+                    shrinkWrap: true,
+                    childAspectRatio: 6,
+                    crossAxisCount: 3,
+                    children: returnlist()),
+              ],
+            )));
+  }
+
+  Widget placesPaid() {
+    if (!game.calculatePayouts && isAdmin) {
+      return new Layout().padded(
+        child: new TextFormField(
+          keyboardType: TextInputType.number,
+          // initialValue: "${game.placesPaid}",
+          style: new TextStyle(color: UIData.blackOrWhite),
+          key: new Key('suboraddpp'),
+          decoration: new InputDecoration(
+              labelText: 'Places paid',
+              labelStyle: new TextStyle(color: Colors.grey[600])),
+          autocorrect: false,
+          controller: myController,
+          onSaved: (val) {
+            int intVal = int.tryParse(val);
+            if (val.isEmpty) {
+              game.placesPaid = 0;
+            } else if (intVal > game.maxPlayers) {
+              game.placesPaid = game.maxPlayers;
+            } else {
+              game.placesPaid = intVal;
+            }
+          },
+        ),
+      );
+    } else {
+      return new Container();
+    }
+  }
+
+  Widget buttonPP() {
+    if (!game.calculatePayouts && isAdmin) {
+      return new RaisedButton(
+          child: new Text(
+            "Save Payouts",
+          ),
+          shape: new RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10.0))),
+          onPressed: () {
+            keepList = true;
+            if (validateAndSave()) {
+              firestoreInstance
+                  .document(gamePath)
+                  .updateData({"placespaid": int.tryParse(myController.text)});
+              calculatePayouts(false);
+            }
+          });
     } else {
       return new Container();
     }

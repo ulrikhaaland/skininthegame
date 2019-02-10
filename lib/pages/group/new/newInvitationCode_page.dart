@@ -57,38 +57,33 @@ class InvitationCodePageState extends State<InvitationCodePage> {
     _getGroupCode();
   }
 
-  
-
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      resizeToAvoidBottomPadding: true,
-      appBar: new AppBar(
-        iconTheme: IconThemeData(
-          color: UIData.blackOrWhite
+        resizeToAvoidBottomPadding: true,
+        appBar: new AppBar(
+          iconTheme: IconThemeData(color: UIData.blackOrWhite),
+          actions: <Widget>[
+            // IconButton(
+            //     padding: EdgeInsets.fromLTRB(0.0, 0.0, 5.0, 0.0),
+            //     icon: new Icon(Icons.home,
+            //         color: Colors.white, size: UIData.iconSizeAppBar),
+            //     onPressed: () {
+            //       Navigator.of(context)..pop()..pop();
+            //     }),
+          ],
+          backgroundColor: UIData.appBarColor,
+          title: new Text(
+            "Invitation Codes",
+            style: new TextStyle(
+                fontSize: UIData.fontSize24, color: UIData.blackOrWhite),
+          ),
         ),
-        actions: <Widget>[
-          // IconButton(
-          //     padding: EdgeInsets.fromLTRB(0.0, 0.0, 5.0, 0.0),
-          //     icon: new Icon(Icons.home,
-          //         color: Colors.white, size: UIData.iconSizeAppBar),
-          //     onPressed: () {
-          //       Navigator.of(context)..pop()..pop();
-          //     }),
-        ],
-        backgroundColor: UIData.appBarColor,
-        title: new Text(
-          "Invitation Codes",
-          style: new TextStyle(fontSize: UIData.fontSize24, color: UIData.blackOrWhite),
-        ),
-      ),
-      backgroundColor: UIData.dark,
-      body: new Form(
-        key: formKey,
-        child: Essentials().setScreen(_newGame(), loading),
-      )
-      
-    );
+        backgroundColor: UIData.dark,
+        body: new Form(
+          key: formKey,
+          child: Essentials().setScreen(_newGame(), loading),
+        ));
   }
 
   Widget _newGame() {
@@ -258,18 +253,8 @@ class InvitationCodePageState extends State<InvitationCodePage> {
             Icons.refresh,
             color: UIData.yellow,
           ),
-          onPressed: () {
-            fireStoreInstance.runTransaction((Transaction tx) async {
-              DocumentSnapshot docSnap =
-                  await fireStoreInstance.document("groups/$groupId").get();
-              if (docSnap.data["adminsleft"] > 0) {
-                _setGroupCode(
-                    adminGroupCode, "admingroupcode", currentAdminGroupCode);
-              } else {
-                print("Set buy more adminspage");
-              }
-            });
-          },
+          onPressed: () => _setGroupCode(
+              adminGroupCode, "admingroupcode", currentAdminGroupCode),
         ),
         title: new TextFormField(
           keyboardAppearance: Brightness.dark,
@@ -294,20 +279,14 @@ class InvitationCodePageState extends State<InvitationCodePage> {
     ];
   }
 
-  _getGroupCode() {
-    fireStoreInstance.runTransaction((Transaction tx) async {
-      DocumentSnapshot docSnap =
-          await fireStoreInstance.document("groups/$groupId").get();
-      if (docSnap.data["adminsleft"] > 0) {
-        fireStoreInstance
-            .document("groups/$groupId/codes/admingroupcode")
-            .get()
-            .then((datasnapshot) {
-          if (datasnapshot.exists) {
-            currentAdminGroupCode = datasnapshot.data["code"];
-            setState(() {});
-          }
-        });
+  _getGroupCode() async {
+    fireStoreInstance
+        .document("groups/$groupId/codes/admingroupcode")
+        .get()
+        .then((datasnapshot) {
+      if (datasnapshot.exists) {
+        currentAdminGroupCode = datasnapshot.data["code"];
+        setState(() {});
       }
     });
 

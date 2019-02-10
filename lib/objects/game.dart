@@ -31,14 +31,20 @@ class Game {
       this.floorName,
       this.stopReg,
       {this.addonPrice,
-      this.rebuyPrice});
+      this.rebuyPrice,
+      this.subOrAddPP,
+      this.add,
+      this.placesPaid});
 
   bool calculatePayouts;
   bool isRunning;
   bool showMoneyOnTable;
   bool stopReg;
-  int type;
+  bool add;
 
+  int placesPaid;
+  int type;
+  int subOrAddPP;
   int moneyOnTable;
   int addon;
   int buyin;
@@ -97,6 +103,9 @@ class Game {
         'floorfcm': this.floorFCM,
         'floorname': this.floorName,
         'stopreg': this.stopReg,
+        'subpp': this.subOrAddPP,
+        'add': this.add,
+        'placespaid': this.placesPaid,
       };
 
   Game fromMap(Map map) {
@@ -129,8 +138,11 @@ class Game {
       floorFCM,
       floorName,
       stopReg,
-      rebuyPrice: this.rebuyPrice,
-      addonPrice: this.addonPrice,
+      rebuyPrice: rebuyPrice,
+      addonPrice: addonPrice,
+      subOrAddPP: subOrAddPP,
+      add: add,
+      placesPaid: placesPaid,
     );
     return game;
   }

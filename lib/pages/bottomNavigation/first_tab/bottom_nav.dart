@@ -353,15 +353,7 @@ class PageOneState extends State<PageOne> {
             .delete();
         firestoreInstance.document("codes/$groupCode").delete();
       } else if (groupCode.contains("a")) {
-        await firestoreInstance.runTransaction((Transaction tx) async {
-          DocumentSnapshot docSnap =
-              await firestoreInstance.document("groups/$groupId").get();
-          if (docSnap.data["adminsleft"] < 1) {
-            admin = false;
-          } else {
-            admin = true;
-          }
-        });
+        admin = true;
       }
       firestoreInstance
           .document("groups/$groupId/members/${widget.user.id}")
