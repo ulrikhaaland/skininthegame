@@ -1,46 +1,50 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'prizePool.dart';
 
 class Game {
   Game(
-      this.totalPrizePool,
-      this.addon,
-      this.id,
-      this.info,
-      this.name,
-      this.fittedName,
-      this.adress,
-      this.bBlind,
-      this.buyin,
-      this.date,
-      this.gameType,
-      this.maxPlayers,
-      this.orderByTime,
-      this.rebuy,
-      this.registeredPlayers,
-      this.sBlind,
-      this.startingChips,
-      this.time,
-      this.calculatePayouts,
-      this.currency,
-      this.isRunning,
-      this.moneyOnTable,
-      this.showMoneyOnTable,
-      this.type,
-      this.floor,
-      this.floorFCM,
-      this.floorName,
-      this.stopReg,
-      {this.addonPrice,
-      this.rebuyPrice,
-      this.subOrAddPP,
-      this.add,
-      this.placesPaid});
+    this.totalPrizePool,
+    this.addon,
+    this.id,
+    this.info,
+    this.name,
+    this.fittedName,
+    this.adress,
+    this.bBlind,
+    this.buyin,
+    this.date,
+    this.gameType,
+    this.maxPlayers,
+    this.orderByTime,
+    this.rebuy,
+    this.registeredPlayers,
+    this.sBlind,
+    this.startingChips,
+    this.time,
+    this.calculatePayouts,
+    this.currency,
+    this.isRunning,
+    this.moneyOnTable,
+    this.showMoneyOnTable,
+    this.type,
+    this.floor,
+    this.floorFCM,
+    this.floorName,
+    this.stopReg, {
+    this.addonPrice,
+    this.rebuyPrice,
+    this.subOrAddPP,
+    this.add,
+    this.placesPaid,
+  });
 
   bool calculatePayouts;
   bool isRunning;
   bool showMoneyOnTable;
   bool stopReg;
   bool add;
+
+  List<PayoutObject> payoutList;
 
   int placesPaid;
   int type;
@@ -103,7 +107,7 @@ class Game {
         'floorfcm': this.floorFCM,
         'floorname': this.floorName,
         'stopreg': this.stopReg,
-        'subpp': this.subOrAddPP,
+        'suboraddpp': this.subOrAddPP,
         'add': this.add,
         'placespaid': this.placesPaid,
       };

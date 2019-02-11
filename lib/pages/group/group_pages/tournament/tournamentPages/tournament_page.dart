@@ -78,8 +78,6 @@ class TournamentPageState extends State<TournamentPage>
 
   Game game;
 
-  bool keepList = false;
-
   @override
   initState() {
     super.initState();
@@ -88,8 +86,11 @@ class TournamentPageState extends State<TournamentPage>
     currentUserId = widget.user.id;
     currentUserName = widget.user.userName;
     groupId = widget.group.id;
-    myController.addListener(() => calculatePayouts(false));
-
+    myController.addListener(() async => selfDefinedPP(
+        int.tryParse(myController.text),
+        await calculatePayouts(false),
+        true,
+        false));
     isAdmin = widget.group.admin;
     if (isAdmin == true) {
       if (!widget.history) {
@@ -315,6 +316,7 @@ class TournamentPageState extends State<TournamentPage>
             : addOrSubtractText = "subtracted from";
         if (game.calculatePayouts) {
           calculateText = "The app will calculate payouts";
+          calculatePayouts(true);
         } else {
           calculateText = "Define your own payouts";
           QuerySnapshot qSnap = await firestoreInstance
@@ -322,7 +324,7 @@ class TournamentPageState extends State<TournamentPage>
               .getDocuments();
           if (qSnap.documents.isNotEmpty) {
             myController.text = qSnap.documents.length.toString();
-            keepList = true;
+            game.calculatePayouts = false;
             pObjectList = new List();
             qSnap.documents.forEach((doc) {
               PayoutObject payoutObject = new PayoutObject(
@@ -333,10 +335,11 @@ class TournamentPageState extends State<TournamentPage>
               pObjectList.add(payoutObject);
             });
             pObjectList.sort((a, b) => a.placing.compareTo(b.placing));
+            calculatePayouts(false);
           }
         }
         myController.text = game.placesPaid.toString();
-        calculatePayouts(false);
+
         checkIfFull();
         userFound = true;
         setScreen();
@@ -589,7 +592,7 @@ class TournamentPageState extends State<TournamentPage>
     }
   }
 
-  calculatePayouts(bool keepList) async {
+  Future<int> calculatePayouts(bool calculatePayouts) async {
     int totalPPAmount = 0;
     int totalAddons = 0;
     int totalRebuys = 0;
@@ -607,17 +610,15 @@ class TournamentPageState extends State<TournamentPage>
     calcRebuys = totalRebuys;
     calcAddons = totalAddons;
     calcBuyins = qSnap.documents.length;
-
+    game.totalPrizePool = totalPPAmount.toString();
     populatePPList();
     game.add
         ? totalPPAmount += game.subOrAddPP
         : totalPPAmount -= game.subOrAddPP;
-
-    if (game.calculatePayouts) {
+    if (calculatePayouts) {
       appPP(qSnap.documents.length, totalPPAmount);
-    } else if (myController.text != "") {
-      selfDefinedPP(int.tryParse(myController.text), totalPPAmount);
     }
+    return totalPPAmount;
   }
 
   List<Widget> list = new List();
@@ -626,6 +627,7 @@ class TournamentPageState extends State<TournamentPage>
   appPP(int count, int pp) {
     PrizePoolList poolList = new PrizePoolList(count);
     list = new List();
+    pObjectList = new List();
     for (int i = 0; i < poolList.list.length; i++) {
       double doobs = (poolList.list[i] / 100);
       double doobsAmount = pp * doobs;
@@ -645,59 +647,67 @@ class TournamentPageState extends State<TournamentPage>
           style: new TextStyle(color: UIData.blackOrWhite),
         ),
       );
+      PayoutObject payoutObject =
+          new PayoutObject(tile, i + 1, amount, poolList.list[i]);
+      pObjectList.add(payoutObject);
       list.add(tile);
     }
+    game.payoutList = pObjectList;
+    game.placesPaid = poolList.list.length;
+    firestoreInstance.document(gamePath).updateData({
+      "placespaid": game.placesPaid,
+    });
     setState(() {
       populatePPList();
     });
   }
 
-  void selfDefinedPP(int count, int pp) async {
-    if (keepList && count != pObjectList.length) {
-      keepList = false;
-    }
-    list = new List();
+  void selfDefinedPP(int count, int pp, bool init, bool save) async {
+    if (myController.text != "" && !game.calculatePayouts || !init) {
+      list = new List();
 
-    if (!keepList) {
-      pObjectList = new List();
-    }
-    for (var i = 0; i < count; i++) {
-      PayoutObject payoutObject;
-      if (!keepList) {
-        payoutObject = new PayoutObject(null, i + 1, 0, 0);
-      } else {
-        payoutObject = pObjectList[i];
-        
+      if (pObjectList == null) {
+        pObjectList = new List();
       }
-      ListTile tile = new ListTile(
-        leading: new Text(
-          "${i + 1}.",
-          style: new TextStyle(color: UIData.blackOrWhite, fontSize: 24),
-        ),
-        title: new TextFormField(
-          keyboardType: TextInputType.number,
-          initialValue: payoutObject.payout.toString(),
-          style: new TextStyle(color: UIData.blackOrWhite),
-          onSaved: (val) {
-            if (val.isNotEmpty) {
-              payoutObject.payout = int.tryParse(val);
-            } else {
-              payoutObject.payout = 0;
-            }
-            payoutObject.percentage = payoutObject.payout / pp * 100;
-            print(payoutObject.percentage);
-          },
-        ),
-        trailing: new Text(
-          "${payoutObject.percentage.toStringAsPrecision(4)}%",
-          style: new TextStyle(color: UIData.blackOrWhite),
-        ),
-      );
-      payoutObject.tile = tile;
-      if (!keepList) {
-        pObjectList.add(payoutObject);
+      for (var i = 0; i < count; i++) {
+        PayoutObject payoutObject;
+        if (pObjectList.length < count) {
+          payoutObject = new PayoutObject(null, i + 1, 0, 0);
+        } else {
+          payoutObject = pObjectList[i];
+        }
+        ListTile tile = new ListTile(
+          leading: new Text(
+            "${i + 1}.",
+            style: new TextStyle(color: UIData.blackOrWhite, fontSize: 24),
+          ),
+          title: new TextFormField(
+            keyboardType: TextInputType.number,
+            initialValue: payoutObject.payout.toString(),
+            style: new TextStyle(color: UIData.blackOrWhite),
+            onSaved: (val) {
+              if (val.isNotEmpty) {
+                payoutObject.payout = int.tryParse(val);
+              } else {
+                payoutObject.payout = 0;
+              }
+              payoutObject.percentage = payoutObject.payout / pp * 100;
+              print(payoutObject.percentage);
+            },
+          ),
+          trailing: new Text(
+            "${payoutObject.percentage.toStringAsPrecision(4)}%",
+            style: new TextStyle(color: UIData.blackOrWhite),
+          ),
+        );
+        payoutObject.tile = tile;
+        if (pObjectList.length < i + 1) {
+          pObjectList.add(payoutObject);
+        }
       }
-      if (keepList) {
+      if (save) {
+        game.payoutList = pObjectList;
+
         QuerySnapshot querySnapshot = await firestoreInstance
             .collection("$gamePath/payouts")
             .getDocuments();
@@ -718,12 +728,11 @@ class TournamentPageState extends State<TournamentPage>
           });
         }
       }
+      for (var item in pObjectList) {
+        list.add(item.tile);
+      }
+      setState(() {});
     }
-
-    for (var item in pObjectList) {
-      list.add(item.tile);
-    }
-    setState(() {});
   }
 
   Widget prizePoolPage() {
@@ -768,7 +777,9 @@ class TournamentPageState extends State<TournamentPage>
                     "suboraddpp": game.subOrAddPP,
                     "add": game.add,
                   });
-                  calculatePayouts(false);
+                  if (game.calculatePayouts) {
+                    calculatePayouts(false);
+                  }
                   setState(() {});
                 },
               ),
@@ -838,7 +849,7 @@ class TournamentPageState extends State<TournamentPage>
                   }
                   if (val) {
                     calculateText = "The app will calculate payouts";
-                    calculatePayouts(false);
+                    calculatePayouts(true);
                   } else {
                     calculateText = "Define your own payouts";
                   }
@@ -1053,12 +1064,13 @@ class TournamentPageState extends State<TournamentPage>
           shape: new RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(10.0))),
           onPressed: () {
-            keepList = true;
+            game.calculatePayouts = false;
             if (validateAndSave()) {
               firestoreInstance
                   .document(gamePath)
                   .updateData({"placespaid": int.tryParse(myController.text)});
-              calculatePayouts(false);
+              selfDefinedPP(int.tryParse(myController.text),
+                  int.tryParse(game.totalPrizePool), false, true);
             }
           });
     } else {
