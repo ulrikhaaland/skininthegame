@@ -663,13 +663,25 @@ class TournamentPageState extends State<TournamentPage>
   }
 
   void selfDefinedPP(int count, int pp, bool init, bool save) async {
-    if (myController.text != "" && !game.calculatePayouts || !init) {
+    if (myController.text != "" && !game.calculatePayouts ||
+        !init && myController.text != "") {
       list = new List();
 
       if (pObjectList == null) {
         pObjectList = new List();
       }
       for (var i = 0; i < count; i++) {
+        if (pObjectList.length > count) {
+          List<PayoutObject> list = new List();
+          for (int i = 0; i < pObjectList.length; i++) {
+            if (i < count) {
+              list.add(pObjectList[i]);
+            }
+          }
+          pObjectList = new List();
+          pObjectList = list;
+        }
+
         PayoutObject payoutObject;
         if (pObjectList.length < count) {
           payoutObject = new PayoutObject(null, i + 1, 0, 0);
@@ -778,7 +790,7 @@ class TournamentPageState extends State<TournamentPage>
                     "add": game.add,
                   });
                   if (game.calculatePayouts) {
-                    calculatePayouts(false);
+                    calculatePayouts(true);
                   }
                   setState(() {});
                 },
