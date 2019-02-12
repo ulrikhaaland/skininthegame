@@ -102,6 +102,19 @@ class RootPageState extends State<RootPage> {
     return messagingToken;
   }
 
+  Future<bool> isAdmin(String groupId, String uid) async {
+    bool isAdmin = false;
+    QuerySnapshot qSnap = await firestoreInstance
+        .collection("groups/$groupId/members")
+        .getDocuments();
+    qSnap.documents.forEach((doc) {
+      if (uid == doc.data["uid"] && doc.data["admin"]) {
+        isAdmin = true;
+      }
+    });
+    return isAdmin;
+  }
+
   void handleMessage(Map<String, dynamic> message) async {
     if (user == null) {
       user = await getUserInfo();
@@ -122,13 +135,14 @@ class RootPageState extends State<RootPage> {
       var admin = docSnap.data["admin"];
       Group group = new Group(groupName, dailyMessage, host, fromGroupId, info,
           lowerCaseName, null, null, null, admin, null, null, null);
-      if (gameType == "Tournament!") {
+      if (gameType == "Tournament!")  {
         Navigator.of(context).push(new MaterialPageRoute(
             builder: (context) => new TournamentPage(
                   user: user,
                   group: group,
                   fromNotification: true,
                   gameId: fromGameId,
+                  history: false,
                 )));
       } else if (gameType == "Cash Game!") {
         Navigator.of(context).push(new MaterialPageRoute(
@@ -137,6 +151,7 @@ class RootPageState extends State<RootPage> {
                   group: group,
                   fromNotification: true,
                   gameId: fromGameId,
+                  history: false,
                 )));
       }
     } else {}

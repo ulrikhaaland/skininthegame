@@ -214,15 +214,12 @@ class NewTournamentState extends State<NewTournament> {
 
       if (notifyMembers == true) {
         OwnCloudFunctions().groupNotification(
-            game.name,
-            widget.group.name,
-            widget.group.id,
-            game.id,
             "Tournament!",
+            game,
             widget.group,
             "New Tournament!",
             "${widget.group.name} has invited you to join ${game.name}",
-            null);
+            true);
       }
     }
   }

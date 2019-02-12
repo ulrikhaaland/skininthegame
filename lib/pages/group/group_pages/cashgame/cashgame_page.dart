@@ -24,7 +24,8 @@ class CashGamePage extends StatefulWidget {
       this.gameId,
       this.group,
       this.history,
-      this.fromNotification})
+      this.fromNotification,
+     })
       : super(key: key);
   final User user;
   final String gameId;
@@ -102,9 +103,10 @@ class CashGamePageState extends State<CashGamePage>
     currentUserId = widget.user.getId();
     currentUserName = widget.user.getName();
     groupId = widget.group.id;
+
     isAdmin = widget.group.admin;
 
-    if (isAdmin == true && !widget.history) {
+    if (isAdmin == true && widget.history != true) {
       _tabController = new TabController(vsync: this, length: 6);
       isScrollable = true;
     } else {
@@ -810,6 +812,7 @@ class CashGamePageState extends State<CashGamePage>
       color = UIData.blue;
     }
     return new Slidable(
+      enabled: isAdmin,
       delegate: new SlidableDrawerDelegate(),
       actionExtentRatio: 0.25,
       child: new Container(
@@ -873,21 +876,47 @@ class CashGamePageState extends State<CashGamePage>
     if (document.documentID == widget.user.id) {
       color = UIData.blue;
     }
-    return new ListTile(
-      leading: addImage(document.data["profilepicurl"]),
-      title: new Text(
-        document.data["name"],
-        style: new TextStyle(fontSize: 25.0, color: color),
-        overflow: TextOverflow.ellipsis,
+    return new Slidable(
+      enabled: isAdmin,
+      delegate: new SlidableDrawerDelegate(),
+      actionExtentRatio: 0.25,
+      child: new Container(
+        child: new ListTile(
+          leading: addImage(document.data["profilepicurl"]),
+          title: new Text(
+            document.data["name"],
+            style: new TextStyle(fontSize: 25.0, color: color),
+            overflow: TextOverflow.ellipsis,
+          ),
+          // trailing: iconButtonDelete(document.documentID),
+          onTap: () => pushPlayerPage(
+              document.documentID,
+              document.data["buyin"],
+              document.data["payout"],
+              document.data["name"],
+              document.data["profilepicurl"],
+              true),
+        ),
       ),
-      // trailing: iconButtonDelete(document.documentID),
-      onTap: () => pushPlayerPage(
-          document.documentID,
-          document.data["buyin"],
-          document.data["payout"],
-          document.data["name"],
-          document.data["profilepicurl"],
-          true),
+      secondaryActions: <Widget>[
+        new IconSlideAction(
+            caption: 'Remove',
+            color: UIData.red,
+            icon: Icons.delete,
+            onTap: () {
+              firestoreInstance
+                  .document("$gamePath/activeplayers/${document.documentID}")
+                  .delete();
+              firestoreInstance
+                  .document("$gamePath/players/${document.documentID}")
+                  .delete();
+              checkIfFull();
+              Log().postLogToCollection(
+                  "$currentUserName removed ${widget.user.userName} from the game",
+                  "$gamePath/log",
+                  "Remove");
+            }),
+      ],
     );
   }
 
@@ -1027,6 +1056,7 @@ class CashGamePageState extends State<CashGamePage>
       color = UIData.blue;
     }
     return new Slidable(
+      enabled: isAdmin,
       delegate: new SlidableDrawerDelegate(),
       actionExtentRatio: 0.25,
       child: new Container(
@@ -1064,7 +1094,7 @@ class CashGamePageState extends State<CashGamePage>
                   .delete();
               checkIfFull();
               Log().postLogToCollection(
-                  "$currentUserName removed ${widget.user.userName} from the queue",
+                  "$currentUserName removed ${document.data["name"]} from the queue",
                   "$gamePath/log",
                   "Remove");
             }),
@@ -1125,6 +1155,7 @@ class CashGamePageState extends State<CashGamePage>
       result = document.data["payout"];
     }
     return new Slidable(
+      enabled: isAdmin,
       delegate: new SlidableDrawerDelegate(),
       actionExtentRatio: 0.25,
       child: new Container(

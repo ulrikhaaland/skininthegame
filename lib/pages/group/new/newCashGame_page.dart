@@ -252,15 +252,14 @@ class NewCashGameState extends State<NewCashGame> {
 
       if (notifyMembers == true) {
         OwnCloudFunctions().groupNotification(
-            game.name,
-            widget.group.name,
-            widget.group.id,
-            game.id,
+            
             "Cash Game!",
+            game,
             widget.group,
             "New Cash Game!",
             "${widget.group.name} has invited you to join ${game.name}",
-            null);
+            true
+            );
       }
     }
   }

@@ -91,9 +91,10 @@ class TournamentPageState extends State<TournamentPage>
         await calculatePayouts(false),
         true,
         false));
+
     isAdmin = widget.group.admin;
     if (isAdmin == true) {
-      if (!widget.history) {
+      if (widget.history != true) {
         _tabController = new TabController(vsync: this, length: 6);
         isScrollable = true;
       }
@@ -163,7 +164,7 @@ class TournamentPageState extends State<TournamentPage>
         child: Text(joinLeave),
         onPressed: () {
           if (hasJoined == true) {
-            removePlayer(widget.user.id, false, widget.user.userName);
+            removePlayer(widget.user.id, false, widget.user.userName, false);
           } else if (hasJoined == false &&
               game.registeredPlayers < game.maxPlayers) {
             addPlayer();
@@ -227,7 +228,7 @@ class TournamentPageState extends State<TournamentPage>
             .setData({
           'name': currentUserName,
           'id': currentUserId,
-          "placing": game.maxPlayers,
+          "placing": 0,
           'payout': 0,
           'rebuy': 0,
           'addon': 0,
@@ -244,7 +245,7 @@ class TournamentPageState extends State<TournamentPage>
         .postLogToCollection("$currentUserName joined game", logPath, "Joined");
   }
 
-  removePlayer(String uid, bool removed, String userName) async {
+  removePlayer(String uid, bool removed, String userName, bool active) async {
     String removedType;
     String removedText;
     if (removed) {
@@ -258,7 +259,7 @@ class TournamentPageState extends State<TournamentPage>
     setJoin();
     DocumentReference docRef =
         firestoreInstance.document("$gamePath/players/$uid");
-    if (!game.isRunning) {
+    if (!game.isRunning && !active) {
       await docRef.delete();
     } else {
       docRef.updateData({
@@ -579,15 +580,7 @@ class TournamentPageState extends State<TournamentPage>
         ),
         streamOfPosts(),
         setPlayersOrResult(),
-        Container(
-          padding: EdgeInsets.all(10.0),
-          child: new Text(
-            "Prize Pool:\n\n${game.totalPrizePool}",
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-                fontWeight: FontWeight.bold, color: UIData.blackOrWhite),
-          ),
-        ),
+        prizePoolPage(),
       ];
     }
   }
@@ -610,11 +603,12 @@ class TournamentPageState extends State<TournamentPage>
     calcRebuys = totalRebuys;
     calcAddons = totalAddons;
     calcBuyins = qSnap.documents.length;
-    game.totalPrizePool = totalPPAmount.toString();
-    populatePPList();
     game.add
         ? totalPPAmount += game.subOrAddPP
         : totalPPAmount -= game.subOrAddPP;
+    game.totalPrizePool = totalPPAmount.toString();
+    populatePPList();
+
     if (calculatePayouts) {
       appPP(qSnap.documents.length, totalPPAmount);
     }
@@ -688,13 +682,10 @@ class TournamentPageState extends State<TournamentPage>
         } else {
           payoutObject = pObjectList[i];
         }
-        ListTile tile = new ListTile(
-          leading: new Text(
-            "${i + 1}.",
-            style: new TextStyle(color: UIData.blackOrWhite, fontSize: 24),
-          ),
-          title: new TextFormField(
-            keyboardType: TextInputType.number,
+        Widget widget;
+        if (isAdmin) {
+          widget = new TextFormField(
+            keyboardType: TextInputType.numberWithOptions(),
             initialValue: payoutObject.payout.toString(),
             style: new TextStyle(color: UIData.blackOrWhite),
             onSaved: (val) {
@@ -706,7 +697,20 @@ class TournamentPageState extends State<TournamentPage>
               payoutObject.percentage = payoutObject.payout / pp * 100;
               print(payoutObject.percentage);
             },
+          );
+        } else {
+          widget = new Text(
+            payoutObject.payout.toString(),
+            style: new TextStyle(color: UIData.blackOrWhite),
+            textAlign: TextAlign.center,
+          );
+        }
+        ListTile tile = new ListTile(
+          leading: new Text(
+            "${i + 1}.",
+            style: new TextStyle(color: UIData.blackOrWhite, fontSize: 24),
           ),
+          title: widget,
           trailing: new Text(
             "${payoutObject.percentage.toStringAsPrecision(4)}%",
             style: new TextStyle(color: UIData.blackOrWhite),
@@ -874,6 +878,29 @@ class TournamentPageState extends State<TournamentPage>
                 }),
             placesPaid(),
             buttonPP(),
+            new Column(
+              children: list,
+            ),
+          ],
+        ),
+      );
+    } else {
+      return SingleChildScrollView(
+        padding: EdgeInsets.all(12.0),
+        child: new Column(
+          children: <Widget>[
+            new Text(
+              "PRIZE POOL",
+              style: new TextStyle(
+                  color: UIData.blackOrWhite, fontSize: UIData.fontSize24),
+            ),
+            new Padding(
+              padding: EdgeInsets.only(bottom: 10),
+            ),
+            preCalculation(),
+            new Padding(
+              padding: EdgeInsets.only(bottom: 10),
+            ),
             new Column(
               children: list,
             ),
@@ -1075,14 +1102,14 @@ class TournamentPageState extends State<TournamentPage>
           ),
           shape: new RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(10.0))),
-          onPressed: () {
+          onPressed: () async {
             game.calculatePayouts = false;
             if (validateAndSave()) {
               firestoreInstance
                   .document(gamePath)
                   .updateData({"placespaid": int.tryParse(myController.text)});
               selfDefinedPP(int.tryParse(myController.text),
-                  int.tryParse(game.totalPrizePool), false, true);
+                  await calculatePayouts(false), false, true);
             }
           });
     } else {
@@ -1314,7 +1341,8 @@ class TournamentPageState extends State<TournamentPage>
             color: UIData.red,
             icon: Icons.delete,
             onTap: () {
-              removePlayer(document.documentID, true, document.data["name"]);
+              removePlayer(
+                  document.documentID, true, document.data["name"], true);
             }),
       ],
     );

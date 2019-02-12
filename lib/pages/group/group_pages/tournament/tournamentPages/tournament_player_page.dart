@@ -52,6 +52,8 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
   static final formKey = new GlobalKey<FormState>();
   Firestore firestoreInstance = Firestore.instance;
 
+  TextEditingController myController = new TextEditingController();
+
   String groupName;
   String groupId;
   String currentUserId;
@@ -73,6 +75,8 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
   int oldPayout;
   String gamePath;
 
+  int genesisPayout;
+
   String activeOrHistory = "tournamentactive";
 
   @override
@@ -84,6 +88,10 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
     groupName = widget.group.name;
     groupId = widget.group.id;
 
+    myController.addListener(() => updatePayout());
+    myController.text = widget.oldPlacing.toString();
+
+    updatePayout();
     if (widget.history == true) {
       activeOrHistory = "tournamenthistory";
     }
@@ -167,6 +175,7 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
             textAlign: TextAlign.center,
           ),
           onPressed: () {
+            newPayout = genesisPayout;
             setState(() {
               isLoading = true;
             });
@@ -259,6 +268,19 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
     }
   }
 
+  void updatePayout() {
+    if (myController.text != "") if (int.tryParse(myController.text) >
+        widget.game.payoutList.length) {
+      genesisPayout = 0;
+    } else if (myController.text == "0") {
+      genesisPayout = 0;
+    } else {
+      genesisPayout =
+          widget.game.payoutList[int.tryParse(myController.text) - 1].payout;
+    }
+    setState(() {});
+  }
+
   Widget page() {
     if (widget.group.admin) {
       return ListView(
@@ -287,15 +309,15 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
               size: 40.0,
               color: Colors.yellow[700],
             ),
-            title: new TextFormField(
+            title: new TextField(
                 keyboardType: TextInputType.number,
                 style: new TextStyle(color: UIData.blackOrWhite),
-                initialValue: oldPlacing.toString(),
+                controller: myController,
                 decoration: InputDecoration(
                   labelStyle: new TextStyle(color: Colors.grey[600]),
                   labelText: "Placing",
                 ),
-                onSaved: (val) {
+                onChanged: (val) {
                   if (int.tryParse(val) == widget.oldPlacing) {
                     newPlacing = widget.oldPlacing;
                   } else {
@@ -304,27 +326,14 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
                 }),
           ),
           new ListTile(
-            leading: new Icon(
-              Icons.attach_money,
-              size: 40.0,
-              color: UIData.green,
-            ),
-            title: new TextFormField(
-                keyboardType: TextInputType.number,
-                style: new TextStyle(color: UIData.blackOrWhite),
-                initialValue: oldPayout.toString(),
-                decoration: InputDecoration(
-                  labelStyle: new TextStyle(color: Colors.grey[600]),
-                  labelText: "Payout",
-                ),
-                onSaved: (val) {
-                  if ((val) == widget.oldPayout.toString()) {
-                    newPayout = widget.oldPayout;
-                  } else {
-                    newPayout = (int.tryParse(val));
-                  }
-                }),
-          ),
+              leading: new Icon(
+                Icons.attach_money,
+                size: 40.0,
+                color: UIData.green,
+              ),
+              title: new Text("Payout: $genesisPayout${widget.game.currency}",
+                  style: new TextStyle(
+                      color: UIData.white, fontSize: UIData.fontSize18))),
           new ListTile(
             leading: new Icon(
               Icons.refresh,
@@ -477,16 +486,13 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
               "id": widget.user.id,
             });
             OwnCloudFunctions().groupNotification(
-                widget.game.name,
-                widget.group.name,
-                widget.group.id,
-                widget.game.id,
-                "Tournament!",
-                widget.group,
-                "${widget.game.name.toUpperCase()} - ${type.toUpperCase()}",
-                body,
-                widget.game.floorFCM, 
-                          flooruid: widget.game.floor);
+              "Tournament!",
+              widget.game,
+              widget.group,
+              "${widget.game.name.toUpperCase()} - ${type.toUpperCase()}",
+              body,
+              false,
+            );
           } else {
             Essentials().showSnackBar(
                 "You have already requested ${an.toLowerCase()} $type",
