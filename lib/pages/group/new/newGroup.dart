@@ -8,6 +8,7 @@ import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/essentials.dart';
 import 'package:yadda/pages/inAppPurchase/subscription.dart';
 import 'package:yadda/pages/inAppPurchase/subLevel.dart';
+import 'package:yadda/utils/layout.dart';
 
 class NewGroup extends StatefulWidget {
   NewGroup({Key key, this.user, this.onUpdate}) : super(key: key);
@@ -245,8 +246,8 @@ class NewGroupState extends State<NewGroup> {
           child: new Text(
               "You can provide an optional description for your group.",
               key: new Key('hint'),
-              style: new TextStyle(fontSize: 10.0, color: Colors.grey[600]),
-              textAlign: TextAlign.left),
+              style: new TextStyle(fontSize: UIData.fontSize12, color: Colors.grey[600]),
+              textAlign: TextAlign.center),
         ),
         Padding(
           padding: EdgeInsets.fromLTRB(0.0, 38.0, 0.0, 0.0),
@@ -261,10 +262,10 @@ class NewGroupState extends State<NewGroup> {
         Padding(
           padding: EdgeInsets.only(bottom: 10.0),
         ),
-        new Divider(
-          height: .0,
-          color: Colors.black,
-        ),
+        new Padding(
+          padding: EdgeInsets.only(left: 18.0, right: 18.0),
+          child: 
+         Layout().divider(),),
         new ListTile(
             leading: new Icon(
               publicIcon,
@@ -285,10 +286,10 @@ class NewGroupState extends State<NewGroup> {
                 groupType = "public";
               });
             }),
-        new Divider(
-          height: .0,
-          color: Colors.black,
-        ),
+        new Padding(
+          padding: EdgeInsets.only(left: 18.0, right: 18.0),
+          child: 
+         Layout().divider(),),
         new ListTile(
             leading: new Icon(privateIcon, size: 40.0, color: UIData.green),
             title: new Text(
@@ -305,18 +306,18 @@ class NewGroupState extends State<NewGroup> {
                 groupType = "private";
               });
             }),
-        new Divider(
-          height: .0,
-          color: Colors.black,
-        ),
+        new Padding(
+          padding: EdgeInsets.only(left: 18.0, right: 18.0),
+          child: 
+         Layout().divider(),),
         Padding(
           padding: EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0),
         ),
         padded(
             child: new Text(publicPrivateText,
                 key: new Key('hint'),
-                style: new TextStyle(fontSize: 10.0, color: Colors.grey[600]),
-                textAlign: TextAlign.left)),
+                style: new TextStyle(fontSize: UIData.fontSize12, color: Colors.grey[600]),
+                textAlign: TextAlign.center)),
         paddedTwo(),
       ],
     );

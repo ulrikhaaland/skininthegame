@@ -16,7 +16,14 @@ class ProfilePicture {
   }
 
   Future<String> getDownloadUrl(String uid) async {
-    var ref = FirebaseStorage.instance.ref().child(uid).getDownloadURL();
+    String ref;
+    try {
+      ref = await FirebaseStorage.instance.ref().child(uid).getDownloadURL();
+    } catch (e) {
+      print(e);
+    }
+
+    print(ref);
     return ref;
   }
 

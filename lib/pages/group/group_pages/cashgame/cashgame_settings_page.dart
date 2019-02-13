@@ -1009,8 +1009,7 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
             setState(() {
               isLoading = true;
             });
-            // calculatePayouts(widget.game.calculatePayouts, true);
-
+            moveGameToHistory();
             Log().postLogToCollection("$currentUserName ended the game",
                 "$pathToCashGame/log", "Finished");
             Navigator.of(context).pop();

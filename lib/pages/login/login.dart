@@ -104,6 +104,15 @@ class LoginState extends State<Login> {
     if (validateAndSave()) {
       try {
         if (_formType == FormType.login) {
+          if (!_email.contains("@")) {
+            QuerySnapshot qSnap = await firestoreInstance
+                .collection("usernames")
+                .where("name", isEqualTo: _email)
+                .getDocuments();
+            if (qSnap.documents.isNotEmpty) {
+              _email = qSnap.documents[0].data["email"];
+            }
+          }
           String userId = await widget.auth.signIn(_email, _password);
           uid = userId;
           widget.onSignIn();
@@ -137,6 +146,7 @@ class LoginState extends State<Login> {
         notifications: 0);
     firestoreInstance.document("usernames/$uid").setData({
       "name": _username,
+      "email": _email,
     });
     DocumentReference docRef = firestoreInstance.document("users/$uid");
     await docRef.setData(user.toJson());
@@ -238,6 +248,8 @@ class LoginState extends State<Login> {
                 }
                 if (val.length > 18) {
                   return "Username is too long";
+                } else if (val.contains("@")) {
+                  return "Username can't contain @";
                 } else {
                   return null;
                 }
@@ -336,7 +348,7 @@ class LoginState extends State<Login> {
               key: new Key('email'),
               decoration: new InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'Email',
+                  labelText: 'Email / Username',
                   labelStyle: new TextStyle(color: Colors.grey[600])),
               autocorrect: false,
               validator: (val) => val.isEmpty ? 'Email can\'t be empty.' : null,

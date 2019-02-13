@@ -146,6 +146,7 @@ class InvitationCodePageState extends State<InvitationCodePage> {
           },
         ),
         title: new TextFormField(
+          enabled: false,
           keyboardAppearance: Brightness.dark,
           style: new TextStyle(color: UIData.blackOrWhite),
           key: new Key('multicode'),
@@ -203,6 +204,7 @@ class InvitationCodePageState extends State<InvitationCodePage> {
           },
         ),
         title: new TextFormField(
+          enabled: false,
           keyboardAppearance: Brightness.dark,
           style: new TextStyle(color: UIData.blackOrWhite),
           key: new Key('onetimecode'),
@@ -257,6 +259,7 @@ class InvitationCodePageState extends State<InvitationCodePage> {
               adminGroupCode, "admingroupcode", currentAdminGroupCode),
         ),
         title: new TextFormField(
+          enabled: false,
           keyboardAppearance: Brightness.dark,
           style: new TextStyle(color: UIData.blackOrWhite),
           key: new Key('admincode'),
@@ -309,9 +312,8 @@ class InvitationCodePageState extends State<InvitationCodePage> {
 
   void _setGroupCode(String code, String typeOfCode, String currentCode) {
     try {
-      var random = new Random().nextInt(999999999);
+      var random = new Random().nextInt(9999);
       code = random.toString();
-
       if (typeOfCode == "reusablegroupcode") {
         code = code + "r";
         currentReusableGroupCode = code;
@@ -331,13 +333,24 @@ class InvitationCodePageState extends State<InvitationCodePage> {
     }
   }
 
-  _checkGroupCode(String code, String typeOfCode, String currentCode) {
+  _checkGroupCode(String code, String typeOfCode, String currentCode) async {
     fireStoreInstance
         .collection("codes")
-        .where("code", isEqualTo: code)
+        .where(typeOfCode, isEqualTo: code)
         .getDocuments()
-        .then((datasnapshot) {
+        .then((datasnapshot) async {
       if (datasnapshot.documents.isEmpty) {
+        if (typeOfCode == "onetimegroupcode") {
+          QuerySnapshot qSnap = await fireStoreInstance
+              .collection("codes")
+              .where("groupid", isEqualTo: widget.group.id)
+              .getDocuments();
+          qSnap.documents.forEach((doc) {
+            if (doc.documentID.contains("o")) {
+              fireStoreInstance.document("codes/${doc.documentID}").delete();
+            }
+          });
+        }
         setState(() {
           if (typeOfCode == "onetimegroupcode") {
             fireStoreInstance
@@ -346,7 +359,7 @@ class InvitationCodePageState extends State<InvitationCodePage> {
               "code": code,
             });
             fireStoreInstance.document("codes/$code").setData({
-              "code": code,
+              typeOfCode: code,
               "groupid": widget.group.id,
               "groupname": widget.group.name,
             });

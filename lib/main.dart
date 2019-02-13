@@ -14,19 +14,14 @@ class MyApp extends StatelessWidget {
       color: UIData.darkest,
       title: 'Flutter Login',
       theme: new ThemeData(
-        tabBarTheme: TabBarTheme(
-            labelColor: UIData.blackOrWhite,
-            unselectedLabelColor: Colors.grey[600]
-        ),
+          tabBarTheme: TabBarTheme(
+              labelColor: UIData.blackOrWhite,
+              unselectedLabelColor: Colors.grey[600]),
           scaffoldBackgroundColor: UIData.dark,
           buttonColor: Colors.yellow[700],
           inputDecorationTheme: InputDecorationTheme(
-            
             counterStyle: TextStyle(color: Colors.grey[600]),
-          )
-          
-      ),
-      
+          )),
       home: new RootPage(auth: new Auth()),
       routes: <String, WidgetBuilder>{
         "/login": (BuildContext context) => GamePage(),

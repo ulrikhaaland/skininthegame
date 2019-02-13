@@ -108,8 +108,8 @@ class UIData {
       kitGradients = [darkest, dark];
       yellowOrWhite = Color.fromRGBO(251, 192, 45, 1.0);
     } else {
-      darkest = Color.fromRGBO(228, 222, 217, 1);
-      dark = Color.fromRGBO(247, 240, 231, 1.0);
+      darkest = Colors.white;
+      dark = Colors.white;
       blackOrWhite = Colors.black;
       // yellow = Color.fromRGBO(242, 134, 33, 1.0);
       whiteOrBlack = Color.fromRGBO(247, 240, 231, 1.0);

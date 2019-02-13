@@ -14,6 +14,7 @@ import 'package:yadda/utils/uidata.dart';
 import 'dart:async';
 import 'package:yadda/pages/update_page.dart';
 import 'package:yadda/pages/inAppPurchase/subLevel.dart';
+import 'package:yadda/utils/ProfilePic.dart';
 
 class RootPage extends StatefulWidget {
   RootPage({Key key, this.auth}) : super(key: key);
@@ -198,7 +199,7 @@ class RootPageState extends State<RootPage> {
           docSnap.data["following"],
           docSnap.data["followers"],
           docSnap.data["hasprofilepic"],
-          docSnap.data["profilepicurl"],
+          await ProfilePicture().getDownloadUrl(docSnap.data["id"]),
           docSnap.data["currency"],
           docSnap.data["appversion"],
           2,

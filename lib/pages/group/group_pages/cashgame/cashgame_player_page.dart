@@ -363,7 +363,11 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
           ),
           requestBuyin(),
           buyinText(),
-          requestPayout()
+          requestPayout(),
+          new Divider(
+            height: .0,
+            color: Colors.black,
+          ),
         ],
       );
     }
@@ -423,6 +427,20 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
                 textAlign: TextAlign.center,
               )),
         ],
+      );
+    } else if (widget.history) {
+      return new ListTile(
+        leading: new Icon(
+          Icons.attach_money,
+          size: 40.0,
+          color: UIData.green,
+        ),
+        title: new Text(
+          "Payout: $oldPayout",
+          style: new TextStyle(
+              fontSize: UIData.fontSize20, color: UIData.blackOrWhite),
+        ),
+        onTap: null,
       );
     } else {
       return new Container();
