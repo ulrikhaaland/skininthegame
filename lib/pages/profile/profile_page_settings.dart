@@ -275,6 +275,7 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
             firestoreInstace.document("users/${widget.user.id}").updateData({
               "profilepicurl": null,
             });
+            _image = null;
             widget.user.profilePicURL = null;
             widget.user.image = null;
           });
@@ -291,38 +292,46 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
 
       if (_image != null) {
         widget.user.image = _image;
+        new Timer(Duration(seconds: 10), () => widget.user.image = null);
       }
-      await firestoreInstace.document("users/${widget.user.id}").updateData({
-        'shareresults': widget.user.shareResults,
-        'bio': widget.user.bio,
-        "profilepicurl": widget.user.profilePicURL,
-        'currency': widget.user.currency,
-      });
+
       Navigator.pop(context);
+      if (_image != null) {
+        if (widget.user.profilePicURL != null) {
+          await CachedNetworkImageProvider(
+            widget.user.profilePicURL,
+          ).evict().then<void>((bool success) {
+            if (success) debugPrint('removed image!');
+          });
+        }
 
-      if (widget.user.profilePicURL != null) {
-        await CachedNetworkImageProvider(
-          widget.user.profilePicURL,
-        ).evict().then<void>((bool success) {
-          if (success) debugPrint('removed image!');
+        widget.user.hasProfilePic =
+            await ProfilePicture().uploadFile(widget.user.id, _image);
+        var ref = await ProfilePicture().getDownloadUrl(widget.user.id);
+        widget.user.profilePicURL = ref;
+        QuerySnapshot qSnap = await firestoreInstace
+            .collection("users/${widget.user.id}/groups")
+            .getDocuments();
+        qSnap.documents.forEach((DocumentSnapshot doc) {
+          firestoreInstace
+              .document("groups/${doc.documentID}/members/${widget.user.id}")
+              .updateData({
+            "profilepicurl": ref,
+          });
         });
+        updateData();
       }
-
-      widget.user.hasProfilePic =
-          await ProfilePicture().uploadFile(widget.user.id, _image);
-      var ref = await ProfilePicture().getDownloadUrl(widget.user.id);
-      widget.user.profilePicURL = ref;
-      QuerySnapshot qSnap = await firestoreInstace
-          .collection("users/${widget.user.id}/groups")
-          .getDocuments();
-      qSnap.documents.forEach((DocumentSnapshot doc) {
-        firestoreInstace
-            .document("groups/${doc.documentID}/members/${widget.user.id}")
-            .updateData({
-          "profilepicurl": widget.user.profilePicURL,
-        });
-      });
+      updateData();
     }
+  }
+
+  void updateData() async {
+    await firestoreInstace.document("users/${widget.user.id}").updateData({
+      'shareresults': widget.user.shareResults,
+      'bio': widget.user.bio,
+      "profilepicurl": widget.user.profilePicURL,
+      'currency': widget.user.currency,
+    });
   }
 
   Widget addImage() {

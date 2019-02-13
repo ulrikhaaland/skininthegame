@@ -1329,7 +1329,7 @@ class TournamentPageState extends State<TournamentPage>
     if (url != null) {
       return new CircleAvatar(
         radius: 25,
-        backgroundImage: CachedNetworkImageProvider(url),
+        backgroundImage: NetworkImage(url),
         backgroundColor: Colors.grey[600],
       );
     } else {

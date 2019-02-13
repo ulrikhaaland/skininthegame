@@ -13,9 +13,12 @@ import 'package:yadda/widgets/primary_button.dart';
 import 'package:yadda/pages/inAppPurchase/subscription.dart';
 
 class ProfilePage extends StatefulWidget {
-  ProfilePage(
-      {Key key, this.user, this.setGroupPage, this.profileId,})
-      : super(key: key);
+  ProfilePage({
+    Key key,
+    this.user,
+    this.setGroupPage,
+    this.profileId,
+  }) : super(key: key);
   final String profileId;
   final VoidCallback setGroupPage;
   final User user;
@@ -324,6 +327,14 @@ class ProfilePageState extends State<ProfilePage>
   }
 
   Widget addImage() {
+    ImageProvider<dynamic> imageProvider;
+
+    if (userProfile.profilePicURL != null) {
+      ownProfile
+          ? imageProvider =
+              CachedNetworkImageProvider(userProfile.profilePicURL)
+          : imageProvider = NetworkImage(userProfile.profilePicURL);
+    }
     if (widget.user.image != null) {
       return new CircleAvatar(
         radius: 35,
@@ -343,7 +354,7 @@ class ProfilePageState extends State<ProfilePage>
     } else {
       return new CircleAvatar(
         radius: 35,
-        backgroundImage: NetworkImage(widget.user.profilePicURL),
+        backgroundImage: imageProvider,
         backgroundColor: UIData.darkest,
       );
     }
