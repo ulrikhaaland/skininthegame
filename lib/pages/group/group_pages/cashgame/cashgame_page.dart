@@ -16,22 +16,25 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:yadda/pages/profile/profile_page.dart';
 import 'package:yadda/utils/essentials.dart';
+import 'package:yadda/widgets/primary_button.dart';
+import 'dart:math';
 
 class CashGamePage extends StatefulWidget {
-  CashGamePage(
-      {Key key,
-      this.user,
-      this.gameId,
-      this.group,
-      this.history,
-      this.fromNotification,
-     })
-      : super(key: key);
+  CashGamePage({
+    Key key,
+    this.user,
+    this.gameId,
+    this.group,
+    this.history,
+    this.fromNotification,
+    this.request,
+  }) : super(key: key);
   final User user;
   final String gameId;
   final Group group;
   final bool history;
   final bool fromNotification;
+  final bool request;
 
   @override
   CashGamePageState createState() => CashGamePageState();
@@ -43,6 +46,7 @@ class CashGamePageState extends State<CashGamePage>
   final Firestore firestoreInstance = Firestore.instance;
   bool isLoading = false;
   TabController _tabController;
+  Random random = new Random();
 
   String currentUserId;
   String currentUserName;
@@ -109,6 +113,7 @@ class CashGamePageState extends State<CashGamePage>
     if (isAdmin == true && widget.history != true) {
       _tabController = new TabController(vsync: this, length: 6);
       isScrollable = true;
+      if (widget.request == true) _tabController.index = 5;
     } else {
       _tabController = new TabController(vsync: this, length: 4);
     }
@@ -127,6 +132,7 @@ class CashGamePageState extends State<CashGamePage>
   @override
   void dispose() {
     _tabController.dispose();
+
     super.dispose();
   }
 
@@ -229,13 +235,13 @@ class CashGamePageState extends State<CashGamePage>
     return new Scaffold(
         appBar: AppBar(
           iconTheme: IconThemeData(color: UIData.blackOrWhite),
-          title: new Align(
-              child: new Text(
+          title: new Text(
             game.name,
             style: TextStyle(
               color: UIData.blackOrWhite,
             ),
-          )),
+          ),
+          centerTitle: true,
           actions: <Widget>[
             newPostButton(),
             settingsButton(),
@@ -623,35 +629,47 @@ class CashGamePageState extends State<CashGamePage>
       DocumentSnapshot docSnap =
           await firestoreInstance.document("$gamePath").get();
       if (docSnap.data.isNotEmpty) {
+        int requestAmount = 0;
+        if (isAdmin) {
+          QuerySnapshot qSnap = await firestoreInstance
+              .collection("$gamePath/requests")
+              .getDocuments();
+          qSnap.documents.isNotEmpty
+              ? requestAmount = qSnap.documents.length
+              : requestAmount = 0;
+        }
+
         game = new Game(
-            "0",
-            0,
-            docSnap.data["id"],
-            docSnap.data["info"],
-            docSnap.data["name"],
-            docSnap.data["fittedname"],
-            docSnap.data["adress"],
-            docSnap.data["bblind"],
-            0,
-            docSnap.data["date"],
-            docSnap.data["gametype"],
-            docSnap.data["maxplayers"],
-            docSnap.data["orderbytime"],
-            0,
-            docSnap.data["registeredplayers"],
-            docSnap.data["sblind"],
-            "0",
-            docSnap.data["time"],
-            docSnap.data["calculatepayouts"],
-            docSnap.data["currency"],
-            docSnap.data["isrunning"],
-            docSnap.data["moneyontable"],
-            docSnap.data["showmoneyontable"],
-            0,
-            docSnap.data["floor"],
-            docSnap.data["floorfcm"],
-            docSnap.data["floorname"],
-            docSnap.data["stopreg"]);
+          "0",
+          0,
+          docSnap.data["id"],
+          docSnap.data["info"],
+          docSnap.data["name"],
+          docSnap.data["fittedname"],
+          docSnap.data["adress"],
+          docSnap.data["bblind"],
+          0,
+          docSnap.data["date"],
+          docSnap.data["gametype"],
+          docSnap.data["maxplayers"],
+          docSnap.data["orderbytime"],
+          0,
+          docSnap.data["registeredplayers"],
+          docSnap.data["sblind"],
+          "0",
+          docSnap.data["time"],
+          docSnap.data["calculatepayouts"],
+          docSnap.data["currency"],
+          docSnap.data["isrunning"],
+          docSnap.data["moneyontable"],
+          docSnap.data["showmoneyontable"],
+          0,
+          docSnap.data["floor"],
+          docSnap.data["floorfcm"],
+          docSnap.data["floorname"],
+          requestAmount,
+          docSnap.data["stopreg"],
+        );
 
         if (game.calculatePayouts == true && widget.history == true) {
           queueOrCalculateIcon = Icons.attach_money;
@@ -784,6 +802,182 @@ class CashGamePageState extends State<CashGamePage>
                 onUpdate: () => updateMoneyOnTable(),
               )),
     );
+  }
+
+  void calculatePayouts() async {
+    int i = 0;
+    QuerySnapshot qSnap =
+        await firestoreInstance.collection("$gamePath/payouts").getDocuments();
+    if (qSnap.documents.isNotEmpty) {
+      qSnap.documents.forEach((doc) {
+        firestoreInstance
+            .document("$gamePath/payouts/${doc.documentID}")
+            .delete();
+      });
+    }
+    firestoreInstance.document("$gamePath/payouts/-").setData({
+      "data": 1,
+    });
+    firestoreInstance.document(gamePath).updateData({
+      "calculatepayouts": true,
+    });
+    game.calculatePayouts = true;
+    List<Person> personList = new List();
+    firestoreInstance.runTransaction((Transaction tx) async {
+      QuerySnapshot qSnap = await firestoreInstance
+          .collection("$gamePath/players")
+          .getDocuments();
+      int q = 0;
+      qSnap.documents.forEach((DocumentSnapshot doc) {
+        int payout = doc.data["payout"];
+
+        int buyin = doc.data["buyin"];
+        int result = payout - buyin;
+        bool isNegative;
+        if (result.isNegative) {
+          isNegative = true;
+        } else {
+          isNegative = false;
+        }
+        Person person = new Person(doc.data["name"], result, isNegative, q);
+        personList.add(person);
+        q++;
+      });
+
+      Person personNegative;
+      Person personPositive;
+
+      while (personList.isNotEmpty) {
+        int n = 0;
+        int p = 0;
+        for (int i = 0; i < personList.length; i++) {
+          if (personList[i].result.isNegative || personList[i].result == 0) {
+            n++;
+          }
+          if (!personList[i].result.isNegative || personList[i].result == 0) {
+            p++;
+          }
+        }
+        if (n == personList.length) {
+          for (int i = 0; i < personList.length;) {
+            int z = personList[0].result.abs();
+            if (personList[0].result != 0) {
+              await firestoreInstance.collection("$gamePath/payouts").add({
+                "sentence": "${personList[0].name} has $z left to pay out.",
+                "personnegative": "",
+                "personpositive": "",
+                "result": "",
+              });
+            }
+
+            personList.removeAt(i);
+          }
+          if (widget.history) {
+            setState(() {
+              isLoading = false;
+            });
+          }
+          if (i == 0) {
+            i++;
+            Essentials().showSnackBar(
+                "Payouts has been updated", formKey.currentState.context);
+          }
+        } else if (p == personList.length) {
+          for (int i = 0; i < personList.length;) {
+            await firestoreInstance.collection("$gamePath/payouts").add({
+              "sentence":
+                  "${personList[0].name} is missing ${personList[0].result}.",
+              "personnegative": "",
+              "personpositive": "",
+              "result": "",
+            });
+            personList.removeAt(i);
+          }
+          if (widget.history) {
+            setState(() {
+              isLoading = false;
+            });
+          }
+
+          if (i == 0) {
+            i++;
+            Essentials().showSnackBar(
+                "Payouts has been updated", formKey.currentState.context);
+          }
+        }
+        if (personList.length != 0) {
+          int i = random.nextInt(personList.length);
+          for (int i = 0; i < personList.length; i++) {
+            personList[i].setIndex(i);
+          }
+          if (personNegative == null) {
+            if (personList[i].resultIsNegative == true) {
+              personNegative = personList[i];
+            }
+          }
+          if (personPositive == null) {
+            if (!personList[i].resultIsNegative == true &&
+                personList[i].result != 0) {
+              personPositive = personList[i];
+            }
+          }
+          if (personPositive != null && personNegative != null) {
+            int pRes = personPositive.result;
+            int nRes = personNegative.result;
+            int fRes = nRes + pRes;
+            if (fRes.isNegative) {
+              personNegative.setResult(fRes);
+
+              await firestoreInstance.collection("$gamePath/payouts").add({
+                "sentence":
+                    "${personNegative.name} pays ${personPositive.name} ${personPositive.result}.",
+                "personnegative": personNegative.name,
+                "personpositive": personPositive.name,
+                "result": personPositive.result,
+              });
+
+              personList
+                  .removeWhere((item) => item.name == personPositive.name);
+              personPositive = null;
+            } else if (fRes == 0) {
+              personList
+                  .removeWhere((item) => item.name == personPositive.name);
+              personList
+                  .removeWhere((item) => item.name == personNegative.name);
+              await firestoreInstance.collection("$gamePath/payouts").add({
+                "sentence":
+                    "${personNegative.name} pays ${personPositive.name} ${personPositive.result}.",
+                "personnegative": personNegative.name,
+                "personpositive": personPositive.name,
+                "result": personPositive.result,
+              });
+
+              personPositive = null;
+              personNegative = null;
+              setState(() {
+                isLoading = false;
+              });
+              Essentials().showSnackBar(
+                  "Payouts has been updated", formKey.currentState.context);
+            } else if (!fRes.isNegative) {
+              personPositive.setResult(fRes);
+              int abs = personNegative.result.abs();
+              await firestoreInstance.collection("$gamePath/payouts").add({
+                "sentence":
+                    "${personNegative.name} pays ${personPositive.name} $abs.",
+                "personnegative": personNegative.name,
+                "personpositive": personPositive.name,
+                "result": abs,
+              });
+
+              personList.remove(personList[personNegative.index]);
+
+              personNegative = null;
+            }
+          }
+        }
+      }
+    });
   }
 
   Widget addImage(String url) {
@@ -938,7 +1132,17 @@ class CashGamePageState extends State<CashGamePage>
         });
   }
 
-  Widget calculatePayoutsList(BuildContext context, DocumentSnapshot document) {
+  Widget payoutsList(BuildContext context, DocumentSnapshot document) {
+    if (document.documentID == "-") {
+      return new Padding(
+          padding: EdgeInsets.all(30),
+          child: new PrimaryButton(
+            text: "Calculate payouts",
+            onPressed: () {
+              calculatePayouts();
+            },
+          ));
+    }
     return new ListTile(
       dense: true,
       title: new Row(
@@ -974,7 +1178,7 @@ class CashGamePageState extends State<CashGamePage>
     );
   }
 
-  Widget calculatePayouts() {
+  Widget payouts() {
     return StreamBuilder(
         stream: firestoreInstance
             .collection(
@@ -985,7 +1189,7 @@ class CashGamePageState extends State<CashGamePage>
           return ListView.builder(
             itemCount: snapshot.data.documents.length,
             itemBuilder: (context, index) =>
-                calculatePayoutsList(context, snapshot.data.documents[index]),
+                payoutsList(context, snapshot.data.documents[index]),
           );
         });
   }
@@ -1124,7 +1328,7 @@ class CashGamePageState extends State<CashGamePage>
 
   setQueueOrPayouts() {
     if (widget.history == true) {
-      return calculatePayouts();
+      return payouts();
     } else {
       return queue();
     }
@@ -1204,7 +1408,7 @@ class CashGamePageState extends State<CashGamePage>
     return StreamBuilder(
         stream: firestoreInstance
             .collection("$gamePath/players")
-            .orderBy("payout")
+            .orderBy("payout", descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return loading();
@@ -1315,6 +1519,9 @@ class CashGamePageState extends State<CashGamePage>
             icon: Icons.check_circle_outline,
             onTap: () async {
               String logText;
+              setState(() {
+                game.requestAmount -= 1;
+              });
               if (document.data["type"] == "payout") {
                 removePlayer(document.data["id"], true, document.data["name"]);
                 Essentials().showSnackBar(
@@ -1356,6 +1563,9 @@ class CashGamePageState extends State<CashGamePage>
             color: UIData.red,
             icon: Icons.delete,
             onTap: () {
+              setState(() {
+                game.requestAmount -= 1;
+              });
               firestoreInstance
                   .document("$gamePath/requests/${document.documentID}")
                   .delete();
@@ -1376,6 +1586,7 @@ class CashGamePageState extends State<CashGamePage>
           if (!snapshot.hasData)
             return loading();
           else {
+            game.requestAmount = snapshot.data.documents.length;
             return ListView.builder(
               itemCount: snapshot.data.documents.length,
               itemBuilder: (context, index) => _buildStreamOfRequests(

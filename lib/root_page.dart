@@ -58,7 +58,10 @@ class RootPageState extends State<RootPage> {
       handleMessage(msg);
     }, onMessage: (Map<String, dynamic> msg) {
       print("onMessage called");
-      handleMessage(msg);
+      var newGame = getValueFromMap(msg, "newGame");
+      if (newGame == "true") {
+        handleMessage(msg);
+      }
     });
     firebaseMessaging
         .requestNotificationPermissions(const IosNotificationSettings(
@@ -128,14 +131,18 @@ class RootPageState extends State<RootPage> {
       var dailyMessage = getValueFromMap(message, "dailyMessage");
       var host = getValueFromMap(message, "host");
       var info = getValueFromMap(message, "info");
+      var newGame = getValueFromMap(message, "newGame");
       var lowerCaseName = getValueFromMap(message, "lowerCaseName");
       var docSnap = await firestoreInstance
           .document("groups/$fromGroupId/members/${user.id}")
           .get();
       var admin = docSnap.data["admin"];
+      bool request;
+
+      newGame == "true" ? request = false : request = true;
       Group group = new Group(groupName, dailyMessage, host, fromGroupId, info,
           lowerCaseName, null, null, null, admin, null, null, null);
-      if (gameType == "Tournament!")  {
+      if (gameType == "Tournament!") {
         Navigator.of(context).push(new MaterialPageRoute(
             builder: (context) => new TournamentPage(
                   user: user,
@@ -143,6 +150,7 @@ class RootPageState extends State<RootPage> {
                   fromNotification: true,
                   gameId: fromGameId,
                   history: false,
+                  request: request,
                 )));
       } else if (gameType == "Cash Game!") {
         Navigator.of(context).push(new MaterialPageRoute(
@@ -152,6 +160,7 @@ class RootPageState extends State<RootPage> {
                   fromNotification: true,
                   gameId: fromGameId,
                   history: false,
+                  request: request,
                 )));
       }
     } else {}

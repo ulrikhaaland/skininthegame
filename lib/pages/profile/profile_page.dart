@@ -14,9 +14,8 @@ import 'package:yadda/pages/inAppPurchase/subscription.dart';
 
 class ProfilePage extends StatefulWidget {
   ProfilePage(
-      {Key key, this.user, this.setGroupPage, this.profileId, this.onSignOut})
+      {Key key, this.user, this.setGroupPage, this.profileId,})
       : super(key: key);
-  final VoidCallback onSignOut;
   final String profileId;
   final VoidCallback setGroupPage;
   final User user;
@@ -273,7 +272,6 @@ class ProfilePageState extends State<ProfilePage>
                   builder: (context) => ProfileSettingsPage(
                         user: widget.user,
                         setBGSize: () => setBGSize(),
-                        onSignOut: () => widget.onSignOut(),
                       ))),
         ),
       );
@@ -345,9 +343,7 @@ class ProfilePageState extends State<ProfilePage>
     } else {
       return new CircleAvatar(
         radius: 35,
-        backgroundImage: CachedNetworkImageProvider(
-          userProfile.profilePicURL,
-        ),
+        backgroundImage: NetworkImage(widget.user.profilePicURL),
         backgroundColor: UIData.darkest,
       );
     }

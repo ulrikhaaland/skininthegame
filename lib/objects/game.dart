@@ -30,6 +30,7 @@ class Game {
     this.floor,
     this.floorFCM,
     this.floorName,
+    this.requestAmount,
     this.stopReg, {
     this.addonPrice,
     this.rebuyPrice,
@@ -46,6 +47,7 @@ class Game {
 
   List<PayoutObject> payoutList;
 
+  int requestAmount;
   int placesPaid;
   int type;
   int subOrAddPP;
@@ -110,6 +112,7 @@ class Game {
         'suboraddpp': this.subOrAddPP,
         'add': this.add,
         'placespaid': this.placesPaid,
+        'requestamount': this.requestAmount,
       };
 
   Game fromMap(Map map) {
@@ -141,6 +144,7 @@ class Game {
       floor,
       floorFCM,
       floorName,
+      requestAmount,
       stopReg,
       rebuyPrice: rebuyPrice,
       addonPrice: addonPrice,

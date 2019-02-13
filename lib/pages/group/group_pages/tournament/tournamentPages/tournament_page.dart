@@ -24,12 +24,14 @@ class TournamentPage extends StatefulWidget {
     this.history,
     this.group,
     this.fromNotification,
+    this.request,
   }) : super(key: key);
   final User user;
   final Group group;
   final String gameId;
   final bool history;
   final bool fromNotification;
+  final bool request;
 
   @override
   TournamentPageState createState() => TournamentPageState();
@@ -97,10 +99,12 @@ class TournamentPageState extends State<TournamentPage>
       if (widget.history != true) {
         _tabController = new TabController(vsync: this, length: 6);
         isScrollable = true;
+        if (widget.request == true) _tabController.index = 5;
       }
     } else {
       _tabController = new TabController(vsync: this, length: 4);
     }
+
     if (widget.history == true) {
       playerOrResultsIcon = FontAwesomeIcons.trophy;
       playerOrResultsIconSize = 25;
@@ -277,6 +281,15 @@ class TournamentPageState extends State<TournamentPage>
       DocumentSnapshot docSnap =
           await firestoreInstance.document("$gamePath").get();
       if (docSnap.data.isNotEmpty) {
+        int requestAmount = 0;
+        if (isAdmin) {
+          QuerySnapshot qSnap = await firestoreInstance
+              .collection("$gamePath/requests")
+              .getDocuments();
+          qSnap.documents.isNotEmpty
+              ? requestAmount = qSnap.documents.length
+              : requestAmount = 0;
+        }
         game = new Game(
           docSnap.data["totalprizepool"],
           docSnap.data["addon"],
@@ -305,6 +318,7 @@ class TournamentPageState extends State<TournamentPage>
           docSnap.data["floor"],
           docSnap.data["floorfcm"],
           docSnap.data["floorname"],
+          requestAmount,
           docSnap.data["stopreg"],
           rebuyPrice: docSnap.data["rebuyprice"],
           addonPrice: docSnap.data["addonprice"],
@@ -312,6 +326,7 @@ class TournamentPageState extends State<TournamentPage>
           add: docSnap.data["add"],
           placesPaid: docSnap.data["placespaid"],
         );
+
         game.add
             ? addOrSubtractText = "added to"
             : addOrSubtractText = "subtracted from";
@@ -431,13 +446,12 @@ class TournamentPageState extends State<TournamentPage>
               controller: _tabController,
               tabs: tabs(),
             ),
-            title: new Align(
-                alignment: Alignment.center,
-                child: new Text(
-                  game.name,
-                  style: new TextStyle(
-                      color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
-                ))),
+            centerTitle: true,
+            title: new Text(
+              game.name,
+              style: new TextStyle(
+                  color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
+            )),
         body: new Form(
             key: formKey,
             child: Stack(
@@ -1161,11 +1175,19 @@ class TournamentPageState extends State<TournamentPage>
           text: "All",
         ),
         Tab(
-          icon: Icon(
-            Icons.notification_important,
-            color: UIData.red,
-            size: 30.0,
-          ),
+          icon: new Stack(children: <Widget>[
+            Icon(
+              Icons.notification_important,
+              color: UIData.blackOrWhite,
+              size: 30.0,
+            ),
+            new Positioned(
+              // draw a red marble
+              top: 0.0,
+              right: 0.0,
+              child: notificationAmount(),
+            )
+          ]),
           text: "Requests",
         ),
       ];
@@ -1204,6 +1226,20 @@ class TournamentPageState extends State<TournamentPage>
           text: "Payouts",
         ),
       ];
+    }
+  }
+
+  Widget notificationAmount() {
+    if (game.requestAmount > 0) {
+      return new CircleAvatar(
+        backgroundColor: UIData.red,
+        maxRadius: 10,
+        child: Text(
+          "${game.requestAmount}",
+        ),
+      );
+    } else {
+      return new Container();
     }
   }
 
@@ -1284,6 +1320,7 @@ class TournamentPageState extends State<TournamentPage>
                 oldRebuy: rebuy,
                 gameId: widget.gameId,
                 callback: () => getGroup(),
+                history: widget.history,
               )),
     );
   }
@@ -1315,6 +1352,7 @@ class TournamentPageState extends State<TournamentPage>
       color = UIData.blue;
     }
     return new Slidable(
+      enabled: isAdmin,
       delegate: new SlidableDrawerDelegate(),
       actionExtentRatio: 0.25,
       child: new Container(
@@ -1371,6 +1409,7 @@ class TournamentPageState extends State<TournamentPage>
       color = UIData.blue;
     }
     return new Slidable(
+      enabled: isAdmin,
       delegate: new SlidableDrawerDelegate(),
       actionExtentRatio: 0.25,
       child: new Container(
@@ -1548,6 +1587,7 @@ class TournamentPageState extends State<TournamentPage>
     String an;
     document.data["type"] == "addon" ? an = "an" : an = "a";
     return new Slidable(
+      enabled: isAdmin,
       delegate: new SlidableDrawerDelegate(),
       actionExtentRatio: 0.25,
       child: new Container(
@@ -1564,6 +1604,10 @@ class TournamentPageState extends State<TournamentPage>
             color: UIData.green,
             icon: Icons.check_circle_outline,
             onTap: () async {
+              setState(() {
+                game.requestAmount -= 1;
+              });
+
               firestoreInstance
                   .document("$gamePath/requests/${document.documentID}")
                   .delete();
@@ -1586,10 +1630,12 @@ class TournamentPageState extends State<TournamentPage>
             color: UIData.red,
             icon: Icons.delete,
             onTap: () {
+              setState(() {
+                game.requestAmount -= 1;
+              });
               firestoreInstance
                   .document("$gamePath/requests/${document.documentID}")
                   .delete();
-
               Log().postLogToCollection(
                   "${widget.user.userName} has dismissed $an ${document.data["type"]} from ${document.data["name"]}",
                   "$gamePath/log",
@@ -1606,6 +1652,7 @@ class TournamentPageState extends State<TournamentPage>
           if (!snapshot.hasData)
             return loading();
           else {
+            game.requestAmount = snapshot.data.documents.length;
             return ListView.builder(
               itemCount: snapshot.data.documents.length,
               itemBuilder: (context, index) => _buildStreamOfRequests(

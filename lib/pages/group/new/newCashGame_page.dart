@@ -86,6 +86,7 @@ class NewCashGameState extends State<NewCashGame> {
         widget.user.id,
         widget.user.fcm,
         widget.user.userName,
+        0,
         false);
     game.setDate("Not set");
     game.setTime("Not set");

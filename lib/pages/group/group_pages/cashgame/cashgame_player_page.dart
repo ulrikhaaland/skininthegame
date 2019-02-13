@@ -402,13 +402,12 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
                         },
                       );
                       OwnCloudFunctions().groupNotification(
-                        "Cash Game!",
-                        widget.game,
-                        widget.group,
-                        "${widget.game.name.toUpperCase()} - PAYOUT",
-                        "${widget.user.userName} has requested a payout",
-                        false
-                      );
+                          "Cash Game!",
+                          widget.game,
+                          widget.group,
+                          "${widget.game.name.toUpperCase()} - PAYOUT",
+                          "${widget.user.userName} has requested a payout",
+                          false);
                     } else {
                       Essentials().showSnackBar(
                           "A payout request has already been sent",
@@ -489,13 +488,12 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
                     "type": text.toLowerCase(),
                   });
                   OwnCloudFunctions().groupNotification(
-                    "Cash Game!",
-                    widget.game,
-                    widget.group,
-                    "${widget.game.name} - ${text.toUpperCase()}",
-                    "${widget.user.userName} has requested a ${text.toLowerCase()} of $buyin",
-                    false
-                  );
+                      "Cash Game!",
+                      widget.game,
+                      widget.group,
+                      "${widget.game.name} - ${text.toUpperCase()}",
+                      "${widget.user.userName} has requested a ${text.toLowerCase()} of $buyin",
+                      false);
                 } else {
                   Essentials().showSnackBar(
                       "Buyin amount must be greater than 0",

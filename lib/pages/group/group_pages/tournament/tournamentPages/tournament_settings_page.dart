@@ -831,7 +831,8 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
           "currency": widget.game.currency,
           "orderbytime": widget.game.orderByTime,
           "prizepool": widget.game.totalPrizePool,
-          "share": widget.group.shareResults
+          "share": widget.group.shareResults,
+          "type": 1,
         });
       }
     });

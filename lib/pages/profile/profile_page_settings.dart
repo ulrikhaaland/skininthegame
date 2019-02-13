@@ -14,13 +14,11 @@ import 'package:firebase_storage/firebase_storage.dart';
 class ProfileSettingsPage extends StatefulWidget {
   ProfileSettingsPage({
     Key key,
-    this.onSignOut,
     this.user,
     this.setGroupPage,
     this.setBGSize,
     this.loading,
   }) : super(key: key);
-  final VoidCallback onSignOut;
   final VoidCallback setGroupPage;
   final VoidCallback setBGSize;
   final User user;
@@ -319,15 +317,19 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
             "profilepicurl": widget.user.profilePicURL,
           });
         });
-      }
-      await firestoreInstace.runTransaction((Transaction tx) async {
-        await firestoreInstace.document("users/${widget.user.id}").updateData({
-          'shareresults': widget.user.shareResults,
-          'bio': widget.user.bio,
-          "profilepicurl": widget.user.profilePicURL,
-          'currency': widget.user.currency,
+      } else {
+        Navigator.of(context).pop();
+        await firestoreInstace.runTransaction((Transaction tx) async {
+          await firestoreInstace
+              .document("users/${widget.user.id}")
+              .updateData({
+            'shareresults': widget.user.shareResults,
+            'bio': widget.user.bio,
+            "profilepicurl": widget.user.profilePicURL,
+            'currency': widget.user.currency,
+          });
         });
-      });
+      }
     }
   }
 

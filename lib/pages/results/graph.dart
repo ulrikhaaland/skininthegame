@@ -470,7 +470,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
           new Align(
               alignment: Alignment.centerLeft,
               child: new Text(
-                "ITM: ${tournamentResultGameTotal.itm * 100}%",
+                "ITM: ${(tournamentResultGameTotal.itm * 100).toStringAsPrecision(4)}%",
                 style: new TextStyle(
                   color: UIData.blackOrWhite,
                   fontSize: UIData.fontSize16,
@@ -590,7 +590,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
           new Align(
               alignment: Alignment.centerLeft,
               child: new Text(
-                "Win%: ${cashResultGameTotal.winningSessionsPercentage * 100}%",
+                "Win%: ${(cashResultGameTotal.winningSessionsPercentage * 100).toStringAsPrecision(4)}%",
                 style: new TextStyle(
                   color: UIData.blackOrWhite,
                   fontSize: UIData.fontSize16,

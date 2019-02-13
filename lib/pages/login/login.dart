@@ -114,9 +114,6 @@ class LoginState extends State<Login> {
           widget.onSignIn();
           saveUserData();
         }
-        setState(() {
-          loading = false;
-        });
       } catch (e) {
         setState(() {
           _authHint = e.details.toString();

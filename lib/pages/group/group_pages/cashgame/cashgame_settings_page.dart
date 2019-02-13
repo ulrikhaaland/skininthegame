@@ -753,7 +753,8 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
           "$currentUserName updated game. Name: ${widget.game.name}, Adress: ${widget.game.adress}, Date: ${widget.game.date}, Time: ${widget.game.time}, Maxplayers: ${widget.game.maxPlayers}, Buyin: ${widget.game.buyin} Rebuys: ${widget.game.rebuy}, Addon: ${widget.game.addon}, Starting chips: ${widget.game.startingChips}, Prize pool: ${widget.game.totalPrizePool} Gametype: ${widget.game.gameType}, Gameinfo: ${widget.game.info}",
           "$pathToCashGame/log",
           "Update");
-      showSnackBar("Game has been updated");
+      Essentials()
+          .showSnackBar("Game has been updated", formKey.currentState.context);
     }
   }
 
@@ -793,7 +794,8 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
           setState(() {
             widget.game.isRunning = true;
           });
-          showSnackBar("Game has started!");
+          Essentials()
+              .showSnackBar("Game has started!", formKey.currentState.context);
         },
       );
     } else if (widget.history != true && widget.game.isRunning) {
@@ -813,214 +815,7 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
         },
       );
     } else {
-      return new ListTile(
-        leading: new Icon(
-          Icons.attach_money,
-          size: 40.0,
-          color: UIData.green,
-        ),
-        title: new Text(
-          "Calculate Payouts",
-          style: new TextStyle(
-              color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
-        ),
-        onTap: () async {
-          QuerySnapshot qSnap = await firestoreInstance
-              .collection("$pathToCashGame/payouts")
-              .getDocuments();
-          qSnap.documents.forEach((DocumentSnapshot doc) {
-            firestoreInstance
-                .document("$pathToCashGame/payouts/${doc.documentID}")
-                .delete();
-          });
-          setState(() {
-            isLoading = true;
-          });
-          calculatePayouts(true, false);
-        },
-      );
-    }
-  }
-
-  showSnackBar(String message) {
-    Essentials().showSnackBar(message, formKey.currentState.context);
-  }
-
-  void calculatePayouts(bool calculate, bool moveGame) async {
-    firestoreInstance.document(pathToCashGame).updateData({
-      "calculatepayouts": true,
-    });
-    widget.game.calculatePayouts = true;
-    if (calculate == true) {
-      List<Person> personList = new List();
-      firestoreInstance.runTransaction((Transaction tx) async {
-        QuerySnapshot qSnap = await firestoreInstance
-            .collection("$pathToCashGame/players")
-            .getDocuments();
-        int q = 0;
-        qSnap.documents.forEach((DocumentSnapshot doc) {
-          int payout = doc.data["payout"];
-
-          int buyin = doc.data["buyin"];
-          int result = payout - buyin;
-          bool isNegative;
-          if (result.isNegative) {
-            isNegative = true;
-          } else {
-            isNegative = false;
-          }
-          Person person = new Person(doc.data["name"], result, isNegative, q);
-          personList.add(person);
-          q++;
-        });
-
-        Person personNegative;
-        Person personPositive;
-
-        while (personList.isNotEmpty) {
-          int n = 0;
-          int p = 0;
-          for (int i = 0; i < personList.length; i++) {
-            if (personList[i].result.isNegative || personList[i].result == 0) {
-              n++;
-            }
-            if (!personList[i].result.isNegative || personList[i].result == 0) {
-              p++;
-            }
-          }
-          if (n == personList.length) {
-            for (int i = 0; i < personList.length;) {
-              int z = personList[0].result.abs();
-              if (personList[0].result != 0) {
-                await firestoreInstance
-                    .collection("$pathToCashGame/payouts")
-                    .add({
-                  "sentence": "${personList[0].name} has $z left to pay out.",
-                  "personnegative": "",
-                  "personpositive": "",
-                  "result": "",
-                });
-              }
-
-              personList.removeAt(i);
-            }
-            if (widget.history) {
-              setState(() {
-                isLoading = false;
-              });
-            }
-
-            showSnackBar(
-              "Payouts has been updated",
-            );
-          } else if (p == personList.length) {
-            for (int i = 0; i < personList.length;) {
-              await firestoreInstance
-                  .collection("$pathToCashGame/payouts")
-                  .add({
-                "sentence":
-                    "${personList[0].name} is missing ${personList[0].result}.",
-                "personnegative": "",
-                "personpositive": "",
-                "result": "",
-              });
-              personList.removeAt(i);
-            }
-            if (widget.history) {
-              setState(() {
-                isLoading = false;
-              });
-            }
-
-            showSnackBar(
-              "Payouts has been updated",
-            );
-          }
-          if (personList.length != 0) {
-            int i = random.nextInt(personList.length);
-            for (int i = 0; i < personList.length; i++) {
-              personList[i].setIndex(i);
-            }
-            if (personNegative == null) {
-              if (personList[i].resultIsNegative == true) {
-                personNegative = personList[i];
-              }
-            }
-            if (personPositive == null) {
-              if (!personList[i].resultIsNegative == true &&
-                  personList[i].result != 0) {
-                personPositive = personList[i];
-              }
-            }
-            if (personPositive != null && personNegative != null) {
-              int pRes = personPositive.result;
-              int nRes = personNegative.result;
-              int fRes = nRes + pRes;
-              if (fRes.isNegative) {
-                personNegative.setResult(fRes);
-
-                await firestoreInstance
-                    .collection("$pathToCashGame/payouts")
-                    .add({
-                  "sentence":
-                      "${personNegative.name} pays ${personPositive.name} ${personPositive.result}.",
-                  "personnegative": personNegative.name,
-                  "personpositive": personPositive.name,
-                  "result": personPositive.result,
-                });
-
-                personList
-                    .removeWhere((item) => item.name == personPositive.name);
-                personPositive = null;
-              } else if (fRes == 0) {
-                personList
-                    .removeWhere((item) => item.name == personPositive.name);
-                personList
-                    .removeWhere((item) => item.name == personNegative.name);
-                await firestoreInstance
-                    .collection("$pathToCashGame/payouts")
-                    .add({
-                  "sentence":
-                      "${personNegative.name} pays ${personPositive.name} ${personPositive.result}.",
-                  "personnegative": personNegative.name,
-                  "personpositive": personPositive.name,
-                  "result": personPositive.result,
-                });
-
-                personPositive = null;
-                personNegative = null;
-                setState(() {
-                  isLoading = false;
-                });
-                showSnackBar(
-                  "Payouts has been updated",
-                );
-              } else if (!fRes.isNegative) {
-                personPositive.setResult(fRes);
-                int abs = personNegative.result.abs();
-                await firestoreInstance
-                    .collection("$pathToCashGame/payouts")
-                    .add({
-                  "sentence":
-                      "${personNegative.name} pays ${personPositive.name} $abs.",
-                  "personnegative": personNegative.name,
-                  "personpositive": personPositive.name,
-                  "result": abs,
-                });
-
-                personList.remove(personList[personNegative.index]);
-
-                personNegative = null;
-              }
-            }
-          }
-        }
-        if (moveGame == true) {
-          moveGameToHistory();
-        }
-      });
-    } else if (moveGame == true) {
-      moveGameToHistory();
+      return new Container();
     }
   }
 
@@ -1059,6 +854,7 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
           "sblind": widget.game.sBlind,
           "orderbytime": widget.game.orderByTime,
           "share": widget.group.shareResults,
+          "type": 0,
         });
       }
     });
@@ -1213,7 +1009,7 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
             setState(() {
               isLoading = true;
             });
-            calculatePayouts(widget.game.calculatePayouts, true);
+            // calculatePayouts(widget.game.calculatePayouts, true);
 
             Log().postLogToCollection("$currentUserName ended the game",
                 "$pathToCashGame/log", "Finished");

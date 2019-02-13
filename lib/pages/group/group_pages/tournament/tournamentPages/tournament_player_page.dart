@@ -318,7 +318,9 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
                   labelText: "Placing",
                 ),
                 onChanged: (val) {
-                  if (int.tryParse(val) == widget.oldPlacing) {
+                  if (val.isEmpty) {
+                    newPlacing = 0;
+                  } else if (int.tryParse(val) == widget.oldPlacing) {
                     newPlacing = widget.oldPlacing;
                   } else {
                     newPlacing = int.tryParse(val);
@@ -333,7 +335,8 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
               ),
               title: new Text("Payout: $genesisPayout${widget.game.currency}",
                   style: new TextStyle(
-                      color: UIData.white, fontSize: UIData.fontSize18))),
+                      color: UIData.blackOrWhite,
+                      fontSize: UIData.fontSize18))),
           new ListTile(
             leading: new Icon(
               Icons.refresh,
@@ -349,7 +352,9 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
                   labelText: "Rebuys",
                 ),
                 onSaved: (val) {
-                  if (int.tryParse(val) == widget.oldRebuy) {
+                  if (val.isEmpty) {
+                    newRebuy = 0;
+                  } else if (int.tryParse(val) == widget.oldRebuy) {
                     newRebuy = widget.oldRebuy;
                   } else {
                     newRebuy = int.tryParse(val);
@@ -371,7 +376,9 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
                   labelText: "Addon",
                 ),
                 onSaved: (val) {
-                  if (int.tryParse(val) == widget.oldAddon) {
+                  if (val.isEmpty) {
+                    newAddon = 0;
+                  } else if (int.tryParse(val) == widget.oldAddon) {
                     newAddon = widget.oldAddon;
                   } else {
                     newAddon = int.tryParse(val);
@@ -428,7 +435,7 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
   }
 
   Widget addons() {
-    if (widget.game.addon > 0) {
+    if (widget.game.addon > 0 && !widget.history) {
       return new ListTile(
         leading: new Icon(
           Icons.add,
@@ -511,7 +518,7 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
   }
 
   Widget rebuys() {
-    if (widget.game.rebuy > 0) {
+    if (widget.game.rebuy > 0 && !widget.history) {
       return new ListTile(
         leading: new Icon(
           Icons.refresh,

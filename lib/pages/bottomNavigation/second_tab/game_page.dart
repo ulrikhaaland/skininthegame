@@ -146,14 +146,12 @@ class GamePageState extends State<GamePage> {
                     ),
                   ),
                   onTap: () =>
-                      // widget.onSignOut(),
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => ProfilePage(
                                   user: widget.user,
                                   profileId: widget.user.id,
-                                  onSignOut: () => widget.onSignOut(),
                                 )),
                       ),
                 ),

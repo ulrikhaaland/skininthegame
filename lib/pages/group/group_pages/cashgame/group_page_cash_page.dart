@@ -276,7 +276,7 @@ class GroupCashGamesState extends State<GroupCashGames>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               new Text(
-                "Buyin: ",
+                "Blinds: ${document.data["sblind"]}/${document.data["bblind"]}",
                 textAlign: TextAlign.start,
                 style: new TextStyle(color: UIData.blackOrWhite),
               ),

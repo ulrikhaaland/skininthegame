@@ -67,7 +67,7 @@ class SubLevel {
     var result = await FlutterInappPurchase.initConnection;
     print('result: $result');
 
-    int subLevel;
+    int subLevel = 0;
 
     String msg = await FlutterInappPurchase.consumeAllItems;
     print('consumeAllItems: $msg');

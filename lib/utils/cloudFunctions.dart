@@ -27,7 +27,7 @@ class OwnCloudFunctions {
           if (doc.data["notification"] == true && doc.data["fcm"] != null) {
             print("${doc.data["fcm"]}");
             String dataURL =
-                '$base?to=${doc.data["fcm"]}&gameName=${game.name}&groupName=${group.name}&fromGroupId=${group.id}&fromGameId=${game.id}&gameType=$gameType&dailyMessage=${group.dailyMessage}&host=${group.host}&info=${group.info}&lowerCaseName=${group.lowerCaseName}&members=${group.members}&public=${group.public}&thumbs=${group.rating}&title=$title&body=$body&uid=${doc.documentID}';
+                '$base?to=${doc.data["fcm"]}&gameName=${game.name}&groupName=${group.name}&fromGroupId=${group.id}&fromGameId=${game.id}&gameType=$gameType&dailyMessage=${group.dailyMessage}&host=${group.host}&info=${group.info}&lowerCaseName=${group.lowerCaseName}&members=${group.members}&public=${group.public}&thumbs=${group.rating}&title=$title&body=$body&uid=${doc.documentID}&newGame=$newGame';
             print(dataURL);
 
             await http.get(dataURL);
@@ -36,7 +36,7 @@ class OwnCloudFunctions {
       });
     } else {
       String dataURL =
-          '$base?to=${game.floorFCM}&gameName=${game.name}&groupName=${group.name}&fromGroupId=${group.id}&fromGameId=${game.id}&gameType=$gameType&dailyMessage=${group.dailyMessage}&host=${group.host}&info=${group.info}&lowerCaseName=${group.lowerCaseName}&members=${group.members}&public=${group.public}&thumbs=${group.rating}&title=$title&body=$body&uid=${game.floor}';
+          '$base?to=${game.floorFCM}&gameName=${game.name}&groupName=${group.name}&fromGroupId=${group.id}&fromGameId=${game.id}&gameType=$gameType&dailyMessage=${group.dailyMessage}&host=${group.host}&info=${group.info}&lowerCaseName=${group.lowerCaseName}&members=${group.members}&public=${group.public}&thumbs=${group.rating}&title=$title&body=$body&uid=${game.floor}&newGame=$newGame';
       await http.get(dataURL);
     }
   }
