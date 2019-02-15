@@ -244,25 +244,25 @@ class NewTournamentState extends State<NewTournament> {
         .collection("groups/${widget.group.id}/members")
         .getDocuments();
 
-    qSnap.documents.forEach((doc) {
-      if (doc.data["admin"]) {
-        adminsList.add(new User(
-            null,
-            doc.data["uid"],
-            doc.data["username"],
-            doc.data["fcm"],
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null));
-      }
-    });
+    // qSnap.documents.forEach((doc) {
+    //   if (doc.data["admin"]) {
+    //     adminsList.add(new User(
+    //         null,
+    //         doc.data["uid"],
+    //         doc.data["username"],
+    //         doc.data["fcm"],
+    //         null,
+    //         null,
+    //         null,
+    //         null,
+    //         null,
+    //         null,
+    //         null,
+    //         null,
+    //         null,
+    //         null));
+    //   }
+    // });
     setState(() {
       isLoading = false;
     });

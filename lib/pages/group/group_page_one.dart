@@ -150,23 +150,23 @@ class GroupDashboardState extends State<GroupDashboard> {
       );
 
   // Check how many players is in this group.
-  _numberOfMembers() async   {
+  _numberOfMembers() async {
     CollectionReference cRef1 =
         fireStoreInstance.collection("groups/$groupId/members");
     DocumentReference docRef1 = fireStoreInstance.document("groups/$groupId");
-      QuerySnapshot qSnap1 = await cRef1.getDocuments();
-      if (qSnap1.documents.isEmpty) {
-        numberOfMembers = 0;
-        if (group != null) {}
-        docRef1.updateData({
-          "members": numberOfMembers,
-        });
-      } else {
-        numberOfMembers = qSnap1.documents.length;
-        docRef1.updateData({
-          "members": numberOfMembers,
-        });
-      }
+    QuerySnapshot qSnap1 = await cRef1.getDocuments();
+    if (qSnap1.documents.isEmpty) {
+      numberOfMembers = 0;
+      if (group != null) {}
+      docRef1.updateData({
+        "members": numberOfMembers,
+      });
+    } else {
+      numberOfMembers = qSnap1.documents.length;
+      docRef1.updateData({
+        "members": numberOfMembers,
+      });
+    }
   }
 
   checkIfMemberAndGetUserInfo() {
@@ -346,139 +346,106 @@ class GroupDashboardState extends State<GroupDashboard> {
           elevation: 2.0,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            child: GridView.count(
+              mainAxisSpacing: 5,
+              physics: ScrollPhysics(),
+              shrinkWrap: true,
+              childAspectRatio: 4,
+              crossAxisCount: 2,
               children: <Widget>[
-                new Column(children: <Widget>[
-                  new IconButton(
-                    icon: new Icon(
-                      Icons.whatshot,
-                      color: Colors.red,
-                      size: 50.0,
-                    ),
-                    onPressed: () {
-                      if (isMember == true) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => GroupTournaments(
-                                    user: widget.user,
-                                    group: group,
-                                    groupType: type,
-                                  )),
-                        );
-                      }
-                    },
+                new IconButton(
+                  icon: new Icon(
+                    Icons.whatshot,
+                    color: Colors.red,
+                    size: 50.0,
                   ),
-                  padded(),
-                  GestureDetector(
+                  onPressed: () {
+                    if (isMember == true) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => GroupTournaments(
+                                  user: widget.user,
+                                  group: group,
+                                  groupType: type,
+                                )),
+                      );
+                    }
+                  },
+                ),
+                new IconButton(
+                  icon: new Icon(
+                    Icons.attach_money,
+                    color: Colors.green,
+                    size: 50.0,
+                  ),
+                  onPressed: () {
+                    if (isMember == true) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => GroupCashGames(
+                                  group: group,
+                                  user: widget.user,
+                                )),
+                      );
+                    }
+                  },
+                ),
+                GestureDetector(
+                  child: new Padding(
+                    padding: EdgeInsets.only(top: 10),
                     child: new Text(
-                      "    Tournaments",
+                      "Tournaments",
                       style: new TextStyle(
                           color: UIData.blackOrWhite,
                           fontSize: UIData.fontSize16),
+                      textAlign: TextAlign.center,
                     ),
-                    onTap: () {
-                      if (isMember == true) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => GroupTournaments(
-                                    user: widget.user,
-                                    group: group,
-                                    groupType: type,
-                                  )),
-                        );
-                      }
-                    },
                   ),
-                  new IconButton(
-                      icon: new Icon(
-                        Icons.people,
-                        color: Colors.blue,
-                        size: 50.0,
-                      ),
-                      onPressed: () {
-                        if (isMember == true) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => MembersPage(
-                                      user: widget.user,
-                                      group: group,
-                                      groupType: type,
-                                    )),
-                          );
-                        }
-                      }),
-                  padded(),
-                  new GestureDetector(
-                      child: new Text(
-                        "    Members",
-                        style: new TextStyle(
-                            color: UIData.blackOrWhite,
-                            fontSize: UIData.fontSize16),
-                      ),
-                      onTap: () {
-                        if (isMember == true) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => MembersPage(
-                                      user: widget.user,
-                                      group: group,
-                                      groupType: type,
-                                    )),
-                          );
-                        }
-                      }),
-                ]),
-                new Column(children: <Widget>[
-                  new IconButton(
-                    icon: new Icon(
-                      Icons.attach_money,
-                      color: Colors.green,
-                      size: 50.0,
-                    ),
-                    onPressed: () {
-                      if (isMember == true) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => GroupCashGames(
-                                    group: group,
-                                    user: widget.user,
-                                  )),
-                        );
-                      }
-                    },
-                  ),
-                  padded(),
-                  new GestureDetector(
+                  onTap: () {
+                    if (isMember == true) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => GroupTournaments(
+                                  user: widget.user,
+                                  group: group,
+                                  groupType: type,
+                                )),
+                      );
+                    }
+                  },
+                ),
+                new GestureDetector(
+                  child: new Padding(
+                    padding: EdgeInsets.only(top: 10),
                     child: new Text(
-                      "    Cash Games",
+                      "Cash Games",
                       style: new TextStyle(
                         color: UIData.blackOrWhite,
                         fontSize: UIData.fontSize16,
                       ),
+                      textAlign: TextAlign.center,
                     ),
-                    onTap: () {
-                      if (isMember == true) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => GroupCashGames(
-                                    user: widget.user,
-                                    group: group,
-                                  )),
-                        );
-                      }
-                    },
                   ),
-                  new IconButton(
+                  onTap: () {
+                    if (isMember == true) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => GroupCashGames(
+                                  user: widget.user,
+                                  group: group,
+                                )),
+                      );
+                    }
+                  },
+                ),
+                new IconButton(
                     icon: new Icon(
-                      Icons.message,
-                      color: UIData.yellow,
+                      Icons.people,
+                      color: Colors.blue,
                       size: 50.0,
                     ),
                     onPressed: () {
@@ -486,32 +453,80 @@ class GroupDashboardState extends State<GroupDashboard> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) =>
-                                  FeedPage(user: widget.user, group: group)),
+                              builder: (context) => MembersPage(
+                                    user: widget.user,
+                                    group: group,
+                                    groupType: type,
+                                  )),
                         );
                       }
-                    },
+                    }),
+                new IconButton(
+                  icon: new Icon(
+                    Icons.message,
+                    color: UIData.yellow,
+                    size: 50.0,
                   ),
-                  padded(),
-                  new GestureDetector(
-                    child: new Text(
-                      "    Posts",
-                      style: new TextStyle(
-                          color: UIData.blackOrWhite,
-                          fontSize: UIData.fontSize16),
+                  onPressed: () {
+                    if (isMember == true) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                FeedPage(user: widget.user, group: group)),
+                      );
+                    }
+                  },
+                ),
+                new GestureDetector(
+                    child: new Padding(
+                      padding: EdgeInsets.only(top: 10),
+                      child: new Text(
+                        "Members",
+                        style: new TextStyle(
+                            color: UIData.blackOrWhite,
+                            fontSize: UIData.fontSize16),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                     onTap: () {
                       if (isMember == true) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) =>
-                                  FeedPage(user: widget.user, group: group)),
+                              builder: (context) => MembersPage(
+                                    user: widget.user,
+                                    group: group,
+                                    groupType: type,
+                                  )),
                         );
                       }
-                    },
+                    }),
+                new GestureDetector(
+                  child: new Padding(
+                    padding: EdgeInsets.only(top: 10),
+                    child: new Text(
+                      "Posts",
+                      style: new TextStyle(
+                          color: UIData.blackOrWhite,
+                          fontSize: UIData.fontSize16),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                ])
+                  onTap: () {
+                    if (isMember == true) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                FeedPage(user: widget.user, group: group)),
+                      );
+                    }
+                  },
+                ),
+                // Padding(
+                //   padding: EdgeInsets.only(top: 0),
+                // )
               ],
             ),
           ),
@@ -519,73 +534,143 @@ class GroupDashboardState extends State<GroupDashboard> {
       );
 
   Widget balanceCard() => Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
         child: Card(
           color: UIData.cardColor,
           elevation: 2.0,
           child: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Column(
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[
-                    new Column(children: <Widget>[
-                      Text(
-                        "Members",
-                        style: TextStyle(
-                            fontFamily: UIData.ralewayFont,
-                            color: UIData.blackOrWhite,
-                            fontSize: UIData.fontSize16),
-                      ),
-                      padded(),
-                      Text(
-                        "${group.getMembers()}",
-                        style: TextStyle(
-                            fontFamily: UIData.ralewayFont,
-                            fontWeight: FontWeight.w700,
-                            color: UIData.green,
-                            fontSize: 25.0),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ]),
-                    new Column(children: <Widget>[
-                      padded(),
-                      Text(
-                        "${group.rating.toStringAsFixed(1)}",
-                        style: TextStyle(
-                            fontFamily: UIData.ralewayFont,
-                            color: UIData.blackOrWhite,
-                            fontSize: UIData.fontSize16),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      new IconButton(
-                        icon: new Icon(
-                          Icons.star,
-                          size: 30.0,
-                          color: Color.lerp(Colors.grey[600], UIData.yellow,
-                              group.rating / 5),
+              padding: const EdgeInsets.all(8.0),
+              child: new Stack(
+                children: <Widget>[
+                  GridView.count(
+                      physics: ScrollPhysics(),
+                      shrinkWrap: true,
+                      childAspectRatio: 7,
+                      crossAxisCount: 2,
+                      children: <Widget>[
+                        Text(
+                          "Members",
+                          style: TextStyle(
+                              fontFamily: UIData.ralewayFont,
+                              color: UIData.blackOrWhite,
+                              fontSize: UIData.fontSize16),
+                          textAlign: TextAlign.center,
                         ),
-                        onPressed: () async {
-                          if (admin != true && isMember == true) {
-                            DocumentSnapshot docsnap = await fireStoreInstance
-                                .document(
-                                    "groups/${group.id}/rating/${widget.user.id}")
-                                .get();
-                            if (docsnap.exists) {
-                              showRateGroupAlert(docsnap.data["rating"] + .0);
-                            } else {
-                              showRateGroupAlert(0);
-                            }
-                          }
-                        },
+                        Text(
+                          "${group.rating.toStringAsFixed(1)}",
+                          style: TextStyle(
+                              fontFamily: UIData.ralewayFont,
+                              color: UIData.blackOrWhite,
+                              fontSize: UIData.fontSize16),
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          "${group.getMembers()}",
+                          style: TextStyle(
+                              fontFamily: UIData.ralewayFont,
+                              fontWeight: FontWeight.w700,
+                              color: UIData.green,
+                              fontSize: 25.0),
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(top: 0),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(top: 0),
+                        )
+                      ]),
+                  new Positioned(
+                    right: 69,
+                    top: 37,
+                    child: new IconButton(
+                      icon: new Icon(
+                        Icons.star,
+                        size: 30.0,
+                        color: Color.lerp(
+                            Colors.grey[600], UIData.yellow, group.rating / 5),
                       ),
-                    ]),
-                  ],
-                ),
-              ],
-            ),
-          ),
+                      onPressed: () async {
+                        if (admin != true && isMember == true) {
+                          DocumentSnapshot docsnap = await fireStoreInstance
+                              .document(
+                                  "groups/${group.id}/rating/${widget.user.id}")
+                              .get();
+                          if (docsnap.exists) {
+                            showRateGroupAlert(docsnap.data["rating"] + .0);
+                          } else {
+                            showRateGroupAlert(0);
+                          }
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              )
+
+              // Column(
+              //   children: <Widget>[
+              //     Row(
+              //       mainAxisAlignment: MainAxisAlignment.spaceAround,
+              //       children: <Widget>[
+              //         new Column(children: <Widget>[
+              //           Text(
+              //             "Members",
+              //             style: TextStyle(
+              //                 fontFamily: UIData.ralewayFont,
+              //                 color: UIData.blackOrWhite,
+              //                 fontSize: UIData.fontSize16),
+              //           ),
+              //           padded(),
+              //           Text(
+              //             "${group.getMembers()}",
+              //             style: TextStyle(
+              //                 fontFamily: UIData.ralewayFont,
+              //                 fontWeight: FontWeight.w700,
+              //                 color: UIData.green,
+              //                 fontSize: 25.0),
+              //             overflow: TextOverflow.ellipsis,
+              //           ),
+              //         ]),
+              //         new Column(children: <Widget>[
+              //           padded(),
+              //           Text(
+              //             "${group.rating.toStringAsFixed(1)}",
+              //             style: TextStyle(
+              //                 fontFamily: UIData.ralewayFont,
+              //                 color: UIData.blackOrWhite,
+              //                 fontSize: UIData.fontSize16),
+              //             overflow: TextOverflow.ellipsis,
+              //           ),
+              //           new IconButton(
+              //             icon: new Icon(
+              //               Icons.star,
+              //               size: 30.0,
+              //               color: Color.lerp(Colors.grey[600], UIData.yellow,
+              //                   group.rating / 5),
+              //             ),
+              //             onPressed: () async {
+              //               if (admin != true && isMember == true) {
+              //                 DocumentSnapshot docsnap = await fireStoreInstance
+              //                     .document(
+              //                         "groups/${group.id}/rating/${widget.user.id}")
+              //                     .get();
+              //                 if (docsnap.exists) {
+              //                   showRateGroupAlert(docsnap.data["rating"] + .0);
+              //                 } else {
+              //                   showRateGroupAlert(0);
+              //                 }
+              //               }
+              //             },
+              //           ),
+              //         ]),
+              //       ],
+              //     ),
+              //   ],
+              // ),
+              ),
         ),
       );
 

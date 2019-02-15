@@ -810,6 +810,8 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
         .getDocuments();
     qSnap.documents.forEach((DocumentSnapshot doc) {
       if (doc.data["id"] != null) {
+        int placing = doc.data["placing"];
+        if (placing == null) placing = 0;
         firestoreInstance
             .collection("users/${doc.data["id"]}/tournamentresults")
             .add({
@@ -826,7 +828,7 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
           "buyin": widget.game.buyin,
           "addon": doc.data["addon"],
           "payout": doc.data["payout"],
-          "placing": doc.data["placing"],
+          "placing": placing,
           "playeramount": qSnap.documents.length,
           "currency": widget.game.currency,
           "orderbytime": widget.game.orderByTime,

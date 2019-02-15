@@ -191,7 +191,7 @@ class GroupTournamentsState extends State<GroupTournaments>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               new Text(
-                "Buyin: ${document.data["buyin"]}",
+                "Buyin: ${document.data["buyin"]} ${document.data["currency"]}",
                 textAlign: TextAlign.start,
                 style: new TextStyle(color: UIData.blackOrWhite),
               ),

@@ -145,8 +145,7 @@ class GamePageState extends State<GamePage> {
                       color: UIData.blackOrWhite,
                     ),
                   ),
-                  onTap: () =>
-                      Navigator.push(
+                  onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => ProfilePage(
@@ -618,7 +617,7 @@ class GamePageState extends State<GamePage> {
     return StreamBuilder(
         stream: firestoreInstance
             .collection("users/$currentUserId/groups")
-            .orderBy("members", descending: true)
+            .orderBy("numberoftournaments", descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return loading();

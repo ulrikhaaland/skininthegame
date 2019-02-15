@@ -1364,6 +1364,7 @@ class CashGamePageState extends State<CashGamePage>
       actionExtentRatio: 0.25,
       child: new Container(
         child: new ListTile(
+            leading: addImage(document.data["profilepicurl"]),
             title: new Text(
               "${document.data["name"]} ",
               style: new TextStyle(fontSize: 24.0, color: colorName),

@@ -11,6 +11,7 @@ import 'package:yadda/utils/layout.dart';
 import 'package:yadda/widgets/primary_button.dart';
 import 'package:yadda/pages/inAppPurchase/subLevel.dart';
 import 'package:yadda/pages/inAppPurchase/subscription.dart';
+import 'package:yadda/pages/group/group_page_one.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage(
@@ -284,7 +285,7 @@ class PageOneState extends State<PageOne> {
                 } else if (groupCode.contains("a")) {
                   typeOfCode = "admingroupcode";
                 } else if (groupCode.contains("o")) {
-                  typeOfCode = "code";
+                  typeOfCode = "onetimegroupcode";
                 }
                 _getGroup(typeOfCode);
               } else {
@@ -344,44 +345,44 @@ class PageOneState extends State<PageOne> {
   }
 
   void _saveGroup() async {
-    await firestoreInstance.runTransaction((Transaction tx) async {
-      bool admin;
-      if (groupCode.contains("r")) {
-      } else if (groupCode.contains("o")) {
-        firestoreInstance
-            .document("groups/$groupId/codes/onetimegroupcode/codes/$groupCode")
-            .delete();
-        firestoreInstance.document("codes/$groupCode").delete();
-      } else if (groupCode.contains("a")) {
-        admin = true;
-      }
+    bool admin = false;
+    if (groupCode.contains("r")) {
+    } else if (groupCode.contains("o")) {
       firestoreInstance
-          .document("groups/$groupId/members/${widget.user.id}")
-          .setData({
-        "uid": widget.user.id,
-        "username": widget.user.userName,
-        "admin": admin,
-        "notification": true,
-        "fcm": widget.user.fcm,
-        "profilepicurl": widget.user.profilePicURL,
-      });
-      firestoreInstance
-          .document("users/${widget.user.id}/groups/$groupId")
-          .setData({
-        "id": groupId,
-        "name": groupName,
-        "numberofcashgames": 0,
-        "numberoftournaments": 0,
-        "members": 0,
-      });
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) => RootPage(
-                  auth: widget.auth,
-                )),
-      );
+          .document("groups/$groupId/codes/onetimegroupcode/codes/$groupCode")
+          .delete();
+      firestoreInstance.document("codes/$groupCode").delete();
+    } else if (groupCode.contains("a")) {
+      admin = true;
+    }
+    await firestoreInstance
+        .document("groups/$groupId/members/${widget.user.id}")
+        .setData({
+      "uid": widget.user.id,
+      "username": widget.user.userName,
+      "admin": admin,
+      "notification": true,
+      "fcm": widget.user.fcm,
+      "profilepicurl": widget.user.profilePicURL,
     });
+    await firestoreInstance
+        .document("users/${widget.user.id}/groups/$groupId")
+        .setData({
+      "id": groupId,
+      "name": groupName,
+      "numberofcashgames": 0,
+      "numberoftournaments": 0,
+      "members": 0,
+    });
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => GroupDashboard(
+                user: widget.user,
+                groupId: groupId,
+              )),
+    );
+    isLoading = false;
   }
 
   void onChanged(String value) {

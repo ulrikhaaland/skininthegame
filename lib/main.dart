@@ -23,6 +23,7 @@ class MyApp extends StatelessWidget {
             counterStyle: TextStyle(color: Colors.grey[600]),
           )),
       home: new RootPage(auth: new Auth()),
+      debugShowCheckedModeBanner: false,
       routes: <String, WidgetBuilder>{
         "/login": (BuildContext context) => GamePage(),
       },
