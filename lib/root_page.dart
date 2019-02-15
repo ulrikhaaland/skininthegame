@@ -50,6 +50,7 @@ class RootPageState extends State<RootPage> {
 
   initState() {
     super.initState();
+    SubLevel().getSubLevel().then((onValue) => user.subLevel = onValue);
     getUserId();
     firebaseMessaging.configure(onLaunch: (Map<String, dynamic> msg) {
       print("onLaunch called");
@@ -169,7 +170,7 @@ class RootPageState extends State<RootPage> {
 
   Future<String> getUserId() async {
     currentUser = await widget.auth.currentUser();
-    if (authStatus == AuthStatus.signedIn || currentUser != null) {
+    if (currentUser != null) {
       await getUserInfo();
     } else {
       setState(() {
@@ -180,53 +181,51 @@ class RootPageState extends State<RootPage> {
   }
 
   Future<Null> getUserInfo() async {
-    firestoreInstance.runTransaction((Transaction tx) async {
-      DocumentSnapshot docSnap =
-          await firestoreInstance.document("users/$currentUser").get();
-      if (docSnap.exists) {
-        QuerySnapshot qSnap = await firestoreInstance
-            .collection("users/${docSnap.data["id"]}/grouprequests")
-            .getDocuments();
+    DocumentSnapshot docSnap =
+        await firestoreInstance.document("users/$currentUser").get();
+    if (docSnap.exists) {
+      QuerySnapshot qSnap = await firestoreInstance
+          .collection("users/${docSnap.data["id"]}/grouprequests")
+          .getDocuments();
 
-        user = new User(
-          docSnap.data["email"],
-          docSnap.data["id"],
-          docSnap.data["name"],
-          await updateFcmToken(),
-          docSnap.data["bio"],
-          docSnap.data["nightmode"],
-          docSnap.data["shareresults"],
-          docSnap.data["following"],
-          docSnap.data["followers"],
-          docSnap.data["hasprofilepic"],
-          await ProfilePicture().getDownloadUrl(docSnap.data["id"]),
-          docSnap.data["currency"],
-          docSnap.data["appversion"],
-          2,
-          // await SubLevel().getSubLevel(),
-          notifications: qSnap.documents.length,
-        );
-        double version = 0;
-        DocumentSnapshot docSnapV =
-            await firestoreInstance.document("version/version").get();
-        version = docSnapV.data["version"];
-        setState(() {
-          if (currentUser != null) {
-            authStatus = AuthStatus.signedIn;
-            if (user.appVersion < version) {
-              authStatus = AuthStatus.updateApp;
-            }
-          } else {
-            authStatus = AuthStatus.notSignedIn;
+      user = new User(
+        docSnap.data["email"],
+        docSnap.data["id"],
+        docSnap.data["name"],
+        await updateFcmToken(),
+        docSnap.data["bio"],
+        docSnap.data["nightmode"],
+        docSnap.data["shareresults"],
+        docSnap.data["following"],
+        docSnap.data["followers"],
+        docSnap.data["hasprofilepic"],
+        await ProfilePicture().getDownloadUrl(docSnap.data["id"]),
+        docSnap.data["currency"],
+        docSnap.data["appversion"],
+        // 2,
+        subLevel,
+        notifications: qSnap.documents.length,
+      );
+      double version = 0;
+      DocumentSnapshot docSnapV =
+          await firestoreInstance.document("version/version").get();
+      version = docSnapV.data["version"];
+      setState(() {
+        if (currentUser != null) {
+          authStatus = AuthStatus.signedIn;
+          if (user.appVersion < version) {
+            authStatus = AuthStatus.updateApp;
           }
-        });
-        uiData.nightMode(user.nightMode, user.id);
-      } else {
-        setState(() {
+        } else {
           authStatus = AuthStatus.notSignedIn;
-        });
-      }
-    });
+        }
+      });
+      uiData.nightMode(user.nightMode, user.id);
+    } else {
+      setState(() {
+        authStatus = AuthStatus.notSignedIn;
+      });
+    }
   }
 
   void _updateAuthStatus(AuthStatus status) {

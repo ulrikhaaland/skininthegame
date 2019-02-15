@@ -346,43 +346,56 @@ class PageOneState extends State<PageOne> {
 
   void _saveGroup() async {
     bool admin = false;
-    if (groupCode.contains("r")) {
-    } else if (groupCode.contains("o")) {
-      firestoreInstance
-          .document("groups/$groupId/codes/onetimegroupcode/codes/$groupCode")
-          .delete();
-      firestoreInstance.document("codes/$groupCode").delete();
-    } else if (groupCode.contains("a")) {
-      admin = true;
+    if (await SubLevel().groupsLeft(widget.user.id, widget.user.subLevel)) {
+      if (groupCode.contains("r")) {
+      } else if (groupCode.contains("o")) {
+        firestoreInstance
+            .document("groups/$groupId/codes/onetimegroupcode/codes/$groupCode")
+            .delete();
+        firestoreInstance.document("codes/$groupCode").delete();
+      } else if (groupCode.contains("a")) {
+        admin = true;
+      }
+      await firestoreInstance
+          .document("groups/$groupId/members/${widget.user.id}")
+          .setData({
+        "uid": widget.user.id,
+        "username": widget.user.userName,
+        "admin": admin,
+        "notification": true,
+        "fcm": widget.user.fcm,
+        "profilepicurl": widget.user.profilePicURL,
+      });
+      await firestoreInstance
+          .document("users/${widget.user.id}/groups/$groupId")
+          .setData({
+        "id": groupId,
+        "name": groupName,
+        "numberofcashgames": 0,
+        "numberoftournaments": 0,
+        "members": 0,
+      });
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => GroupDashboard(
+                  user: widget.user,
+                  groupId: groupId,
+                )),
+      );
+      isLoading = false;
     }
-    await firestoreInstance
-        .document("groups/$groupId/members/${widget.user.id}")
-        .setData({
-      "uid": widget.user.id,
-      "username": widget.user.userName,
-      "admin": admin,
-      "notification": true,
-      "fcm": widget.user.fcm,
-      "profilepicurl": widget.user.profilePicURL,
-    });
-    await firestoreInstance
-        .document("users/${widget.user.id}/groups/$groupId")
-        .setData({
-      "id": groupId,
-      "name": groupName,
-      "numberofcashgames": 0,
-      "numberoftournaments": 0,
-      "members": 0,
-    });
+    int i;
+    widget.user.subLevel == 0 ? i = 3 : i = 10;
     Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => GroupDashboard(
-                user: widget.user,
-                groupId: groupId,
-              )),
-    );
-    isLoading = false;
+        context,
+        MaterialPageRoute(
+            builder: (context) => Subscription(
+                  user: widget.user,
+                  info: true,
+                  title:
+                      "Your current subscription only allows you to be a part of $i groups at any given time",
+                )));
   }
 
   void onChanged(String value) {

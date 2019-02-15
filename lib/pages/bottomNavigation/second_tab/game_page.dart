@@ -14,6 +14,7 @@ import 'package:yadda/pages/profile/profile_page.dart';
 import 'package:yadda/pages/inAppPurchase/subscription.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:yadda/utils/delete.dart';
+import 'package:yadda/pages/inAppPurchase/sublevel.dart';
 
 SearchBar searchBar;
 
@@ -87,6 +88,7 @@ class GamePageState extends State<GamePage> {
   @override
   initState() {
     super.initState();
+    SubLevel().getSubLevel().then((onValue) => widget.user.subLevel = onValue);
     currentUserId = widget.user.id;
     _registeredGames();
     if (widget.user.nightMode) {
@@ -617,7 +619,7 @@ class GamePageState extends State<GamePage> {
     return StreamBuilder(
         stream: firestoreInstance
             .collection("users/$currentUserId/groups")
-            .orderBy("numberoftournaments", descending: true)
+            .orderBy("members", descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return loading();

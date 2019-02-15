@@ -575,38 +575,47 @@ class GroupDashboardState extends State<GroupDashboard> {
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.center,
                         ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 0),
+                        new GestureDetector(
+                          child: new Icon(
+                            Icons.star,
+                            size: 30.0,
+                            color: Color.lerp(Colors.grey[600], UIData.yellow,
+                                group.rating / 5),
+                          ),
+                          onTap: () async {
+                            if (admin != true && isMember == true) {
+                              DocumentSnapshot docsnap = await fireStoreInstance
+                                  .document(
+                                      "groups/${group.id}/rating/${widget.user.id}")
+                                  .get();
+                              if (docsnap.exists) {
+                                showRateGroupAlert(docsnap.data["rating"] + .0);
+                              } else {
+                                showRateGroupAlert(0);
+                              }
+                            }
+                          },
                         ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 0),
-                        )
+                        new Container()
+                        // onPressed: () async {
+                        //   if (admin != true && isMember == true) {
+                        //     DocumentSnapshot docsnap = await fireStoreInstance
+                        //         .document(
+                        //             "groups/${group.id}/rating/${widget.user.id}")
+                        //         .get();
+                        //     if (docsnap.exists) {
+                        //       showRateGroupAlert(docsnap.data["rating"] + .0);
+                        //     } else {
+                        //       showRateGroupAlert(0);
+                        //     }
+                        //   }
+                        // },
                       ]),
-                  new Positioned(
-                    right: 69,
-                    top: 37,
-                    child: new IconButton(
-                      icon: new Icon(
-                        Icons.star,
-                        size: 30.0,
-                        color: Color.lerp(
-                            Colors.grey[600], UIData.yellow, group.rating / 5),
-                      ),
-                      onPressed: () async {
-                        if (admin != true && isMember == true) {
-                          DocumentSnapshot docsnap = await fireStoreInstance
-                              .document(
-                                  "groups/${group.id}/rating/${widget.user.id}")
-                              .get();
-                          if (docsnap.exists) {
-                            showRateGroupAlert(docsnap.data["rating"] + .0);
-                          } else {
-                            showRateGroupAlert(0);
-                          }
-                        }
-                      },
-                    ),
-                  ),
+                  // new Positioned(
+                  //   right: 69,
+                  //   top: 37,
+                  //   child:
+                  // ),
                 ],
               )
 

@@ -483,6 +483,7 @@ class _SubscriptionState extends State<Subscription> {
                   color: UIData.red,
                   fontSize: UIData.fontSize16,
                 ),
+                textAlign: TextAlign.center,
               ),
             ),
             SizedBox(height: 12.0),
