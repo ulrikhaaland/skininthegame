@@ -21,7 +21,8 @@ class ResultGame {
       this.sBlind,
       this.date,
       this.share,
-      this.type);
+      this.type,
+      {this.position});
 
   final int addon;
   final int buyin;
@@ -35,6 +36,7 @@ class ResultGame {
   final int sBlind;
   final int bBlind;
   final int type;
+  int position;
 
   final DateTime date;
   final bool share;

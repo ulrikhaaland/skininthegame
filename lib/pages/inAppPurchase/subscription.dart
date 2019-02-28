@@ -110,6 +110,7 @@ class _SubscriptionState extends State<Subscription> {
         Firestore.instance.document("users/${widget.user.id}").updateData({
           'sublevel': widget.user.subLevel,
         });
+        Navigator.pop(context);
       }
     } catch (error) {
       print('$error');
@@ -501,10 +502,12 @@ class _SubscriptionState extends State<Subscription> {
       return new Scaffold(
         backgroundColor: UIData.dark,
         appBar: new AppBar(
+          iconTheme: IconThemeData(color: UIData.blackOrWhite),
           backgroundColor: UIData.appBarColor,
           title: new Text(
             "Subscriptions",
-            style: new TextStyle(fontSize: UIData.fontSize24),
+            style: new TextStyle(
+                fontSize: UIData.fontSize24, color: UIData.blackOrWhite),
           ),
         ),
         body: Stack(

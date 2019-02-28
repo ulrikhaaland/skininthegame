@@ -86,6 +86,7 @@ class _SelectionCallbackState extends State<SelectionCallbackExample> {
                 animate: widget.animate,
                 primaryMeasureAxis: charts.NumericAxisSpec(
                     renderSpec: charts.GridlineRendererSpec(
+                        labelOffsetFromAxisPx: 10,
                         labelStyle:
                             charts.TextStyleSpec(fontSize: 12, color: color),
                         lineStyle: charts.LineStyleSpec(
@@ -93,6 +94,7 @@ class _SelectionCallbackState extends State<SelectionCallbackExample> {
                             color: charts.MaterialPalette.gray.shadeDefault))),
                 domainAxis: new charts.DateTimeAxisSpec(
                   renderSpec: charts.SmallTickRendererSpec(
+                      labelOffsetFromAxisPx: 10,
                       axisLineStyle: charts.LineStyleSpec(
                         color: color,
                       ),

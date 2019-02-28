@@ -5,14 +5,13 @@ import 'package:yadda/utils/uidata.dart';
 import 'package:yadda/pages/bottomNavigation/second_tab/game_page.dart';
 
 void main() => runApp(MyApp());
-
+  
 class MyApp extends StatelessWidget {
-  @override
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
       color: UIData.darkest,
-      title: 'Flutter Login',
+      title: 'GALANTE',
       theme: new ThemeData(
           tabBarTheme: TabBarTheme(
               labelColor: UIData.blackOrWhite,

@@ -330,6 +330,13 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
     cashResultGameTotal.gameCount = cashgameResults.length;
 
     cashgameResults.sort((a, b) => a.date.compareTo(b.date));
+    for (int i = 0; i < cashgameResults.length; i++) {
+      cashgameResults[i].position = cashgameResults[i].profit;
+
+      if (i != 0) {
+        cashgameResults[i].position += cashgameResults[i - 1].position;
+      }
+    }
     cashgameData = charts.Series<ResultGame, DateTime>(
       colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
       id: 'Cashgame',
@@ -384,11 +391,18 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
     tournamentResultGameTotal.gameCount = tournamentResults.length;
 
     tournamentResults.sort((a, b) => a.date.compareTo(b.date));
+    for (int i = 0; i < tournamentResults.length; i++) {
+      tournamentResults[i].position = tournamentResults[i].profit;
+
+      if (i != 0) {
+        tournamentResults[i].position += tournamentResults[i - 1].position;
+      }
+    }
     tournamentData = charts.Series<ResultGame, DateTime>(
       colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
       id: 'Tournament',
       domainFn: (ResultGame game, _) => game.date,
-      measureFn: (ResultGame game, _) => game.profit,
+      measureFn: (ResultGame game, _) => game.position,
       data: tournamentResults,
     );
 

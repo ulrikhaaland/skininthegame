@@ -980,6 +980,7 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
       actions: <Widget>[
         new FlatButton(
           onPressed: () {
+            widget.game.finished = true;
             Navigator.pop(context);
             setState(() {
               isLoading = true;

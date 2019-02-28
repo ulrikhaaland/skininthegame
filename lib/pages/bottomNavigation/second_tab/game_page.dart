@@ -88,7 +88,7 @@ class GamePageState extends State<GamePage> {
   @override
   initState() {
     super.initState();
-    SubLevel().getSubLevel().then((onValue) => widget.user.subLevel = onValue);
+    checkSubLevel();
     currentUserId = widget.user.id;
     _registeredGames();
     if (widget.user.nightMode) {
@@ -101,6 +101,11 @@ class GamePageState extends State<GamePage> {
   @override
   dispose() {
     super.dispose();
+  }
+
+  checkSubLevel() {
+    SubLevel().getSubLevel().then((onValue) =>
+        widget.user != null ? widget.user.subLevel = onValue : null);
   }
 
   @override

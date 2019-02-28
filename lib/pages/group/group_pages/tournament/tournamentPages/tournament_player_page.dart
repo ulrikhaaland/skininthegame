@@ -75,6 +75,8 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
   int oldPayout;
   String gamePath;
 
+  int payoutListLength = 0;
+
   int genesisPayout;
 
   String activeOrHistory = "tournamentactive";
@@ -82,7 +84,9 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
   @override
   void initState() {
     super.initState();
-
+    if (widget.game.payoutList != null) {
+      payoutListLength = widget.game.payoutList.length;
+    }
     currentUserId = widget.user.getId();
     currentUserName = widget.user.getName();
     groupName = widget.group.name;
@@ -270,7 +274,7 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
 
   void updatePayout() {
     if (myController.text != "") if (int.tryParse(myController.text) >
-        widget.game.payoutList.length) {
+        payoutListLength) {
       genesisPayout = 0;
     } else if (myController.text == "0") {
       genesisPayout = 0;

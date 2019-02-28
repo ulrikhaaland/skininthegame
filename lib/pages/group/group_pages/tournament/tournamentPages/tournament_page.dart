@@ -766,6 +766,9 @@ class TournamentPageState extends State<TournamentPage>
   }
 
   Widget prizePoolPage() {
+    if (game.finished != true) {
+      calculatePayouts(game.calculatePayouts);
+    }
     if (isAdmin) {
       return SingleChildScrollView(
         padding: EdgeInsets.all(12.0),
@@ -1082,7 +1085,7 @@ class TournamentPageState extends State<TournamentPage>
     if (!game.calculatePayouts && isAdmin) {
       return new Layout().padded(
         child: new TextFormField(
-          keyboardType: TextInputType.number,
+          keyboardType: TextInputType.numberWithOptions(decimal: false),
           // initialValue: "${game.placesPaid}",
           style: new TextStyle(color: UIData.blackOrWhite),
           key: new Key('suboraddpp'),

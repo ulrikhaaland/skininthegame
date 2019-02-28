@@ -38,7 +38,7 @@ class RootPageState extends State<RootPage> {
   String messagingToken;
   User user;
 
-  int subLevel;
+  int subLevel = 0;
 
   UIData uiData = new UIData();
 
@@ -50,8 +50,8 @@ class RootPageState extends State<RootPage> {
 
   initState() {
     super.initState();
-    SubLevel().getSubLevel().then((onValue) => user.subLevel = onValue);
     getUserId();
+    checkSubLevel();
     firebaseMessaging.configure(onLaunch: (Map<String, dynamic> msg) {
       print("onLaunch called");
       handleMessage(msg);
@@ -60,10 +60,10 @@ class RootPageState extends State<RootPage> {
       handleMessage(msg);
     }, onMessage: (Map<String, dynamic> msg) {
       print("onMessage called");
-      var newGame = getValueFromMap(msg, "newGame");
-      if (newGame == "true") {
-        handleMessage(msg);
-      }
+      // var newGame = getValueFromMap(msg, "newGame");
+      // if (newGame == "true") {
+      //   handleMessage(msg);
+      // }
     });
     firebaseMessaging
         .requestNotificationPermissions(const IosNotificationSettings(
@@ -80,6 +80,12 @@ class RootPageState extends State<RootPage> {
   @override
   void dispose() async {
     super.dispose();
+  }
+
+  checkSubLevel() {
+    SubLevel()
+        .getSubLevel()
+        .then((onValue) => user != null ? user.subLevel = onValue : null);
   }
 
   Future<String> updateFcmToken() async {
@@ -202,8 +208,8 @@ class RootPageState extends State<RootPage> {
         await ProfilePicture().getDownloadUrl(docSnap.data["id"]),
         docSnap.data["currency"],
         docSnap.data["appversion"],
-        // 2,
-        subLevel,
+        2,
+        // subLevel,
         notifications: qSnap.documents.length,
       );
       double version = 0;

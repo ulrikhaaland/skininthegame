@@ -37,6 +37,7 @@ class Game {
     this.subOrAddPP,
     this.add,
     this.placesPaid,
+    this.finished
   });
 
   bool calculatePayouts;
@@ -44,6 +45,7 @@ class Game {
   bool showMoneyOnTable;
   bool stopReg;
   bool add;
+  bool finished;
 
   List<PayoutObject> payoutList;
 

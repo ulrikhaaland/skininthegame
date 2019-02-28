@@ -20,7 +20,7 @@ class SubLevel {
         break;
       case (2):
         {
-          tru = true;  
+          tru = true;
         }
         break;
     }

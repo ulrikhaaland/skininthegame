@@ -485,7 +485,7 @@ class LoginState extends State<Login> {
   Widget hintText() {
     return new Container(
         //height: 80.0,
-        padding: const EdgeInsets.all(32.0),
+        // padding: const EdgeInsets.all(32.0),
         child: new Text(_authHint,
             key: new Key('hint'),
             style: new TextStyle(fontSize: 18.0, color: Colors.grey[600]),
@@ -505,10 +505,10 @@ class LoginState extends State<Login> {
                     key: formKey,
                     child: new Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: usernameAndPassword() + submitWidgets(),
+                      children: usernameAndPassword() + [hintText()] + submitWidgets(),
                     ))),
           ])),
-      hintText()
+      
     ])));
   }
 
