@@ -69,6 +69,7 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
 
   IconData regIcon;
   String regText;
+  List<User> adminsList = new List();
 
   @override
   initState() {
@@ -89,6 +90,7 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
     if (widget.history == true) {
       tournamentActiveOrHistory = "tournamenthistory";
     }
+    getAdmins();
 
     setReg();
     _date = new DateTime(
@@ -118,6 +120,35 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
   @override
   Widget build(BuildContext context) {
     return page();
+  }
+
+  void getAdmins() async {
+    QuerySnapshot qSnap = await firestoreInstance
+        .collection("groups/${widget.group.id}/members")
+        .getDocuments();
+
+    qSnap.documents.forEach((doc) {
+      if (doc.data["admin"]) {
+        adminsList.add(new User(
+            null,
+            doc.data["uid"],
+            doc.data["username"],
+            doc.data["fcm"],
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null));
+      }
+    });
+    setState(() {
+      isLoading = false;
+    });
   }
 
   void setReg() {
@@ -255,7 +286,6 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                 controller: _tabController,
                 children: [
                   SingleChildScrollView(
-                    padding: EdgeInsets.all(16),
                     child: Column(
                       children: <Widget>[
                         new ListTile(
@@ -284,9 +314,9 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                                         )));
                           },
                         ),
-                        Layout().divider(),
+                        Layout().dividerPadded(),
                         markAsFinishedList(),
-                        divider(),
+                        Layout().dividerPadded(),
                         new ListTile(
                           leading: new Icon(
                             Icons.delete,
@@ -301,40 +331,45 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                           ),
                           onTap: () => _deleteAlert(),
                         ),
-                        Layout().divider(),
+                        Layout().dividerPadded(),
                         showReg(),
-                        Layout().divider(),
+                        Layout().dividerPadded(),
                         Padding(
                           padding: EdgeInsets.only(top: 16),
                         ),
-                        new TextFormField(
-                          textCapitalization: TextCapitalization.sentences,
-                          initialValue: widget.game.name,
-                          style: new TextStyle(color: UIData.blackOrWhite),
-                          key: new Key('name'),
-                          decoration: new InputDecoration(
-                              labelText: 'Name',
-                              labelStyle:
-                                  new TextStyle(color: Colors.grey[600])),
-                          autocorrect: false,
-                          onSaved: (val) {
-                            if (val.isEmpty) {
-                              val = "Not Set";
-                            }
-                            if (val.length > 18) {
-                              setState(() {
-                                String fittedString = val.substring(0, 16);
-                                widget.game.setName(val);
-                                widget.game.setFittedName("$fittedString...");
-                              });
-                            } else {
-                              setState(() {
-                                widget.game.setName(val);
-                                widget.game.setFittedName(val);
-                              });
-                            }
-                          },
+                        Layout().padded(
+                          child: new TextFormField(
+                            textCapitalization: TextCapitalization.sentences,
+                            initialValue: widget.game.name,
+                            style: new TextStyle(color: UIData.blackOrWhite),
+                            key: new Key('name'),
+                            decoration: new InputDecoration(
+                                labelText: 'Name',
+                                labelStyle:
+                                    new TextStyle(color: Colors.grey[600])),
+                            autocorrect: false,
+                            onSaved: (val) {
+                              if (val.isEmpty) {
+                                val = "Not Set";
+                              }
+                              if (val.length > 18) {
+                                setState(() {
+                                  String fittedString = val.substring(0, 16);
+                                  widget.game.setName(val);
+                                  widget.game.setFittedName("$fittedString...");
+                                });
+                              } else {
+                                setState(() {
+                                  widget.game.setName(val);
+                                  widget.game.setFittedName(val);
+                                });
+                              }
+                            },
+                          ),
                         ),
+                        Layout().padded(
+                          child: 
+                        
                         new TextFormField(
                           textCapitalization: TextCapitalization.sentences,
                           initialValue: widget.game.adress,
@@ -346,10 +381,8 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                                   new TextStyle(color: Colors.grey[600])),
                           autocorrect: false,
                           onSaved: (val) => widget.game.setAdress(val),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 16),
-                        ),
+                        ),),
+                       
                         new Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
@@ -395,6 +428,8 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                             ),
                           ],
                         ),
+                        Layout().padded(
+                          child: 
                         new TextFormField(
                             keyboardType: TextInputType.numberWithOptions(),
                             initialValue: widget.game.maxPlayers.toString(),
@@ -407,39 +442,44 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                                     new TextStyle(color: Colors.grey[600])),
                             autocorrect: false,
                             validator: (val) {
-                              val.isEmpty
-                                  ? val = widget.game.maxPlayers.toString()
-                                  : null;
+                              int isNumber = int.tryParse(val);
+                              if (isNumber != null) {
+                                val.isEmpty
+                                    ? val = widget.game.maxPlayers.toString()
+                                    : null;
 
-                              if (widget.user.subLevel < 2) {
-                                String sub;
-                                if (widget.user.subLevel == 1 &&
-                                    int.tryParse(val) > 27) {
-                                  sub =
-                                      "Your current subscription only allows \n27 players per tournament";
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => Subscription(
-                                                user: widget.user,
-                                                info: true,
-                                                title: sub,
-                                              )));
-                                  return sub;
-                                } else if (widget.user.subLevel == 0 &&
-                                    int.tryParse(val) > 9) {
-                                  sub =
-                                      "Your current subscription only allows \n9 players per tournament";
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => Subscription(
-                                                user: widget.user,
-                                                info: true,
-                                                title: sub,
-                                              )));
-                                  return sub;
+                                if (widget.user.subLevel < 2) {
+                                  String sub;
+                                  if (widget.user.subLevel == 1 &&
+                                      int.tryParse(val) > 27) {
+                                    sub =
+                                        "Your current subscription only allows \n27 players per tournament";
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => Subscription(
+                                                  user: widget.user,
+                                                  info: true,
+                                                  title: sub,
+                                                )));
+                                    return sub;
+                                  } else if (widget.user.subLevel == 0 &&
+                                      int.tryParse(val) > 9) {
+                                    sub =
+                                        "Your current subscription only allows \n9 players per tournament";
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => Subscription(
+                                                  user: widget.user,
+                                                  info: true,
+                                                  title: sub,
+                                                )));
+                                    return sub;
+                                  }
                                 }
+                              } else {
+                                return "Input must be a number!";
                               }
                             },
                             onSaved: (val) {
@@ -464,7 +504,9 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                               } else {
                                 widget.game.setMaxPlayers(int.tryParse(val));
                               }
-                            }),
+                            }),),
+                            Layout().padded(
+                          child: 
                         new TextFormField(
                           textCapitalization: TextCapitalization.sentences,
                           initialValue: widget.game.gameType,
@@ -476,7 +518,9 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                                   new TextStyle(color: Colors.grey[600])),
                           autocorrect: false,
                           onSaved: (val) => widget.game.setGameType(val),
-                        ),
+                        ),),
+                        Layout().padded(
+                          child: 
                         new TextFormField(
                             keyboardType: TextInputType.numberWithOptions(),
                             initialValue: widget.game.buyin.toString(),
@@ -488,6 +532,12 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                                 labelStyle:
                                     new TextStyle(color: Colors.grey[600])),
                             autocorrect: false,
+                            validator: (val) {
+                              int isNumber = int.tryParse(val);
+                              if (isNumber == null) {
+                                return "Input must be a number!";
+                              }
+                            },
                             onSaved: (val) {
                               if (val.isEmpty) {
                                 widget.game.setBuyin(0);
@@ -498,7 +548,7 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                                 widget.game.rebuyPrice = widget.game.buyin;
                                 widget.game.addonPrice = widget.game.buyin;
                               }
-                            }),
+                            }),),
                         new Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
@@ -521,6 +571,12 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                                       labelStyle: new TextStyle(
                                           color: Colors.grey[600])),
                                   autocorrect: false,
+                                  validator: (val) {
+                                    int isNumber = int.tryParse(val);
+                                    if (isNumber == null) {
+                                      return "Input must be a number!";
+                                    }
+                                  },
                                   onSaved: (val) =>
                                       widget.game.setRebuy(int.tryParse(val)),
                                 ),
@@ -543,6 +599,12 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                                         labelStyle: new TextStyle(
                                             color: Colors.grey[600])),
                                     autocorrect: false,
+                                    validator: (val) {
+                                      int isNumber = int.tryParse(val);
+                                      if (isNumber == null) {
+                                        return "Input must be a number!";
+                                      }
+                                    },
                                     onSaved: (val) => widget.game
                                         .setAddon(int.tryParse(val))),
                               ),
@@ -556,16 +618,16 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                               "Same price as buyin?",
                               style: new TextStyle(color: UIData.blackOrWhite),
                             ),
-                            subtitle: new Text(
-                              "If the price for rebuy's and addon's is the same as the price for buyin then check this box",
-                              style: new TextStyle(color: Colors.grey[600]),
-                            ),
+                            
                             value: sameAsBuyin,
                             onChanged: (val) {
                               sameAsBuyin = val;
                               showRebuyPrice = !val;
                               setState(() {});
                             }),
+                            // Layout().dividerPadded(),
+                            Layout().padded(
+                          child: 
                         new TextFormField(
                           keyboardType: TextInputType.numberWithOptions(),
                           initialValue: widget.game.startingChips,
@@ -576,8 +638,16 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                               labelStyle:
                                   new TextStyle(color: Colors.grey[600])),
                           autocorrect: false,
+                          validator: (val) {
+                            int isNumber = int.tryParse(val);
+                            if (isNumber == null) {
+                              return "Input must be a number!";
+                            }
+                          },
                           onSaved: (val) => widget.game.setStartingChips(val),
-                        ),
+                        ),),
+                        Layout().padded(
+                          child: 
                         new TextFormField(
                           initialValue: widget.game.totalPrizePool,
                           maxLines: 3,
@@ -589,7 +659,9 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                                   new TextStyle(color: Colors.grey[600])),
                           autocorrect: false,
                           onSaved: (val) => widget.game.setTotalPrizePool(val),
-                        ),
+                        ),),
+                        Layout().padded(
+                          child: 
                         new TextFormField(
                             textCapitalization: TextCapitalization.sentences,
                             style: new TextStyle(color: UIData.blackOrWhite),
@@ -602,7 +674,9 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                             autocorrect: false,
                             onSaved: (val) => val.isEmpty
                                 ? widget.game.setCurrency(widget.user.currency)
-                                : widget.game.setCurrency(val)),
+                                : widget.game.setCurrency(val)),),
+                                Layout().padded(
+                          child: 
                         new TextFormField(
                           textCapitalization: TextCapitalization.sentences,
                           initialValue: widget.game.info,
@@ -615,6 +689,66 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                                   new TextStyle(color: Colors.grey[600])),
                           autocorrect: false,
                           onSaved: (val) => widget.game.setInfo(val),
+                        ),),
+                        Padding(
+                          padding: EdgeInsets.only(bottom: 16),
+                          child: ListTile(
+                            subtitle: new Text(
+                              "The user in charge of this game",
+                              style: new TextStyle(color: Colors.grey[600]),
+                            ),
+                            title: new Text(
+                              "Floor",
+                              style: new TextStyle(color: UIData.blackOrWhite),
+                            ),
+                            trailing: Theme(
+                              data: Theme.of(context)
+                                  .copyWith(canvasColor: UIData.appBarColor),
+                              child: new Container(
+                                child: new DropdownButton<User>(
+                                  style: TextStyle(color: UIData.blackOrWhite),
+                                  hint: new Text(
+                                    widget.game.floorName,
+                                    style: new TextStyle(
+                                        color: UIData.blackOrWhite,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  items: adminsList.map((User user) {
+                                    return new DropdownMenuItem<User>(
+                                      value: user,
+                                      child: new Text(
+                                        user.userName,
+                                        style: new TextStyle(
+                                            color: UIData.blackOrWhite),
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (_) {
+                                    if (widget.game.floorName != _.userName) {
+                                      setState(() {
+                                        widget.game.floorName = _.userName;
+                                        for (var user in adminsList) {
+                                          if (user.userName == _.userName) {
+                                            widget.game.floor = user.id;
+                                            widget.game.floorFCM = user.fcm;
+                                            widget.game.floorName =
+                                                user.userName;
+                                          }
+                                        }
+                                      });
+                                      firestoreInstance
+                                          .document(pathToTournament)
+                                          .updateData({
+                                        "floor": widget.game.floor,
+                                        "floorfcm": widget.game.floorFCM,
+                                        "floorname": widget.game.floorName,
+                                      });
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                         Padding(
                           padding: EdgeInsets.only(bottom: 18.0),
@@ -687,6 +821,12 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                   labelText: "Rebuy price",
                   labelStyle: new TextStyle(color: Colors.grey[600])),
               autocorrect: false,
+              validator: (val) {
+                int isNumber = int.tryParse(val);
+                if (isNumber == null) {
+                  return "Input must be a number!";
+                }
+              },
               onSaved: (val) => val.isEmpty
                   ? widget.game.rebuyPrice = widget.game.buyin
                   : widget.game.rebuyPrice = int.tryParse(val),
@@ -708,6 +848,12 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                     labelText: "Addon price",
                     labelStyle: new TextStyle(color: Colors.grey[600])),
                 autocorrect: false,
+                validator: (val) {
+                  int isNumber = int.tryParse(val);
+                  if (isNumber == null) {
+                    return "Input must be a number!";
+                  }
+                },
                 onSaved: (val) => val.isEmpty
                     ? widget.game.addonPrice = widget.game.buyin
                     : widget.game.addonPrice = int.tryParse(val)),

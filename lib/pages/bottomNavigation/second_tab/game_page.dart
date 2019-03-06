@@ -531,7 +531,7 @@ class GamePageState extends State<GamePage> {
     return new Slidable(
       // enabled: enabled,
       delegate: new SlidableDrawerDelegate(),
-      actionExtentRatio: 0.25,
+      actionExtentRatio: .25,
       child: new Container(
         child: new ListTile(
           contentPadding: EdgeInsets.all(3.0),
@@ -566,7 +566,6 @@ class GamePageState extends State<GamePage> {
                         color: Colors.red,
                         size: 25.0,
                       ),
-                      new Align(),
                       Text(" ${document["numberoftournaments"].toString()}",
                           overflow: TextOverflow.ellipsis,
                           style: new TextStyle(

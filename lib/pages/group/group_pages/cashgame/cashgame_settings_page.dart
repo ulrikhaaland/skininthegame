@@ -249,7 +249,6 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
                 controller: _tabController,
                 children: [
                   SingleChildScrollView(
-                    padding: EdgeInsets.all(16),
                     child: Column(
                       children: <Widget>[
                         new ListTile(
@@ -279,9 +278,9 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
                                         )));
                           },
                         ),
-                        Layout().divider(),
+                        Layout().dividerPadded(),
                         markAsFinishedList(),
-                        Layout().divider(),
+                        Layout().dividerPadded(),
                         new ListTile(
                           leading: new Icon(
                             Icons.delete,
@@ -298,54 +297,55 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
                             _deleteAlert();
                           },
                         ),
-                        Layout().divider(),
+                        Layout().dividerPadded(),
                         showReg(),
-                        Layout().divider(),
+                        Layout().dividerPadded(),
                         Padding(
                           padding: EdgeInsets.only(top: 16),
                         ),
-                        new TextFormField(
-                          textCapitalization: TextCapitalization.sentences,
-                          initialValue: widget.game.name,
-                          style: new TextStyle(color: UIData.blackOrWhite),
-                          key: new Key('name'),
-                          decoration: new InputDecoration(
-                              labelText: 'Name',
-                              labelStyle:
-                                  new TextStyle(color: Colors.grey[600])),
-                          autocorrect: false,
-                          onSaved: (val) {
-                            if (val.isEmpty) {
-                              val = "Not Set";
-                            }
-                            if (val.length > 18) {
-                              setState(() {
-                                String fittedString = val.substring(0, 16);
-                                widget.game.setName(val);
-                                widget.game.setFittedName("$fittedString...");
-                              });
-                            } else {
-                              setState(() {
-                                widget.game.setName(val);
-                                widget.game.setFittedName(val);
-                              });
-                            }
-                          },
+                        Layout().padded(
+                          child: new TextFormField(
+                            textCapitalization: TextCapitalization.sentences,
+                            initialValue: widget.game.name,
+                            style: new TextStyle(color: UIData.blackOrWhite),
+                            key: new Key('name'),
+                            decoration: new InputDecoration(
+                                labelText: 'Name',
+                                labelStyle:
+                                    new TextStyle(color: Colors.grey[600])),
+                            autocorrect: false,
+                            onSaved: (val) {
+                              if (val.isEmpty) {
+                                val = "Not Set";
+                              }
+                              if (val.length > 18) {
+                                setState(() {
+                                  String fittedString = val.substring(0, 16);
+                                  widget.game.setName(val);
+                                  widget.game.setFittedName("$fittedString...");
+                                });
+                              } else {
+                                setState(() {
+                                  widget.game.setName(val);
+                                  widget.game.setFittedName(val);
+                                });
+                              }
+                            },
+                          ),
                         ),
-                        new TextFormField(
-                          textCapitalization: TextCapitalization.sentences,
-                          initialValue: widget.game.adress,
-                          style: new TextStyle(color: UIData.blackOrWhite),
-                          key: new Key('adress'),
-                          decoration: new InputDecoration(
-                              labelText: 'Adress',
-                              labelStyle:
-                                  new TextStyle(color: Colors.grey[600])),
-                          autocorrect: false,
-                          onSaved: (val) => widget.game.setAdress(val),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 16),
+                        Layout().padded(
+                          child: new TextFormField(
+                            textCapitalization: TextCapitalization.sentences,
+                            initialValue: widget.game.adress,
+                            style: new TextStyle(color: UIData.blackOrWhite),
+                            key: new Key('adress'),
+                            decoration: new InputDecoration(
+                                labelText: 'Adress',
+                                labelStyle:
+                                    new TextStyle(color: Colors.grey[600])),
+                            autocorrect: false,
+                            onSaved: (val) => widget.game.setAdress(val),
+                          ),
                         ),
                         new Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -392,90 +392,98 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
                             ),
                           ],
                         ),
-                        new TextFormField(
-                            keyboardType: TextInputType.numberWithOptions(),
-                            initialValue: widget.game.maxPlayers.toString(),
-                            maxLength: 6,
+                        Layout().padded(
+                          child: new TextFormField(
+                              keyboardType: TextInputType.numberWithOptions(),
+                              initialValue: widget.game.maxPlayers.toString(),
+                              maxLength: 6,
+                              style: new TextStyle(color: UIData.blackOrWhite),
+                              key: new Key('maximumplayers'),
+                              decoration: new InputDecoration(
+                                  labelText: 'Maximum players',
+                                  labelStyle:
+                                      new TextStyle(color: Colors.grey[600])),
+                              autocorrect: false,
+                              validator: (val) {
+                                int isNumber = int.tryParse(val);
+                                if (isNumber != null) {
+                                  val.isEmpty
+                                      ? val = widget.game.maxPlayers.toString()
+                                      : null;
+
+                                  if (widget.user.subLevel < 2) {
+                                    String sub;
+                                    if (widget.user.subLevel == 1 &&
+                                        int.tryParse(val) > 9) {
+                                      sub =
+                                          "Your current subscription only allows \n9 players per cash game";
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  Subscription(
+                                                    user: widget.user,
+                                                    info: true,
+                                                    title: sub,
+                                                  )));
+                                      return sub;
+                                    } else if (widget.user.subLevel == 0 &&
+                                        int.tryParse(val) > 6) {
+                                      sub =
+                                          "Your current subscription only allows \n6 players per cash game";
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  Subscription(
+                                                    user: widget.user,
+                                                    info: true,
+                                                    title: sub,
+                                                  )));
+                                      return sub;
+                                    }
+                                  }
+                                } else {
+                                  return "Input must be a number!";
+                                }
+                              },
+                              onSaved: (val) {
+                                if (val.isEmpty) {
+                                  switch (widget.user.subLevel) {
+                                    case (0):
+                                      widget.game.setMaxPlayers(6);
+                                      break;
+                                    case (1):
+                                      widget.game.setMaxPlayers(9);
+                                      break;
+                                    case (2):
+                                      widget.game.setMaxPlayers(9);
+                                      break;
+                                  }
+                                } else if (widget.user.subLevel == 1 &&
+                                    int.tryParse(val) > 9) {
+                                  widget.game.setMaxPlayers(9);
+                                } else if (widget.user.subLevel == 0 &&
+                                    int.tryParse(val) > 6) {
+                                  widget.game.setMaxPlayers(6);
+                                } else {
+                                  widget.game.setMaxPlayers(int.tryParse(val));
+                                }
+                              }),
+                        ),
+                        Layout().padded(
+                          child: new TextFormField(
+                            textCapitalization: TextCapitalization.sentences,
+                            initialValue: widget.game.gameType,
                             style: new TextStyle(color: UIData.blackOrWhite),
-                            key: new Key('maximumplayers'),
+                            key: new Key('gametype'),
                             decoration: new InputDecoration(
-                                labelText: 'Maximum players',
+                                labelText: 'Gametype',
                                 labelStyle:
                                     new TextStyle(color: Colors.grey[600])),
                             autocorrect: false,
-                            validator: (val) {
-                              val.isEmpty
-                                  ? val = widget.game.maxPlayers.toString()
-                                  : null;
-
-                              if (widget.user.subLevel < 2) {
-                                String sub;
-                                if (widget.user.subLevel == 1 &&
-                                    int.tryParse(val) > 9) {
-                                  sub =
-                                      "Your current subscription only allows \n9 players per cash game";
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => Subscription(
-                                                user: widget.user,
-                                                info: true,
-                                                title: sub,
-                                              )));
-                                  return sub;
-                                } else if (widget.user.subLevel == 0 &&
-                                    int.tryParse(val) > 6) {
-                                  sub =
-                                      "Your current subscription only allows \n6 players per cash game";
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => Subscription(
-                                                user: widget.user,
-                                                info: true,
-                                                title: sub,
-                                              )));
-                                  return sub;
-                                }
-                              }
-                            },
-                            onSaved: (val) {
-                              if (val.isEmpty) {
-                                switch (widget.user.subLevel) {
-                                  case (0):
-                                    widget.game.setMaxPlayers(6);
-                                    break;
-                                  case (1):
-                                    widget.game.setMaxPlayers(9);
-                                    break;
-                                  case (2):
-                                    widget.game.setMaxPlayers(9);
-                                    break;
-                                }
-                              } else if (widget.user.subLevel == 1 &&
-                                  int.tryParse(val) > 9) {
-                                widget.game.setMaxPlayers(9);
-                              } else if (widget.user.subLevel == 0 &&
-                                  int.tryParse(val) > 6) {
-                                widget.game.setMaxPlayers(6);
-                              } else {
-                                widget.game.setMaxPlayers(int.tryParse(val));
-                              }
-                            }),
-                        new TextFormField(
-                          textCapitalization: TextCapitalization.sentences,
-                          initialValue: widget.game.gameType,
-                          style: new TextStyle(color: UIData.blackOrWhite),
-                          key: new Key('gametype'),
-                          decoration: new InputDecoration(
-                              labelText: 'Gametype',
-                              labelStyle:
-                                  new TextStyle(color: Colors.grey[600])),
-                          autocorrect: false,
-                          onSaved: (val) => widget.game.setGameType(val),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 16),
+                            onSaved: (val) => widget.game.setGameType(val),
+                          ),
                         ),
                         new Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -500,6 +508,12 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
                                       labelStyle: new TextStyle(
                                           color: Colors.grey[600])),
                                   autocorrect: false,
+                                  validator: (val) {
+                                    int isNumber = int.tryParse(val);
+                                    if (isNumber == null) {
+                                      return "Input must be a number!";
+                                    }
+                                  },
                                   onSaved: (val) =>
                                       widget.game.setSBlind(int.tryParse(val)),
                                 ),
@@ -523,37 +537,48 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
                                         labelStyle: new TextStyle(
                                             color: Colors.grey[600])),
                                     autocorrect: false,
+                                    validator: (val) {
+                                      int isNumber = int.tryParse(val);
+                                      if (isNumber == null) {
+                                        return "Input must be a number!";
+                                      }
+                                    },
                                     onSaved: (val) => widget.game
                                         .setBBlind(int.tryParse(val))),
                               ),
                             ),
                           ],
                         ),
-                        new TextFormField(
+                        Layout().padded(
+                          child: new TextFormField(
+                              textCapitalization: TextCapitalization.sentences,
+                              style: new TextStyle(color: UIData.blackOrWhite),
+                              key: new Key('currency'),
+                              initialValue: widget.game.currency,
+                              decoration: new InputDecoration(
+                                  labelText: 'Currency',
+                                  labelStyle:
+                                      new TextStyle(color: Colors.grey[600])),
+                              autocorrect: false,
+                              onSaved: (val) => val.isEmpty
+                                  ? widget.game
+                                      .setCurrency(widget.user.currency)
+                                  : widget.game.setCurrency(val)),
+                        ),
+                        Layout().padded(
+                          child: new TextFormField(
                             textCapitalization: TextCapitalization.sentences,
+                            initialValue: widget.game.info,
+                            maxLines: 3,
                             style: new TextStyle(color: UIData.blackOrWhite),
-                            key: new Key('currency'),
-                            initialValue: widget.game.currency,
+                            key: new Key('info'),
                             decoration: new InputDecoration(
-                                labelText: 'Currency',
+                                labelText: 'Additional information',
                                 labelStyle:
                                     new TextStyle(color: Colors.grey[600])),
                             autocorrect: false,
-                            onSaved: (val) => val.isEmpty
-                                ? widget.game.setCurrency(widget.user.currency)
-                                : widget.game.setCurrency(val)),
-                        new TextFormField(
-                          textCapitalization: TextCapitalization.sentences,
-                          initialValue: widget.game.info,
-                          maxLines: 3,
-                          style: new TextStyle(color: UIData.blackOrWhite),
-                          key: new Key('info'),
-                          decoration: new InputDecoration(
-                              labelText: 'Additional information',
-                              labelStyle:
-                                  new TextStyle(color: Colors.grey[600])),
-                          autocorrect: false,
-                          onSaved: (val) => widget.game.setInfo(val),
+                            onSaved: (val) => widget.game.setInfo(val),
+                          ),
                         ),
                         Padding(
                           padding: EdgeInsets.only(bottom: 16),

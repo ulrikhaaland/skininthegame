@@ -200,7 +200,7 @@ class TournamentCreatePlayerPageState
           style: new TextStyle(color: Colors.black),
         ),
       ));
-    } else {
+    } else if (qSnap.documents.length >= widget.game.maxPlayers) {
       Scaffold.of(formKey.currentState.context).showSnackBar(new SnackBar(
         backgroundColor: UIData.yellow,
         content: new Text(

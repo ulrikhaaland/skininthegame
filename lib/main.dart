@@ -5,7 +5,7 @@ import 'package:yadda/utils/uidata.dart';
 import 'package:yadda/pages/bottomNavigation/second_tab/game_page.dart';
 
 void main() => runApp(MyApp());
-  
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -15,6 +15,7 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(
           tabBarTheme: TabBarTheme(
               labelColor: UIData.blackOrWhite,
+
               unselectedLabelColor: Colors.grey[600]),
           scaffoldBackgroundColor: UIData.dark,
           buttonColor: Colors.yellow[700],

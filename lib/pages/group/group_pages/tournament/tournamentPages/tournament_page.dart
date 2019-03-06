@@ -61,7 +61,7 @@ class TournamentPageState extends State<TournamentPage>
   bool userFound = false;
   bool full = false;
   bool isLoading = false;
-  bool hasJoined;
+  bool hasJoined = false;
   bool isScrollable = false;
 
   IconData playerOrResultsIcon = Icons.people;
@@ -161,7 +161,7 @@ class TournamentPageState extends State<TournamentPage>
   }
 
   FloatingActionButton floatingActionButton() {
-    if (widget.history != true) {
+    if (widget.history != true && !game.stopReg || hasJoined) {
       return new FloatingActionButton(
         backgroundColor: color,
         tooltip: "Join",
@@ -221,7 +221,6 @@ class TournamentPageState extends State<TournamentPage>
   addPlayer() async {
     hasJoined = true;
     setLeave();
-    checkIfFull();
     DocumentReference docRef =
         firestoreInstance.document("$gamePath/players/$currentUserId");
     DocumentSnapshot docSnap = await docRef.get();
@@ -351,6 +350,7 @@ class TournamentPageState extends State<TournamentPage>
               pObjectList.add(payoutObject);
             });
             pObjectList.sort((a, b) => a.placing.compareTo(b.placing));
+            game.payoutList = pObjectList;
             calculatePayouts(false);
           }
         }
@@ -793,6 +793,12 @@ class TournamentPageState extends State<TournamentPage>
                     labelText: 'Add or subtract money',
                     labelStyle: new TextStyle(color: Colors.grey[600])),
                 autocorrect: false,
+                validator: (val) {
+                  int isNumber = int.tryParse(val);
+                  if (isNumber == null) {
+                    return "Input must be a number!";
+                  }
+                },
                 onSaved: (val) {
                   if (val.isEmpty) {
                     game.subOrAddPP = 0;
@@ -1094,6 +1100,12 @@ class TournamentPageState extends State<TournamentPage>
               labelStyle: new TextStyle(color: Colors.grey[600])),
           autocorrect: false,
           controller: myController,
+          validator: (val) {
+            int isNumber = int.tryParse(val);
+            if (isNumber == null) {
+              return "Input must be a number!";
+            }
+          },
           onSaved: (val) {
             int intVal = int.tryParse(val);
             if (val.isEmpty) {

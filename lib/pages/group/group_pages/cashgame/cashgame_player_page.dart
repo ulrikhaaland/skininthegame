@@ -233,9 +233,8 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
         });
       }
       widget.onUpdate();
+      Navigator.pop(context);
     }
-
-    Navigator.pop(context);
   }
 
   Widget page() {
@@ -277,6 +276,12 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
                 labelStyle: new TextStyle(color: Colors.grey[600]),
                 labelText: "$sessionOrTotal buyin amount",
               ),
+              validator: (val) {
+                int isNumber = int.tryParse(val);
+                if (isNumber == null) {
+                  return "Input must be a number!";
+                }
+              },
               onSaved: (val) => val.isEmpty
                   ? newPlayerBuyinAmount = 0
                   : newPlayerBuyinAmount = int.tryParse(val),
@@ -303,6 +308,12 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
                 labelStyle: new TextStyle(color: Colors.grey[600]),
                 labelText: "Payout",
               ),
+              validator: (val) {
+                int isNumber = int.tryParse(val);
+                if (isNumber == null) {
+                  return "Input must be a number!";
+                }
+              },
               onSaved: (val) =>
                   val.isEmpty ? newPayout = 0 : newPayout = int.tryParse(val),
             ),
@@ -364,10 +375,6 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
           requestBuyin(),
           buyinText(),
           requestPayout(),
-          new Divider(
-            height: .0,
-            color: Colors.black,
-          ),
         ],
       );
     }
@@ -450,7 +457,7 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
   Widget buyinText() {
     String text;
     oldPlayerBuyinAmount != 0
-        ? text = "Request more chips"
+        ? text = "Request a rebuy"
         : text = "Request a buyin";
     if (!widget.history && widget.playerId == widget.user.id)
       return Padding(
@@ -488,7 +495,10 @@ class CashGamePlayerPageState extends State<CashGamePlayerPage> {
                   .document("$gamePath/requests/${widget.user.id}r")
                   .get();
               if (!docSnap.exists) {
-                if (buyin > 0) {
+                if (buyin == null) {
+                  Essentials().showSnackBar(
+                      "Please enter a number", formKey.currentState.context);
+                } else if (buyin > 0) {
                   Log().postLogToCollection(
                       "${widget.user.userName} has requested a ${text.toLowerCase()} of $buyin",
                       "$gamePath/log",

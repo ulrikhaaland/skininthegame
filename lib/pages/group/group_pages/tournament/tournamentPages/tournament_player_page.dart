@@ -92,10 +92,6 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
     groupName = widget.group.name;
     groupId = widget.group.id;
 
-    myController.addListener(() => updatePayout());
-    myController.text = widget.oldPlacing.toString();
-
-    updatePayout();
     if (widget.history == true) {
       activeOrHistory = "tournamenthistory";
     }
@@ -122,6 +118,10 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
     } else {
       oldPayout = widget.oldPayout;
     }
+
+    myController.text = oldPlacing.toString();
+    myController.addListener(() => updatePayout());
+    updatePayout();
   }
 
   Widget loading() {
@@ -248,8 +248,8 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
       setState(() {
         isLoading = false;
       });
+      Navigator.pop(context);
     }
-    Navigator.pop(context);
   }
 
   Widget addImage(String url) {
@@ -273,8 +273,8 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
   }
 
   void updatePayout() {
-    if (myController.text != "") if (int.tryParse(myController.text) >
-        payoutListLength) {
+    if (myController.text != "" &&
+        int.tryParse(myController.text) > payoutListLength) {
       genesisPayout = 0;
     } else if (myController.text == "0") {
       genesisPayout = 0;
@@ -322,12 +322,17 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
                   labelText: "Placing",
                 ),
                 onChanged: (val) {
-                  if (val.isEmpty) {
+                  int isNumber = int.tryParse(val);
+                  if (isNumber == null) {
                     newPlacing = 0;
-                  } else if (int.tryParse(val) == widget.oldPlacing) {
-                    newPlacing = widget.oldPlacing;
                   } else {
-                    newPlacing = int.tryParse(val);
+                    if (val.isEmpty) {
+                      newPlacing = 0;
+                    } else if (int.tryParse(val) == widget.oldPlacing) {
+                      newPlacing = widget.oldPlacing;
+                    } else {
+                      newPlacing = int.tryParse(val);
+                    }
                   }
                 }),
           ),
@@ -355,6 +360,12 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
                   labelStyle: new TextStyle(color: Colors.grey[600]),
                   labelText: "Rebuys",
                 ),
+                validator: (val) {
+                  int isNumber = int.tryParse(val);
+                  if (isNumber == null) {
+                    return "Input must be a number!";
+                  }
+                },
                 onSaved: (val) {
                   if (val.isEmpty) {
                     newRebuy = 0;
@@ -379,6 +390,12 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
                   labelStyle: new TextStyle(color: Colors.grey[600]),
                   labelText: "Addon",
                 ),
+                validator: (val) {
+                  int isNumber = int.tryParse(val);
+                  if (isNumber == null) {
+                    return "Input must be a number!";
+                  }
+                },
                 onSaved: (val) {
                   if (val.isEmpty) {
                     newAddon = 0;

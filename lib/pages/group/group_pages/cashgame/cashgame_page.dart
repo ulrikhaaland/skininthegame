@@ -57,7 +57,7 @@ class CashGamePageState extends State<CashGamePage>
   String logPath;
   String gamePath;
 
-  bool hasJoined;
+  bool hasJoined = false;
   bool isAdmin = false;
   bool userFound = false;
   bool full = false;
@@ -468,7 +468,7 @@ class CashGamePageState extends State<CashGamePage>
   }
 
   Widget floatingActionButton() {
-    if (!widget.history && !game.stopReg) {
+    if (!widget.history && !game.stopReg || hasJoined) {
       return new FloatingActionButton(
         backgroundColor: color,
         tooltip: "Join",

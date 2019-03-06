@@ -244,25 +244,25 @@ class NewTournamentState extends State<NewTournament> {
         .collection("groups/${widget.group.id}/members")
         .getDocuments();
 
-    // qSnap.documents.forEach((doc) {
-    //   if (doc.data["admin"]) {
-    //     adminsList.add(new User(
-    //         null,
-    //         doc.data["uid"],
-    //         doc.data["username"],
-    //         doc.data["fcm"],
-    //         null,
-    //         null,
-    //         null,
-    //         null,
-    //         null,
-    //         null,
-    //         null,
-    //         null,
-    //         null,
-    //         null));
-    //   }
-    // });
+    qSnap.documents.forEach((doc) {
+      if (doc.data["admin"]) {
+        adminsList.add(new User(
+            null,
+            doc.data["uid"],
+            doc.data["username"],
+            doc.data["fcm"],
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null));
+      }
+    });
     setState(() {
       isLoading = false;
     });
@@ -297,7 +297,7 @@ class NewTournamentState extends State<NewTournament> {
               },
             ),
           ),
-          padded(
+          Layout().padded(
               child: new TextFormField(
             textCapitalization: TextCapitalization.sentences,
             style: new TextStyle(color: UIData.blackOrWhite),
@@ -359,43 +359,49 @@ class NewTournamentState extends State<NewTournament> {
               child: new TextFormField(
                   keyboardType: TextInputType.number,
                   maxLength: 6,
+                  initialValue: game.maxPlayers.toString(),
                   style: new TextStyle(color: UIData.blackOrWhite),
                   key: new Key('maximumplayers'),
                   decoration: new InputDecoration(
-                      hintText: game.maxPlayers.toString(),
                       labelText: 'Maximum players',
                       labelStyle: new TextStyle(color: Colors.grey[600])),
                   autocorrect: false,
                   validator: (val) {
-                    val.isEmpty ? val = game.maxPlayers.toString() : null;
-                    if (widget.user.subLevel < 2) {
-                      String sub;
-                      if (widget.user.subLevel == 1 && int.tryParse(val) > 27) {
-                        sub =
-                            "Your current subscription only allows \n27 players per tournament";
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Subscription(
-                                      user: widget.user,
-                                      info: true,
-                                      title: sub,
-                                    )));
-                        return sub;
-                      } else if (widget.user.subLevel == 0 &&
-                          int.tryParse(val) > 9) {
-                        sub =
-                            "Your current subscription only allows \n9 players per tournament";
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Subscription(
-                                      user: widget.user,
-                                      info: true,
-                                      title: sub,
-                                    )));
-                        return sub;
+                    int isNumber = int.tryParse(val);
+                    if (isNumber != null) {
+                      val.isEmpty ? val = game.maxPlayers.toString() : null;
+                      if (widget.user.subLevel < 2) {
+                        String sub;
+                        if (widget.user.subLevel == 1 &&
+                            int.tryParse(val) > 27) {
+                          sub =
+                              "Your current subscription only allows \n27 players per tournament";
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Subscription(
+                                        user: widget.user,
+                                        info: true,
+                                        title: sub,
+                                      )));
+                          return sub;
+                        } else if (widget.user.subLevel == 0 &&
+                            int.tryParse(val) > 9) {
+                          sub =
+                              "Your current subscription only allows \n9 players per tournament";
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Subscription(
+                                        user: widget.user,
+                                        info: true,
+                                        title: sub,
+                                      )));
+                          return sub;
+                        }
                       }
+                    } else {
+                      return "Input must be a number!";
                     }
                   },
                   onSaved: (val) {
@@ -446,6 +452,13 @@ class NewTournamentState extends State<NewTournament> {
                         labelText: 'Buyin',
                         labelStyle: new TextStyle(color: Colors.grey[600])),
                     autocorrect: false,
+                    validator: (val) {
+                      int isNumber = int.tryParse(val);
+                      if (isNumber != null) {
+                      } else {
+                        return "Input must be a number!";
+                      }
+                    },
                     onSaved: (val) {
                       if (val.isEmpty) {
                         game.setBuyin(0);
@@ -475,6 +488,13 @@ class NewTournamentState extends State<NewTournament> {
                       labelText: "Rebuy",
                       labelStyle: new TextStyle(color: Colors.grey[600])),
                   autocorrect: false,
+                  validator: (val) {
+                    int isNumber = int.tryParse(val);
+                    if (isNumber != null) {
+                    } else {
+                      return "Input must be a number!";
+                    }
+                  },
                   onSaved: (val) => val.isEmpty
                       ? game.setRebuy(0)
                       : game.setRebuy(int.tryParse(val)),
@@ -495,6 +515,13 @@ class NewTournamentState extends State<NewTournament> {
                         labelText: "Addon",
                         labelStyle: new TextStyle(color: Colors.grey[600])),
                     autocorrect: false,
+                    validator: (val) {
+                      int isNumber = int.tryParse(val);
+                      if (isNumber != null) {
+                      } else {
+                        return "Input must be a number!";
+                      }
+                    },
                     onSaved: (val) => val.isEmpty
                         ? game.setAddon(0)
                         : game.setAddon(int.tryParse(val))),
@@ -530,6 +557,13 @@ class NewTournamentState extends State<NewTournament> {
                 labelText: 'Starting chips',
                 labelStyle: new TextStyle(color: Colors.grey[600])),
             autocorrect: false,
+            validator: (val) {
+              int isNumber = int.tryParse(val);
+              if (isNumber != null) {
+              } else {
+                return "Input must be a number!";
+              }
+            },
             onSaved: (val) => val.isEmpty
                 ? game.setStartingChips("0")
                 : game.setStartingChips(val),
@@ -692,6 +726,13 @@ class NewTournamentState extends State<NewTournament> {
                   labelText: "Rebuy price",
                   labelStyle: new TextStyle(color: Colors.grey[600])),
               autocorrect: false,
+              validator: (val) {
+                int isNumber = int.tryParse(val);
+                if (isNumber != null) {
+                } else {
+                  return "Input must be a number!";
+                }
+              },
               onSaved: (val) => val.isEmpty
                   ? game.rebuyPrice = game.buyin
                   : game.rebuyPrice = int.tryParse(val),
@@ -712,6 +753,13 @@ class NewTournamentState extends State<NewTournament> {
                     labelText: "Addon price",
                     labelStyle: new TextStyle(color: Colors.grey[600])),
                 autocorrect: false,
+                validator: (val) {
+                  int isNumber = int.tryParse(val);
+                  if (isNumber != null) {
+                  } else {
+                    return "Input must be a number!";
+                  }
+                },
                 onSaved: (val) => val.isEmpty
                     ? game.addonPrice = game.buyin
                     : game.addonPrice = int.tryParse(val)),

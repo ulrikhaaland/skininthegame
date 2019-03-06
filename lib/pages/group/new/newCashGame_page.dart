@@ -253,14 +253,12 @@ class NewCashGameState extends State<NewCashGame> {
 
       if (notifyMembers == true) {
         OwnCloudFunctions().groupNotification(
-            
             "Cash Game!",
             game,
             widget.group,
             "New Cash Game!",
             "${widget.group.name} has invited you to join ${game.name}",
-            true
-            );
+            true);
       }
     }
   }
@@ -355,44 +353,49 @@ class NewCashGameState extends State<NewCashGame> {
                 child: new TextFormField(
                     keyboardType: TextInputType.number,
                     maxLength: 6,
+                    initialValue: game.maxPlayers.toString(),
                     style: new TextStyle(color: UIData.blackOrWhite),
                     key: new Key('maximumplayers'),
                     decoration: new InputDecoration(
-                        hintText: game.maxPlayers.toString(),
                         labelText: 'Maximum players',
                         labelStyle: new TextStyle(color: Colors.grey[600])),
                     autocorrect: false,
                     validator: (val) {
-                      val.isEmpty ? val = game.maxPlayers.toString() : null;
-                      if (widget.user.subLevel < 2) {
-                        String sub;
-                        if (widget.user.subLevel == 1 &&
-                            int.tryParse(val) > 9) {
-                          sub =
-                              "Your current subscription only allows \n9 players per cash game";
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Subscription(
-                                        user: widget.user,
-                                        info: true,
-                                        title: sub,
-                                      )));
-                          return sub;
-                        } else if (widget.user.subLevel == 0 &&
-                            int.tryParse(val) > 6) {
-                          sub =
-                              "Your current subscription only allows \n6 players per cash game";
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Subscription(
-                                        user: widget.user,
-                                        info: true,
-                                        title: sub,
-                                      )));
-                          return sub;
+                      int isNumber = int.tryParse(val);
+                      if (isNumber != null) {
+                        val.isEmpty ? val = game.maxPlayers.toString() : null;
+                        if (widget.user.subLevel < 2) {
+                          String sub;
+                          if (widget.user.subLevel == 1 &&
+                              int.tryParse(val) > 9) {
+                            sub =
+                                "Your current subscription only allows \n9 players per cash game";
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Subscription(
+                                          user: widget.user,
+                                          info: true,
+                                          title: sub,
+                                        )));
+                            return sub;
+                          } else if (widget.user.subLevel == 0 &&
+                              int.tryParse(val) > 6) {
+                            sub =
+                                "Your current subscription only allows \n6 players per cash game";
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Subscription(
+                                          user: widget.user,
+                                          info: true,
+                                          title: sub,
+                                        )));
+                            return sub;
+                          }
                         }
+                      } else {
+                        return "Input must be a number!";
                       }
                     },
                     onSaved: (val) {
@@ -449,6 +452,12 @@ class NewCashGameState extends State<NewCashGame> {
                           labelText: "Small Blind",
                           labelStyle: new TextStyle(color: Colors.grey[600])),
                       autocorrect: false,
+                      validator: (val) {
+                        int isNumber = int.tryParse(val);
+                        if (isNumber == null) {
+                          return "Input must be a number!";
+                        }
+                      },
                       onSaved: (val) => val.isEmpty
                           ? game.setSBlind(0)
                           : game.setSBlind(int.tryParse(val)),
@@ -471,6 +480,12 @@ class NewCashGameState extends State<NewCashGame> {
                               color: Colors.grey[600],
                             )),
                         autocorrect: false,
+                        validator: (val) {
+                          int isNumber = int.tryParse(val);
+                          if (isNumber == null) {
+                            return "Input must be a number!";
+                          }
+                        },
                         onSaved: (val) => val.isEmpty
                             ? game.setBBlind(0)
                             : game.setBBlind(int.tryParse(val))),
