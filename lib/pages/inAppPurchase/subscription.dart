@@ -69,7 +69,10 @@ class _SubscriptionState extends State<Subscription> {
 
   Future<Null> _getProduct() async {
     List<IAPItem> items = await FlutterInappPurchase.getSubscriptions(iapId);
-    int subLevel = await SubLevel().getSubLevel();
+    int subLevel;
+    widget.user.subLevel == null
+        ? subLevel = await SubLevel().getSubLevel()
+        : subLevel = widget.user.subLevel;
 
     items[0].body = "light";
     items[1].body = "medium";
@@ -82,12 +85,12 @@ class _SubscriptionState extends State<Subscription> {
     }
     subLevel == 1
         ? sharkTitle = "YOUR PLAN"
-        : sharkTitle = '${_items[0].price} ${_items[0].currency} / MONTH';
+        : sharkTitle = '${_items[0].price} ${_items[0].currency} PER MONTH';
     if (subLevel == 2) {
       whaleTitle = "YOUR PLAN";
-      sharkTitle = '${_items[0].price} ${_items[0].currency} / MONTH';
+      sharkTitle = '${_items[0].price} ${_items[0].currency} PER MONTH';
     } else {
-      whaleTitle = '${_items[1].price} ${_items[1].currency} / MONTH';
+      whaleTitle = '${_items[1].price} ${_items[1].currency} PER MONTH';
     }
     loading = false;
     setState(() {});
