@@ -254,6 +254,7 @@ class GamePageState extends State<GamePage> {
                     setState(() {});
                   },
                 ),
+
                 // new ListTile(
                 //   leading: IconButton(
                 //     icon: Icon(Icons.exit_to_app, size: 30, color: Colors.grey),
@@ -383,10 +384,8 @@ class GamePageState extends State<GamePage> {
     } else {
       return new CircleAvatar(
         radius: 35,
-        backgroundImage: CachedNetworkImageProvider(
-          widget.user.profilePicURL,
-        ),
-        backgroundColor: UIData.darkest,
+        backgroundColor: Colors.grey[600],
+        backgroundImage: CachedNetworkImageProvider(widget.user.profilePicURL),
       );
     }
   }

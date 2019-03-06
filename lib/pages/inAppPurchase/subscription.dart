@@ -8,6 +8,7 @@ import 'package:yadda/objects/group.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yadda/utils/essentials.dart';
 import 'subLevel.dart';
+import 'TermsAndConditions.dart';
 
 class Subscription extends StatefulWidget {
   Subscription(
@@ -26,7 +27,7 @@ class Subscription extends StatefulWidget {
 class _SubscriptionState extends State<Subscription> {
   static List<String> iapId = ["shark", "whale"];
 
-  String fishTitle = "";
+  String fishTitle = "YOUR PLAN";
   String sharkTitle = "";
   String whaleTitle = "";
 
@@ -178,15 +179,6 @@ class _SubscriptionState extends State<Subscription> {
                     color: UIData.blackOrWhite,
                   ),
                   SizedBox(height: 24.0),
-                  SizedBox(
-                    width: 240.0,
-                    height: 50.0,
-                    child: PrimaryButton(
-                      onPressed: () => null,
-                      text: fishTitle,
-                    ),
-                  ),
-                  SizedBox(height: 24.0),
                 ],
               ),
             ),
@@ -200,9 +192,6 @@ class _SubscriptionState extends State<Subscription> {
     return Card(
       color: UIData.listColor,
       elevation: 3,
-      // padding: EdgeInsets.only(
-      //   bottom: 24.0,
-      // ),
       child: Column(
         children: <Widget>[
           SizedBox(height: 12.0),
@@ -302,6 +291,40 @@ class _SubscriptionState extends State<Subscription> {
                       text: sharkTitle,
                     ),
                   ),
+                  new Align(
+                    alignment: Alignment.center,
+                    child: new Container(
+                      width: 300,
+                      child: new Column(
+                        children: <Widget>[
+                          SizedBox(height: 12.0),
+                          new Text(
+                            "Recurring billing. Cancel anytime.",
+                            style: new TextStyle(color: Colors.grey[600]),
+                          ),
+                          FlatButton(
+                            child: new Text(
+                              "Terms & Conditions",
+                              style: new TextStyle(color: UIData.blackOrWhite),
+                            ),
+                            onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        TermsAndConditions())),
+                          ),
+                          new Padding(
+                            padding: EdgeInsets.only(left: 12),
+                            child: new Text(
+                              "The subscription will automatically renew unless auto-renew is turned off at least 24 hours before the end of the current period. You can go to your iTunes Account settings to manage your subscriptions and turn off auto-renew. Your iTunes Account will be charged when the purchase is confirmed.",
+                              style: new TextStyle(color: Colors.grey[600]),
+                              textAlign: TextAlign.left,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   SizedBox(height: 24.0),
                 ],
               ),
@@ -386,6 +409,40 @@ class _SubscriptionState extends State<Subscription> {
                     child: PrimaryButton(
                       onPressed: () => _buySubscription(_items[1]),
                       text: whaleTitle,
+                    ),
+                  ),
+                  new Align(
+                    alignment: Alignment.center,
+                    child: new Container(
+                      width: 300,
+                      child: new Column(
+                        children: <Widget>[
+                          SizedBox(height: 12.0),
+                          new Text(
+                            "Recurring billing. Cancel anytime.",
+                            style: new TextStyle(color: Colors.grey[600]),
+                          ),
+                          FlatButton(
+                            child: new Text(
+                              "Terms & Conditions",
+                              style: new TextStyle(color: UIData.blackOrWhite),
+                            ),
+                            onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        TermsAndConditions())),
+                          ),
+                          new Padding(
+                            padding: EdgeInsets.only(left: 12),
+                            child: new Text(
+                              "The subscription will automatically renew unless auto-renew is turned off at least 24 hours before the end of the current period. You can go to your iTunes Account settings to manage your subscriptions and turn off auto-renew. Your iTunes Account will be charged when the purchase is confirmed.",
+                              style: new TextStyle(color: Colors.grey[600]),
+                              textAlign: TextAlign.left,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   SizedBox(height: 24.0),

@@ -292,7 +292,7 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
 
       if (_image != null) {
         widget.user.image = _image;
-        new Timer(Duration(seconds: 10), () => widget.user.image = null);
+        // new Timer(Duration(seconds: 10), () => widget.user.image = null);
       }
 
       Navigator.pop(context);

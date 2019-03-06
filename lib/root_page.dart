@@ -208,8 +208,7 @@ class RootPageState extends State<RootPage> {
         await ProfilePicture().getDownloadUrl(docSnap.data["id"]),
         docSnap.data["currency"],
         docSnap.data["appversion"],
-        2,
-        // subLevel,
+        subLevel,
         notifications: qSnap.documents.length,
       );
       double version = 0;
