@@ -14,7 +14,6 @@ import 'package:yadda/pages/profile/profile_page.dart';
 import 'package:yadda/pages/inAppPurchase/subscription.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:yadda/utils/delete.dart';
-import 'package:yadda/pages/inAppPurchase/sublevel.dart';
 
 SearchBar searchBar;
 
@@ -104,8 +103,9 @@ class GamePageState extends State<GamePage> {
   }
 
   checkSubLevel() {
-    SubLevel().getSubLevel().then((onValue) =>
-        widget.user != null ? widget.user.subLevel = onValue : null);
+    widget.user.subLevel = 0;
+    // SubLevel().getSubLevel().then((onValue) =>
+    //     widget.user != null ? widget.user.subLevel = onValue : null);
   }
 
   @override
@@ -190,6 +190,7 @@ class GamePageState extends State<GamePage> {
                               builder: (context) => Subscription(
                                     user: widget.user,
                                     title: "Subscription",
+                                    from: "results",
                                   )));
                     }
                   },

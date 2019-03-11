@@ -8,7 +8,6 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:yadda/pages/results/results_graph_page.dart';
 import 'package:yadda/utils/uidata.dart';
 import 'package:yadda/utils/essentials.dart';
-import 'results_settings.dart';
 import 'package:yadda/objects/currency.dart';
 
 class ResultPage extends StatefulWidget {
@@ -341,7 +340,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
       colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
       id: 'Cashgame',
       domainFn: (ResultGame game, _) => game.date,
-      measureFn: (ResultGame game, _) => game.profit,
+      measureFn: (ResultGame game, _) => game.position,
       data: cashgameResults,
     );
     QuerySnapshot qSnap = await Firestore.instance

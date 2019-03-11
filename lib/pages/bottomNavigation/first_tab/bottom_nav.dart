@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:yadda/auth.dart';
 import 'package:yadda/pages/bottomNavigation/second_tab/game_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:yadda/root_page.dart';
 import 'package:yadda/utils/uidata.dart';
 import 'package:yadda/pages/profile/profile_page.dart';
 import 'package:yadda/objects/user.dart';

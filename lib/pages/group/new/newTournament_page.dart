@@ -559,7 +559,7 @@ class NewTournamentState extends State<NewTournament> {
             autocorrect: false,
             validator: (val) {
               int isNumber = int.tryParse(val);
-              if (isNumber != null) {
+              if (val == "" || isNumber != null) {
               } else {
                 return "Input must be a number!";
               }
@@ -567,18 +567,6 @@ class NewTournamentState extends State<NewTournament> {
             onSaved: (val) => val.isEmpty
                 ? game.setStartingChips("0")
                 : game.setStartingChips(val),
-          )),
-          padded(
-              child: new TextFormField(
-            style: new TextStyle(color: UIData.blackOrWhite),
-            key: new Key('totalprizepool'),
-            decoration: new InputDecoration(
-                labelText: 'Total prize pool',
-                labelStyle: new TextStyle(color: Colors.grey[600])),
-            autocorrect: false,
-            onSaved: (val) => val.isEmpty
-                ? game.setTotalPrizePool("Not Set")
-                : game.setTotalPrizePool(val),
           )),
           padded(
               child: new TextFormField(

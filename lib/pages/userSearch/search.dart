@@ -102,8 +102,7 @@ class SearchBar {
   ///
   /// This adds a new route that listens for onRemove (and stops the search when that happens), and then calls [setState] to rebuild and start the search.
   void beginSearch(context) {
-    ModalRoute
-        .of(context)
+    ModalRoute.of(context)
         .addLocalHistoryEntry(new LocalHistoryEntry(onRemove: () {
       setState(() {
         _isSearching = false;
@@ -177,7 +176,6 @@ class SearchBar {
             autofocus: true,
             controller: controller,
           )),
-      
     );
   }
 

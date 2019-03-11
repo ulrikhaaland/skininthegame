@@ -7,7 +7,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/log.dart';
 import 'package:yadda/pages/profile/profile_page.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:yadda/utils/layout.dart';
 import 'package:yadda/objects/game.dart';
 import 'package:yadda/utils/essentials.dart';
@@ -27,6 +26,7 @@ class TournamentPlayerPage extends StatefulWidget {
       this.group,
       this.url,
       this.callback,
+      this.callbackCP,
       this.game,
       this.gameId})
       : super(key: key);
@@ -43,6 +43,7 @@ class TournamentPlayerPage extends StatefulWidget {
   final String gameId;
   final bool history;
   final VoidCallback callback;
+  final VoidCallback callbackCP;
 
   @override
   TournamentPlayerPageState createState() => TournamentPlayerPageState();
@@ -248,6 +249,7 @@ class TournamentPlayerPageState extends State<TournamentPlayerPage> {
       setState(() {
         isLoading = false;
       });
+      widget.callbackCP();
       Navigator.pop(context);
     }
   }

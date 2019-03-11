@@ -7,9 +7,7 @@ import 'cashgame_page.dart';
 import '../../new/newCashGame_page.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
-import 'package:yadda/pages/inAppPurchase/consumeable.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:yadda/utils/delete.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 
 class GroupCashGames extends StatefulWidget {
@@ -321,7 +319,7 @@ class GroupCashGamesState extends State<GroupCashGames>
     return StreamBuilder(
         stream: Firestore.instance
             .collection("groups/$groupId/games/type/cashgamehistory")
-            .orderBy("orderbytime", descending: false)
+            .orderBy("orderbytime", descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return loading();

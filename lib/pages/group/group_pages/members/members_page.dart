@@ -6,7 +6,6 @@ import 'package:yadda/objects/user.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:yadda/pages/profile/profile_page.dart';
 import 'package:yadda/objects/group.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 SearchBar searchBar;
 bool _fresh = false;
@@ -106,11 +105,10 @@ class MembersPageState extends State<MembersPage> {
                 ),
               ),
               onChanged: (String value) {
-                groupSearchName = value.toLowerCase();
+                groupSearchName = value.toLowerCase().trim();
                 if (screen == 0) {
                   setState(() {
                     screen = 1;
-
                     setScreen();
                   });
                 } else if (value == "") {
@@ -166,6 +164,10 @@ class MembersPageState extends State<MembersPage> {
   }
 
   Widget _buildListItem(BuildContext context, DocumentSnapshot document) {
+    String admin = "";
+    if (document.data["admin"]) {
+      admin = " (admin)";
+    }
     Color color;
     widget.user.id == document.documentID
         ? color = UIData.blue
@@ -194,7 +196,7 @@ class MembersPageState extends State<MembersPage> {
         child: new ListTile(
           leading: addImage(document.data["profilepicurl"]),
           title: new Text(
-            document.data["username"],
+            document.data["username"] + admin,
             style: new TextStyle(color: color),
             overflow: TextOverflow.ellipsis,
           ),
@@ -260,6 +262,10 @@ class MembersPageState extends State<MembersPage> {
   }
 
   Widget buildSearch(BuildContext context, DocumentSnapshot document) {
+    String adminText = "";
+    if (document.data["admin"]) {
+      adminText = " (admin)";
+    }
     bool isAdmin = document.data["admin"];
     IconData adminIcon;
     String adminString;
@@ -284,7 +290,7 @@ class MembersPageState extends State<MembersPage> {
         child: new ListTile(
           leading: addImage(document.data["profilepicurl"]),
           title: new Text(
-            document.data["username"],
+            document.data["username"] + adminText,
             style: new TextStyle(color: UIData.blackOrWhite),
             overflow: TextOverflow.ellipsis,
           ),

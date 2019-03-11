@@ -10,10 +10,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/log.dart';
 import 'package:yadda/objects/game.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:yadda/objects/prizePool.dart';
-import 'package:yadda/widgets/primary_button.dart';
 import 'package:yadda/utils/layout.dart';
 
 class TournamentPage extends StatefulWidget {
@@ -409,6 +407,7 @@ class TournamentPageState extends State<TournamentPage>
                       group: widget.group,
                       history: widget.history,
                       callBack: () => checkIfFull(),
+                      callbackCP: () => calculatePayouts(game.calculatePayouts),
                     )),
           );
         },
@@ -766,9 +765,6 @@ class TournamentPageState extends State<TournamentPage>
   }
 
   Widget prizePoolPage() {
-    if (game.finished != true) {
-      calculatePayouts(game.calculatePayouts);
-    }
     if (isAdmin) {
       return SingleChildScrollView(
         padding: EdgeInsets.all(12.0),
@@ -1064,7 +1060,7 @@ class TournamentPageState extends State<TournamentPage>
           style: new TextStyle(color: UIData.blackOrWhite),
           textAlign: TextAlign.right),
     );
-    setState(() {});
+    // setState(() {});
   }
 
   Widget preCalculation() {
@@ -1335,6 +1331,7 @@ class TournamentPageState extends State<TournamentPage>
                 oldRebuy: rebuy,
                 gameId: widget.gameId,
                 callback: () => getGroup(),
+                callbackCP: () => calculatePayouts(game.calculatePayouts),
                 history: widget.history,
               )),
     );
@@ -1639,6 +1636,7 @@ class TournamentPageState extends State<TournamentPage>
                       docSnap.data["${document.data["type"]}"] + 1,
                 });
               });
+              calculatePayouts(game.calculatePayouts);
             }),
         new IconSlideAction(
             caption: 'Dismiss',

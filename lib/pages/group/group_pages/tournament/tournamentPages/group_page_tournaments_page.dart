@@ -8,7 +8,6 @@ import 'package:yadda/pages/group/group_pages/tournament/tournamentPages/tournam
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:yadda/utils/delete.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 
 class GroupTournaments extends StatefulWidget {

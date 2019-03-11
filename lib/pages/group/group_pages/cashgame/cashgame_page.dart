@@ -12,11 +12,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/log.dart';
 import 'package:yadda/objects/game.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:yadda/pages/profile/profile_page.dart';
 import 'package:yadda/utils/essentials.dart';
-import 'package:yadda/widgets/primary_button.dart';
 import 'dart:math';
 
 class CashGamePage extends StatefulWidget {
@@ -185,11 +183,19 @@ class CashGamePageState extends State<CashGamePage>
           text: "Totals",
         ),
         Tab(
-          icon: Icon(
-            Icons.notification_important,
-            color: UIData.red,
-            size: 30.0,
-          ),
+          icon: new Stack(children: <Widget>[
+            Icon(
+              Icons.notification_important,
+              color: UIData.blackOrWhite,
+              size: 30.0,
+            ),
+            new Positioned(
+              // draw a red marble
+              top: 0.0,
+              right: 0.0,
+              child: notificationAmount(),
+            )
+          ]),
           text: "Requests",
         ),
       ];
@@ -228,6 +234,20 @@ class CashGamePageState extends State<CashGamePage>
           text: queueOrCalculateString,
         ),
       ];
+    }
+  }
+
+  Widget notificationAmount() {
+    if (game.requestAmount > 0) {
+      return new CircleAvatar(
+        backgroundColor: UIData.red,
+        maxRadius: 10,
+        child: Text(
+          "${game.requestAmount}",
+        ),
+      );
+    } else {
+      return new Container();
     }
   }
 
@@ -1134,14 +1154,15 @@ class CashGamePageState extends State<CashGamePage>
 
   Widget payoutsList(BuildContext context, DocumentSnapshot document) {
     if (document.documentID == "-") {
-      return new Padding(
-          padding: EdgeInsets.all(30),
-          child: new PrimaryButton(
-            text: "Calculate payouts",
-            onPressed: () {
-              calculatePayouts();
-            },
-          ));
+      return new RaisedButton(
+        color: UIData.yellowOrWhite,
+        child: new Text(
+          "Calculate payouts",
+          style: new TextStyle(
+              fontSize: UIData.fontSize20, color: UIData.whiteOrBlack),
+        ),
+        onPressed: () => calculatePayouts(),
+      );
     }
     return new ListTile(
       dense: true,
@@ -1187,6 +1208,7 @@ class CashGamePageState extends State<CashGamePage>
         builder: (context, snapshot) {
           if (!snapshot.hasData) return loading();
           return ListView.builder(
+            itemExtent: 60.0,
             itemCount: snapshot.data.documents.length,
             itemBuilder: (context, index) =>
                 payoutsList(context, snapshot.data.documents[index]),
@@ -1414,7 +1436,7 @@ class CashGamePageState extends State<CashGamePage>
         builder: (context, snapshot) {
           if (!snapshot.hasData) return loading();
           return ListView.builder(
-            itemExtent: 50.0,
+            itemExtent: 60.0,
             itemCount: snapshot.data.documents.length,
             itemBuilder: (context, index) =>
                 _resultList(context, snapshot.data.documents[index]),

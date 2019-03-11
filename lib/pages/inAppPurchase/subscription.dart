@@ -9,14 +9,22 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yadda/utils/essentials.dart';
 import 'subLevel.dart';
 import 'TermsAndConditions.dart';
+import 'package:yadda/pages/results/graph.dart';
 
 class Subscription extends StatefulWidget {
   Subscription(
-      {Key key, this.title, this.user, this.onUpdate, this.group, this.info})
+      {Key key,
+      this.title,
+      this.user,
+      this.onUpdate,
+      this.group,
+      this.info,
+      this.from})
       : super(key: key);
   final User user;
   final VoidCallback onUpdate;
   final String title;
+  final String from;
   final Group group;
   final bool info;
 
@@ -114,7 +122,18 @@ class _SubscriptionState extends State<Subscription> {
         Firestore.instance.document("users/${widget.user.id}").updateData({
           'sublevel': widget.user.subLevel,
         });
-        Navigator.pop(context);
+        if (widget.from == "results") {
+          Navigator.of(context)
+            ..pop()
+            ..push(MaterialPageRoute(
+                builder: (context) => ResultPage(
+                      currentUser: widget.user,
+                      user: widget.user,
+                      isLoading: true,
+                    )));
+        } else {
+          Navigator.pop(context);
+        }
       }
     } catch (error) {
       print('$error');

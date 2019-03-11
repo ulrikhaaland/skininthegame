@@ -11,6 +11,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:yadda/pages/results/graph.dart';
 import 'package:yadda/widgets/primary_button.dart';
 import 'package:yadda/pages/inAppPurchase/subscription.dart';
+import 'package:yadda/widgets/report_dialog.dart';
 
 class ProfilePage extends StatefulWidget {
   ProfilePage({
@@ -45,6 +46,9 @@ class ProfilePageState extends State<ProfilePage>
   QuerySnapshot qSnapCash;
   QuerySnapshot qSnapTournament;
 
+  String block = "Block";
+  bool isBlocked = false;
+
   @override
   void initState() {
     super.initState();
@@ -57,6 +61,19 @@ class ProfilePageState extends State<ProfilePage>
       followOrEdit = "Results";
     }
     getUserInfo();
+    checkBlocked();
+  }
+
+  checkBlocked() async {
+    if (!ownProfile) {
+      DocumentSnapshot docSnap = await firestoreInstance
+          .document("users/${widget.user.id}/blocked/${widget.profileId}")
+          .get();
+      if (docSnap.exists) {
+        block = "Unblock";
+        isBlocked = true;
+      }
+    }
   }
 
   Future<QuerySnapshot> cashStream() async {
@@ -137,6 +154,7 @@ class ProfilePageState extends State<ProfilePage>
           ),
           actions: <Widget>[
             settingsButton(),
+            reportButton(),
           ],
           bottom: PreferredSize(
             preferredSize: Size(0, profileBGSize),
@@ -283,6 +301,89 @@ class ProfilePageState extends State<ProfilePage>
     }
   }
 
+  Widget reportButton() {
+    if (!ownProfile) {
+      return new Padding(
+        padding: EdgeInsets.only(right: 4.0),
+        child: new IconButton(
+            icon: new Icon(
+              Icons.more_vert,
+              size: UIData.iconSizeAppBar,
+              color: UIData.blackOrWhite,
+            ),
+            onPressed: () {
+              _showAlert();
+            }),
+      );
+    } else {
+      return new Container();
+    }
+  }
+
+  void _showAlert() {
+    AlertDialog dialog = new AlertDialog(
+      content: new Container(
+        height: 120,
+        child: new Column(
+          children: <Widget>[
+            new ListTile(
+              leading: new Icon(
+                Icons.flag,
+                color: UIData.yellow,
+              ),
+              title: new Text(
+                "Report",
+                style: TextStyle(color: UIData.whiteOrBlack),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                ReportDialog reportDialog = new ReportDialog(
+                  text: "Report user",
+                  reportedById: widget.user.id,
+                  type: "user",
+                  reportedId: userProfile.id,
+                );
+                showDialog(context: context, child: reportDialog);
+              },
+            ),
+            new ListTile(
+              leading: new Icon(
+                Icons.block,
+                color: UIData.red,
+              ),
+              title: new Text(
+                block,
+                style: TextStyle(color: UIData.whiteOrBlack),
+              ),
+              onTap: () {
+                if (isBlocked) {
+                  firestoreInstance
+                      .document(
+                          "users/${widget.user.id}/blocked/${userProfile.id}")
+                      .delete();
+                  setState(() {
+                    block = "Block";
+                    isBlocked = false;
+                  });
+                } else if (!isBlocked) {
+                  firestoreInstance
+                      .document(
+                          "users/${widget.user.id}/blocked/${userProfile.id}")
+                      .setData({"name": userProfile.userName});
+                  block = "Unblock";
+                  isBlocked = true;
+                }
+                // setState(() {});
+                Navigator.pop(context);
+              },
+            )
+          ],
+        ),
+      ),
+    );
+    showDialog(context: context, child: dialog);
+  }
+
   Widget resultsButton() {
     if (!ownProfile) {
       return Padding(
@@ -397,7 +498,7 @@ class ProfilePageState extends State<ProfilePage>
                 child: new Column(
                   children: <Widget>[
                     new Text(
-                      "A subscription is required to view player results",
+                      "A subscription is required to view game history",
                       style: new TextStyle(
                         fontSize: 25.0,
                         color: UIData.blackOrWhite,

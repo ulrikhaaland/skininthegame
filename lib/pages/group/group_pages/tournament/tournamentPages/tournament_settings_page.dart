@@ -10,7 +10,6 @@ import 'package:yadda/utils/log.dart';
 import 'package:yadda/objects/game.dart';
 import 'package:yadda/pages/inAppPurchase/subscription.dart';
 import 'package:yadda/utils/layout.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 
 class TournamentSettingsPage extends StatefulWidget {
@@ -22,6 +21,7 @@ class TournamentSettingsPage extends StatefulWidget {
     this.history,
     this.callBack,
     this.game,
+    this.callbackCP,
   }) : super(key: key);
   final Group group;
   final User user;
@@ -29,6 +29,7 @@ class TournamentSettingsPage extends StatefulWidget {
   final VoidCallback initState;
   final bool history;
   final VoidCallback callBack;
+  final VoidCallback callbackCP;
   @override
   TournamentSettingsPageState createState() => TournamentSettingsPageState();
 }
@@ -206,6 +207,7 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
           "$pathToTournament/log",
           "Update");
       showSnackBar("Game has been updated");
+      widget.callbackCP();
     }
   }
 
@@ -368,21 +370,20 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                           ),
                         ),
                         Layout().padded(
-                          child: 
-                        
-                        new TextFormField(
-                          textCapitalization: TextCapitalization.sentences,
-                          initialValue: widget.game.adress,
-                          style: new TextStyle(color: UIData.blackOrWhite),
-                          key: new Key('adress'),
-                          decoration: new InputDecoration(
-                              labelText: 'Adress',
-                              labelStyle:
-                                  new TextStyle(color: Colors.grey[600])),
-                          autocorrect: false,
-                          onSaved: (val) => widget.game.setAdress(val),
-                        ),),
-                       
+                          child: new TextFormField(
+                            textCapitalization: TextCapitalization.sentences,
+                            initialValue: widget.game.adress,
+                            style: new TextStyle(color: UIData.blackOrWhite),
+                            key: new Key('adress'),
+                            decoration: new InputDecoration(
+                                labelText: 'Adress',
+                                labelStyle:
+                                    new TextStyle(color: Colors.grey[600])),
+                            autocorrect: false,
+                            onSaved: (val) => widget.game.setAdress(val),
+                          ),
+                        ),
+
                         new Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
@@ -429,126 +430,128 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                           ],
                         ),
                         Layout().padded(
-                          child: 
-                        new TextFormField(
-                            keyboardType: TextInputType.numberWithOptions(),
-                            initialValue: widget.game.maxPlayers.toString(),
-                            maxLength: 6,
-                            style: new TextStyle(color: UIData.blackOrWhite),
-                            key: new Key('maximumplayers'),
-                            decoration: new InputDecoration(
-                                labelText: 'Maximum players',
-                                labelStyle:
-                                    new TextStyle(color: Colors.grey[600])),
-                            autocorrect: false,
-                            validator: (val) {
-                              int isNumber = int.tryParse(val);
-                              if (isNumber != null) {
-                                val.isEmpty
-                                    ? val = widget.game.maxPlayers.toString()
-                                    : null;
+                          child: new TextFormField(
+                              keyboardType: TextInputType.numberWithOptions(),
+                              initialValue: widget.game.maxPlayers.toString(),
+                              maxLength: 6,
+                              style: new TextStyle(color: UIData.blackOrWhite),
+                              key: new Key('maximumplayers'),
+                              decoration: new InputDecoration(
+                                  labelText: 'Maximum players',
+                                  labelStyle:
+                                      new TextStyle(color: Colors.grey[600])),
+                              autocorrect: false,
+                              validator: (val) {
+                                int isNumber = int.tryParse(val);
+                                if (isNumber != null) {
+                                  val.isEmpty
+                                      ? val = widget.game.maxPlayers.toString()
+                                      : null;
 
-                                if (widget.user.subLevel < 2) {
-                                  String sub;
-                                  if (widget.user.subLevel == 1 &&
-                                      int.tryParse(val) > 27) {
-                                    sub =
-                                        "Your current subscription only allows \n27 players per tournament";
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => Subscription(
-                                                  user: widget.user,
-                                                  info: true,
-                                                  title: sub,
-                                                )));
-                                    return sub;
-                                  } else if (widget.user.subLevel == 0 &&
-                                      int.tryParse(val) > 9) {
-                                    sub =
-                                        "Your current subscription only allows \n9 players per tournament";
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => Subscription(
-                                                  user: widget.user,
-                                                  info: true,
-                                                  title: sub,
-                                                )));
-                                    return sub;
+                                  if (widget.user.subLevel < 2) {
+                                    String sub;
+                                    if (widget.user.subLevel == 1 &&
+                                        int.tryParse(val) > 27) {
+                                      sub =
+                                          "Your current subscription only allows \n27 players per tournament";
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  Subscription(
+                                                    user: widget.user,
+                                                    info: true,
+                                                    title: sub,
+                                                  )));
+                                      return sub;
+                                    } else if (widget.user.subLevel == 0 &&
+                                        int.tryParse(val) > 9) {
+                                      sub =
+                                          "Your current subscription only allows \n9 players per tournament";
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  Subscription(
+                                                    user: widget.user,
+                                                    info: true,
+                                                    title: sub,
+                                                  )));
+                                      return sub;
+                                    }
                                   }
+                                } else {
+                                  return "Input must be a number!";
                                 }
-                              } else {
-                                return "Input must be a number!";
-                              }
-                            },
-                            onSaved: (val) {
-                              if (val.isEmpty) {
-                                switch (widget.user.subLevel) {
-                                  case (0):
-                                    widget.game.setMaxPlayers(9);
-                                    break;
-                                  case (1):
-                                    widget.game.setMaxPlayers(18);
-                                    break;
-                                  case (2):
-                                    widget.game.setMaxPlayers(27);
-                                    break;
+                              },
+                              onSaved: (val) {
+                                if (val.isEmpty) {
+                                  switch (widget.user.subLevel) {
+                                    case (0):
+                                      widget.game.setMaxPlayers(9);
+                                      break;
+                                    case (1):
+                                      widget.game.setMaxPlayers(18);
+                                      break;
+                                    case (2):
+                                      widget.game.setMaxPlayers(27);
+                                      break;
+                                  }
+                                } else if (widget.user.subLevel == 1 &&
+                                    int.tryParse(val) > 27) {
+                                  widget.game.setMaxPlayers(27);
+                                } else if (widget.user.subLevel == 0 &&
+                                    int.tryParse(val) > 9) {
+                                  widget.game.setMaxPlayers(9);
+                                } else {
+                                  widget.game.setMaxPlayers(int.tryParse(val));
                                 }
-                              } else if (widget.user.subLevel == 1 &&
-                                  int.tryParse(val) > 27) {
-                                widget.game.setMaxPlayers(27);
-                              } else if (widget.user.subLevel == 0 &&
-                                  int.tryParse(val) > 9) {
-                                widget.game.setMaxPlayers(9);
-                              } else {
-                                widget.game.setMaxPlayers(int.tryParse(val));
-                              }
-                            }),),
-                            Layout().padded(
-                          child: 
-                        new TextFormField(
-                          textCapitalization: TextCapitalization.sentences,
-                          initialValue: widget.game.gameType,
-                          style: new TextStyle(color: UIData.blackOrWhite),
-                          key: new Key('gametype'),
-                          decoration: new InputDecoration(
-                              labelText: 'Gametype',
-                              labelStyle:
-                                  new TextStyle(color: Colors.grey[600])),
-                          autocorrect: false,
-                          onSaved: (val) => widget.game.setGameType(val),
-                        ),),
+                              }),
+                        ),
                         Layout().padded(
-                          child: 
-                        new TextFormField(
-                            keyboardType: TextInputType.numberWithOptions(),
-                            initialValue: widget.game.buyin.toString(),
-                            maxLength: 10,
+                          child: new TextFormField(
+                            textCapitalization: TextCapitalization.sentences,
+                            initialValue: widget.game.gameType,
                             style: new TextStyle(color: UIData.blackOrWhite),
-                            key: new Key('buyin'),
+                            key: new Key('gametype'),
                             decoration: new InputDecoration(
-                                labelText: 'Buyin',
+                                labelText: 'Gametype',
                                 labelStyle:
                                     new TextStyle(color: Colors.grey[600])),
                             autocorrect: false,
-                            validator: (val) {
-                              int isNumber = int.tryParse(val);
-                              if (isNumber == null) {
-                                return "Input must be a number!";
-                              }
-                            },
-                            onSaved: (val) {
-                              if (val.isEmpty) {
-                                widget.game.setBuyin(0);
-                              } else {
-                                widget.game.setBuyin(int.tryParse(val));
-                              }
-                              if (sameAsBuyin) {
-                                widget.game.rebuyPrice = widget.game.buyin;
-                                widget.game.addonPrice = widget.game.buyin;
-                              }
-                            }),),
+                            onSaved: (val) => widget.game.setGameType(val),
+                          ),
+                        ),
+                        Layout().padded(
+                          child: new TextFormField(
+                              keyboardType: TextInputType.numberWithOptions(),
+                              initialValue: widget.game.buyin.toString(),
+                              maxLength: 10,
+                              style: new TextStyle(color: UIData.blackOrWhite),
+                              key: new Key('buyin'),
+                              decoration: new InputDecoration(
+                                  labelText: 'Buyin',
+                                  labelStyle:
+                                      new TextStyle(color: Colors.grey[600])),
+                              autocorrect: false,
+                              validator: (val) {
+                                int isNumber = int.tryParse(val);
+                                if (isNumber == null) {
+                                  return "Input must be a number!";
+                                }
+                              },
+                              onSaved: (val) {
+                                if (val.isEmpty) {
+                                  widget.game.setBuyin(0);
+                                } else {
+                                  widget.game.setBuyin(int.tryParse(val));
+                                }
+                                if (sameAsBuyin) {
+                                  widget.game.rebuyPrice = widget.game.buyin;
+                                  widget.game.addonPrice = widget.game.buyin;
+                                }
+                              }),
+                        ),
                         new Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
@@ -618,78 +621,65 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                               "Same price as buyin?",
                               style: new TextStyle(color: UIData.blackOrWhite),
                             ),
-                            
                             value: sameAsBuyin,
                             onChanged: (val) {
                               sameAsBuyin = val;
                               showRebuyPrice = !val;
                               setState(() {});
                             }),
-                            // Layout().dividerPadded(),
-                            Layout().padded(
-                          child: 
-                        new TextFormField(
-                          keyboardType: TextInputType.numberWithOptions(),
-                          initialValue: widget.game.startingChips,
-                          style: new TextStyle(color: UIData.blackOrWhite),
-                          key: new Key('startingchips'),
-                          decoration: new InputDecoration(
-                              labelText: 'Starting chips',
-                              labelStyle:
-                                  new TextStyle(color: Colors.grey[600])),
-                          autocorrect: false,
-                          validator: (val) {
-                            int isNumber = int.tryParse(val);
-                            if (isNumber == null) {
-                              return "Input must be a number!";
-                            }
-                          },
-                          onSaved: (val) => widget.game.setStartingChips(val),
-                        ),),
+                        // Layout().dividerPadded(),
                         Layout().padded(
-                          child: 
-                        new TextFormField(
-                          initialValue: widget.game.totalPrizePool,
-                          maxLines: 3,
-                          style: new TextStyle(color: UIData.blackOrWhite),
-                          key: new Key('totalprizepool'),
-                          decoration: new InputDecoration(
-                              labelText: 'Total prize pool',
-                              labelStyle:
-                                  new TextStyle(color: Colors.grey[600])),
-                          autocorrect: false,
-                          onSaved: (val) => widget.game.setTotalPrizePool(val),
-                        ),),
-                        Layout().padded(
-                          child: 
-                        new TextFormField(
-                            textCapitalization: TextCapitalization.sentences,
+                          child: new TextFormField(
+                            keyboardType: TextInputType.numberWithOptions(),
+                            initialValue: widget.game.startingChips,
                             style: new TextStyle(color: UIData.blackOrWhite),
-                            key: new Key('currency'),
-                            initialValue: widget.game.currency,
+                            key: new Key('startingchips'),
                             decoration: new InputDecoration(
-                                labelText: 'Currency',
+                                labelText: 'Starting chips',
                                 labelStyle:
                                     new TextStyle(color: Colors.grey[600])),
                             autocorrect: false,
-                            onSaved: (val) => val.isEmpty
-                                ? widget.game.setCurrency(widget.user.currency)
-                                : widget.game.setCurrency(val)),),
-                                Layout().padded(
-                          child: 
-                        new TextFormField(
-                          textCapitalization: TextCapitalization.sentences,
-                          initialValue: widget.game.info,
-                          maxLines: 3,
-                          style: new TextStyle(color: UIData.blackOrWhite),
-                          key: new Key('info'),
-                          decoration: new InputDecoration(
-                              labelText: 'Additional information',
-                              labelStyle:
-                                  new TextStyle(color: Colors.grey[600])),
-                          autocorrect: false,
-                          onSaved: (val) => widget.game.setInfo(val),
-                        ),),
+                            validator: (val) {
+                              int isNumber = int.tryParse(val);
+                              if (isNumber == null) {
+                                return "Input must be a number!";
+                              }
+                            },
+                            onSaved: (val) => widget.game.setStartingChips(val),
+                          ),
+                        ),
+
+                        Layout().padded(
+                          child: new TextFormField(
+                              textCapitalization: TextCapitalization.sentences,
+                              style: new TextStyle(color: UIData.blackOrWhite),
+                              key: new Key('currency'),
+                              initialValue: widget.game.currency,
+                              decoration: new InputDecoration(
+                                  labelText: 'Currency',
+                                  labelStyle:
+                                      new TextStyle(color: Colors.grey[600])),
+                              autocorrect: false,
+                              onSaved: (val) => val.isEmpty
+                                  ? widget.game
+                                      .setCurrency(widget.user.currency)
+                                  : widget.game.setCurrency(val)),
+                        ),
+                        Layout().padded(
+                          child: new TextFormField(
+                            textCapitalization: TextCapitalization.sentences,
+                            initialValue: widget.game.info,
+                            maxLines: 3,
+                            style: new TextStyle(color: UIData.blackOrWhite),
+                            key: new Key('info'),
+                            decoration: new InputDecoration(
+                                labelText: 'Additional information',
+                                labelStyle:
+                                    new TextStyle(color: Colors.grey[600])),
+                            autocorrect: false,
+                            onSaved: (val) => widget.game.setInfo(val),
+                          ),
+                        ),
                         Padding(
                           padding: EdgeInsets.only(bottom: 16),
                           child: ListTile(

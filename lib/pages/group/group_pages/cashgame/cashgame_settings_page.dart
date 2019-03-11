@@ -9,7 +9,6 @@ import 'package:yadda/pages/group/group_pages/tournament/tournamentPages/tournam
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/log.dart';
 import 'package:yadda/objects/game.dart';
-import 'package:yadda/utils/delete.dart';
 import 'package:yadda/auth.dart';
 import 'package:yadda/utils/layout.dart';
 import 'package:yadda/pages/inAppPurchase/subscription.dart';
@@ -901,33 +900,32 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
     QuerySnapshot collectionSnapshotPlayers =
         await fromCollectionPlayers.getDocuments();
     collectionSnapshotPlayers.documents.forEach((DocumentSnapshot doc) async {
-      DocumentReference toCollection =
-          firestoreInstance.document("$historyPath/players/${doc.documentID}");
-      await toCollection.setData(doc.data);
+      await firestoreInstance
+          .document("$historyPath/players/${doc.documentID}")
+          .setData(doc.data);
     });
 
     QuerySnapshot collectionSnapshotPosts =
         await fromCollectionPosts.getDocuments();
+    CollectionReference toCollection =
+        firestoreInstance.collection("$historyPath/posts");
     collectionSnapshotPosts.documents.forEach((DocumentSnapshot doc) async {
-      CollectionReference toCollection =
-          firestoreInstance.collection("$historyPath/posts");
       await toCollection.add(doc.data);
     });
 
     QuerySnapshot collectionSnapshotPayouts =
         await fromCollectionPayouts.getDocuments();
+    firestoreInstance.document("$historyPath/payouts/-").setData({
+      "-": "-",
+    });
     collectionSnapshotPayouts.documents.forEach((DocumentSnapshot doc) async {
-      CollectionReference toCollection =
-          firestoreInstance.collection("$historyPath/payouts");
-      await toCollection.add(doc.data);
+      await firestoreInstance.collection("$historyPath/payouts").add(doc.data);
     });
 
     QuerySnapshot collectionSnapshotLog =
         await fromCollectionLog.getDocuments();
     collectionSnapshotLog.documents.forEach((DocumentSnapshot doc) async {
-      CollectionReference toCollection =
-          firestoreInstance.collection("$historyPath/log");
-      await toCollection.add(doc.data);
+      await firestoreInstance.collection("$historyPath/log").add(doc.data);
     });
 
     await CloudFunctions.instance

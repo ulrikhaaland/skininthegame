@@ -6,6 +6,7 @@ import '../../new/new_post_page.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:yadda/widgets/report_dialog.dart';
 
 class FeedPage extends StatefulWidget {
   FeedPage({Key key, this.user, this.group}) : super(key: key);
@@ -86,7 +87,6 @@ class FeedPageState extends State<FeedPage> {
           child: new ListTile(
         dense: true,
         title: new Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             new Text(
@@ -94,10 +94,15 @@ class FeedPageState extends State<FeedPage> {
               style: new TextStyle(color: UIData.blue, fontSize: 20.0),
               overflow: TextOverflow.ellipsis,
             ),
-            new Text(
-              "${document.data["dayofweek"]} ${document.data["time"]} ${document.data["date"]}",
-              overflow: TextOverflow.ellipsis,
-              style: new TextStyle(color: Colors.grey[600]),
+            new Row(
+              children: <Widget>[
+                new Text(
+                  "${document.data["dayofweek"]} ${document.data["time"]} ${document.data["date"]}",
+                  overflow: TextOverflow.ellipsis,
+                  style: new TextStyle(color: Colors.grey[600]),
+                ),
+                this.reportButton(document),
+              ],
             )
           ],
         ),
@@ -142,6 +147,29 @@ class FeedPageState extends State<FeedPage> {
             );
           }
         });
+  }
+
+  Widget reportButton(DocumentSnapshot document) {
+    if (widget.group.admin) {
+      return new Container();
+    } else {
+      return new IconButton(
+        icon: Icon(
+          Icons.more_vert,
+          color: UIData.blackOrWhite,
+        ),
+        onPressed: () {
+          ReportDialog reportDialog = new ReportDialog(
+            reportedById: widget.user.id,
+            reportedId: widget.group.id,
+            type: "post",
+            text: "Report post",
+            postId: document.documentID,
+          );
+          showDialog(context: context, child: reportDialog);
+        },
+      );
+    }
   }
 
   Widget padded({Widget child}) {

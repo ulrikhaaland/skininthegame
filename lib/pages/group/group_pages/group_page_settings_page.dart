@@ -4,6 +4,8 @@ import 'package:yadda/utils/uidata.dart';
 import 'package:yadda/pages/group/new/newInviteUser_page.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
+import 'package:yadda/widgets/primary_button.dart';
+import 'package:yadda/widgets/report_dialog.dart';
 
 class GroupSettingsPage extends StatefulWidget {
   GroupSettingsPage(
@@ -39,6 +41,7 @@ class GroupSettingsPageState extends State<GroupSettingsPage> {
   bool notificationSubscription = true;
 
   String groupCode = "";
+  String reportMessage = "";
 
   final Firestore fireStoreInstance = Firestore.instance;
 
@@ -99,14 +102,28 @@ class GroupSettingsPageState extends State<GroupSettingsPage> {
     return new Scaffold(
       resizeToAvoidBottomPadding: true,
       appBar: new AppBar(
+        actions: <Widget>[
+          new IconButton(
+            icon: new Icon(Icons.more_vert),
+            iconSize: UIData.iconSizeAppBar,
+            onPressed: () {
+              ReportDialog dialog = new ReportDialog(
+                text: "Report group",
+                reportedId: widget.group.id,
+                reportedById: widget.user.id,
+                type: "group",
+              );
+              showDialog(context: context, child: dialog);
+            },
+          )
+        ],
         elevation: 0,
-        iconTheme: IconThemeData(
-          color: UIData.blackOrWhite
-        ),
+        iconTheme: IconThemeData(color: UIData.blackOrWhite),
         backgroundColor: UIData.appBarColor,
         title: new Text(
           "Settings",
-          style: new TextStyle(fontSize: UIData.fontSize24, color: UIData.blackOrWhite),
+          style: new TextStyle(
+              fontSize: UIData.fontSize24, color: UIData.blackOrWhite),
         ),
       ),
       backgroundColor: UIData.dark,
@@ -167,7 +184,8 @@ class GroupSettingsPageState extends State<GroupSettingsPage> {
       leading: new Icon(Icons.exit_to_app, size: 40.0, color: UIData.red),
       title: new Text(
         "Leave Group",
-        style: new TextStyle(color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
+        style: new TextStyle(
+            color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
       ),
       onTap: () {
         _showAlert();
