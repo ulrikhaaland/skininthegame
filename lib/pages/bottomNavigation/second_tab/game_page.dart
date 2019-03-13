@@ -158,6 +158,7 @@ class GamePageState extends State<GamePage> {
                             builder: (context) => ProfilePage(
                                   user: widget.user,
                                   profileId: widget.user.id,
+                                  signOut: () => widget.onSignOut(),
                                 )),
                       ),
                 ),
@@ -224,20 +225,7 @@ class GamePageState extends State<GamePage> {
                                 )),
                       ),
                 ),
-                new ListTile(
-                  leading: IconButton(
-                    icon: Icon(Icons.exit_to_app, size: 30, color: Colors.grey),
-                    onPressed: null,
-                  ),
-                  title: new Text(
-                    "Logout",
-                    style: new TextStyle(
-                      fontSize: UIData.fontSize18,
-                      color: UIData.blackOrWhite,
-                    ),
-                  ),
-                  onTap: () => widget.onSignOut(),
-                ),
+                
                 new ListTile(
                   leading: IconButton(
                     icon: Icon(nightmodeIcon, size: 20, color: UIData.yellow),

@@ -8,7 +8,7 @@ import 'package:yadda/objects/group.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yadda/utils/essentials.dart';
 import 'subLevel.dart';
-import 'TermsAndConditions.dart';
+import 'package:yadda/pages/legal/TermsAndConditions.dart';
 import 'package:yadda/pages/results/graph.dart';
 
 class Subscription extends StatefulWidget {

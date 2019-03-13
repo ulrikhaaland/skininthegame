@@ -16,6 +16,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:yadda/pages/profile/profile_page.dart';
 import 'package:yadda/utils/essentials.dart';
 import 'dart:math';
+import 'package:yadda/widgets/report_dialog.dart';
 
 class CashGamePage extends StatefulWidget {
   CashGamePage({
@@ -1453,7 +1454,6 @@ class CashGamePageState extends State<CashGamePage>
         child: new ListTile(
           dense: true,
           title: new Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               new Text(
@@ -1461,10 +1461,15 @@ class CashGamePageState extends State<CashGamePage>
                 style: new TextStyle(color: UIData.blue, fontSize: 20.0),
                 overflow: TextOverflow.ellipsis,
               ),
-              new Text(
-                "${document.data["dayofweek"]} ${document.data["time"]} ${document.data["date"]}",
-                overflow: TextOverflow.ellipsis,
-                style: new TextStyle(color: Colors.grey[600]),
+              new Row(
+                children: <Widget>[
+                  new Text(
+                    "${document.data["dayofweek"]} ${document.data["time"]} ${document.data["date"]}",
+                    overflow: TextOverflow.ellipsis,
+                    style: new TextStyle(color: Colors.grey[600]),
+                  ),
+                  reportButton(document),
+                ],
               )
             ],
           ),
@@ -1496,6 +1501,29 @@ class CashGamePageState extends State<CashGamePage>
             }),
       ],
     );
+  }
+
+  Widget reportButton(DocumentSnapshot document) {
+    if (widget.group.admin) {
+      return new Container();
+    } else {
+      return new IconButton(
+        icon: Icon(
+          Icons.more_vert,
+          color: UIData.blackOrWhite,
+        ),
+        onPressed: () {
+          ReportDialog reportDialog = new ReportDialog(
+            reportedById: widget.user.id,
+            reportedId: widget.group.id,
+            type: "gamepost",
+            text: "Report post",
+            postId: game.id.toString(),
+          );
+          showDialog(context: context, child: reportDialog);
+        },
+      );
+    }
   }
 
   Widget streamOfPosts() {

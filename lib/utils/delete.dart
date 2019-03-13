@@ -114,4 +114,22 @@ class Delete {
     print(resp);
     return null;
   }
+
+  Future<Null> deleteUser(String uid) async {
+    QuerySnapshot qSnap =
+        await firestoreInstance.collection("users/$uid/groups").getDocuments();
+    qSnap.documents.forEach((doc) async {
+      await firestoreInstance
+          .document("groups/${doc.documentID}/members/$uid")
+          .delete();
+    });
+    firestoreInstance.document("usernames/$uid").delete();
+    var resp = await CloudFunctions()
+        .call(functionName: "recursiveDeleteUser", parameters: {
+      "path": "users/$uid",
+      "uid": uid,
+    });
+    print(resp);
+    return null;
+  }
 }

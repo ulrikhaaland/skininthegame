@@ -124,8 +124,13 @@ class LoginState extends State<Login> {
           saveUserData();
         }
       } catch (e) {
-        setState(() {
+        if (!_email.contains("@")) {
+          _authHint =
+              "There is no user record corresponding to this identifier. The user may have been deleted.";
+        } else {
           _authHint = e.details.toString();
+        }
+        setState(() {
           duration();
 
           loading = false;
@@ -505,10 +510,11 @@ class LoginState extends State<Login> {
                     key: formKey,
                     child: new Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: usernameAndPassword() + [hintText()] + submitWidgets(),
+                      children: usernameAndPassword() +
+                          [hintText()] +
+                          submitWidgets(),
                     ))),
           ])),
-      
     ])));
   }
 

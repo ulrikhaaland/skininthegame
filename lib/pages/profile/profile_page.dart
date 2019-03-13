@@ -19,9 +19,11 @@ class ProfilePage extends StatefulWidget {
     this.user,
     this.setGroupPage,
     this.profileId,
+    this.signOut
   }) : super(key: key);
   final String profileId;
   final VoidCallback setGroupPage;
+  final VoidCallback signOut;
   final User user;
 
   @override
@@ -293,6 +295,7 @@ class ProfilePageState extends State<ProfilePage>
                   builder: (context) => ProfileSettingsPage(
                         user: widget.user,
                         setBGSize: () => setBGSize(),
+                        signOut: () => widget.signOut(),
                       ))),
         ),
       );
@@ -322,6 +325,7 @@ class ProfilePageState extends State<ProfilePage>
 
   void _showAlert() {
     AlertDialog dialog = new AlertDialog(
+      backgroundColor: UIData.dark,
       content: new Container(
         height: 120,
         child: new Column(
@@ -333,7 +337,7 @@ class ProfilePageState extends State<ProfilePage>
               ),
               title: new Text(
                 "Report",
-                style: TextStyle(color: UIData.whiteOrBlack),
+                style: TextStyle(color: UIData.blackOrWhite),
               ),
               onTap: () {
                 Navigator.pop(context);
@@ -353,7 +357,7 @@ class ProfilePageState extends State<ProfilePage>
               ),
               title: new Text(
                 block,
-                style: TextStyle(color: UIData.whiteOrBlack),
+                style: TextStyle(color: UIData.blackOrWhite),
               ),
               onTap: () {
                 if (isBlocked) {

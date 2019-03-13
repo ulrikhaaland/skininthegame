@@ -29,7 +29,7 @@ class ReportDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new AlertDialog(
-        backgroundColor: UIData.blackOrWhite,
+        backgroundColor: UIData.dark,
         contentPadding: EdgeInsets.all(20.0),
         content: new Container(
           height: 250,
@@ -42,10 +42,11 @@ class ReportDialog extends StatelessWidget {
                 ),
                 title: new Text(
                   text,
-                  style: new TextStyle(color: UIData.whiteOrBlack),
+                  style: new TextStyle(color: UIData.blackOrWhite),
                 ),
               ),
               new TextField(
+                style: new TextStyle(color: UIData.blackOrWhite),
                 decoration: InputDecoration(
                     hintText: "Explain behavior",
                     hintStyle: TextStyle(color: Colors.grey[600])),
