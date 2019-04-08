@@ -130,9 +130,8 @@ class CashGamePageState extends State<CashGamePage>
 
   @override
   void dispose() {
-    _tabController.dispose();
-
     super.dispose();
+    _tabController.dispose();
   }
 
   @override
@@ -191,7 +190,6 @@ class CashGamePageState extends State<CashGamePage>
               size: 30.0,
             ),
             new Positioned(
-              // draw a red marble
               top: 0.0,
               right: 0.0,
               child: notificationAmount(),

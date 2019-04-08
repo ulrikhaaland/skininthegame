@@ -338,7 +338,7 @@ class _SubscriptionState extends State<Subscription> {
                           new Padding(
                             padding: EdgeInsets.only(left: 12),
                             child: new Text(
-                              "The subscription will automatically renew unless auto-renew is turned off at least 24 hours before the end of the current period. You can go to your iTunes Account settings to manage your subscriptions and turn off auto-renew. Your iTunes Account will be charged when the purchase is confirmed.",
+                              "The subscription will automatically renew unless auto-renew is turned off at least 24 hours before the end of the current period. You can go to your iTunes Account settings to manage your subscriptions and turn off auto-renew. Payment will be charged to iTunes Account at confirmation of purchase. Account will be charged for renewal within 24-hours prior to the end of the current period, and identify the cost of the renewal.",
                               style: new TextStyle(color: Colors.grey[600]),
                               textAlign: TextAlign.left,
                             ),
@@ -430,7 +430,7 @@ class _SubscriptionState extends State<Subscription> {
                     height: 50.0,
                     child: PrimaryButton(
                       onPressed: () => _buySubscription(_items[1]),
-                      text: whaleTitle,
+                      text: whaleTitle+"dasdasd",
                     ),
                   ),
                   new Align(
@@ -458,7 +458,7 @@ class _SubscriptionState extends State<Subscription> {
                           new Padding(
                             padding: EdgeInsets.only(left: 12),
                             child: new Text(
-                              "The subscription will automatically renew unless auto-renew is turned off at least 24 hours before the end of the current period. You can go to your iTunes Account settings to manage your subscriptions and turn off auto-renew. Your iTunes Account will be charged when the purchase is confirmed.",
+                              "The subscription will automatically renew unless auto-renew is turned off at least 24 hours before the end of the current period. You can go to your iTunes Account settings to manage your subscriptions and turn off auto-renew. Payment will be charged to iTunes Account at confirmation of purchase. Account will be charged for renewal within 24-hours prior to the end of the current period, and identify the cost of the renewal.",
                               style: new TextStyle(color: Colors.grey[600]),
                               textAlign: TextAlign.left,
                             ),

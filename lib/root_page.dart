@@ -83,9 +83,11 @@ class RootPageState extends State<RootPage> {
   }
 
   checkSubLevel() {
-    SubLevel()
-        .getSubLevel()
-        .then((onValue) => user != null ? user.subLevel = onValue : null);
+    try {
+      SubLevel()
+          .getSubLevel()
+          .then((onValue) => user != null ? user.subLevel = onValue : null);
+    } catch (e) {}
   }
 
   Future<String> updateFcmToken() async {

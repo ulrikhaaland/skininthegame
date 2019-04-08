@@ -209,6 +209,7 @@ class NewGroupState extends State<NewGroup> {
         padded(
             child: new TextField(
           autofocus: true,
+          maxLength: 18,
           textCapitalization: TextCapitalization.sentences,
           style: new TextStyle(color: UIData.blackOrWhite),
           key: new Key('Name'),

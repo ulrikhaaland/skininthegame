@@ -14,13 +14,9 @@ import 'package:yadda/pages/inAppPurchase/subscription.dart';
 import 'package:yadda/widgets/report_dialog.dart';
 
 class ProfilePage extends StatefulWidget {
-  ProfilePage({
-    Key key,
-    this.user,
-    this.setGroupPage,
-    this.profileId,
-    this.signOut
-  }) : super(key: key);
+  ProfilePage(
+      {Key key, this.user, this.setGroupPage, this.profileId, this.signOut})
+      : super(key: key);
   final String profileId;
   final VoidCallback setGroupPage;
   final VoidCallback signOut;
@@ -64,6 +60,13 @@ class ProfilePageState extends State<ProfilePage>
     }
     getUserInfo();
     checkBlocked();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _tabController.dispose();
   }
 
   checkBlocked() async {

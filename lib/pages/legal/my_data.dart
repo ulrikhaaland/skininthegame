@@ -12,15 +12,16 @@ class MyData extends StatelessWidget {
       case (0):
         subLevelText = "Fish Plan (Free)";
         break;
-        case (1):
+      case (1):
         subLevelText = "Shark Plan";
         break;
-        case (2):
+      case (2):
         subLevelText = "Whale Plan";
         break;
       default:
     }
     return Scaffold(
+      backgroundColor: UIData.dark,
       appBar: new AppBar(
         iconTheme: IconThemeData(color: UIData.blackOrWhite),
         backgroundColor: UIData.appBarColor,

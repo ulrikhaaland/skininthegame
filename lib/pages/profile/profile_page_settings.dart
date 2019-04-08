@@ -153,7 +153,7 @@ class ProfileSettingsPageState extends State<ProfileSettingsPage>
                           if (val.isEmpty) {
                             val = "";
                           }
-                          widget.user.bio = val;
+                          widget.user.bio = val.trim();
                         },
                       ),
                     ),

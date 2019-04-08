@@ -23,6 +23,13 @@ class TermsAndConditionsState extends State<TermsAndConditions>
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _tabController.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: UIData.dark,

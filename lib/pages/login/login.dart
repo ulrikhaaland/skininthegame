@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yadda/utils/uidata.dart';
 import 'dart:async';
 import 'package:yadda/objects/user.dart';
+import 'package:yadda/pages/legal/TermsAndConditions.dart';
 
 class Login extends StatefulWidget {
   Login(
@@ -199,14 +200,16 @@ class LoginState extends State<Login> {
     return finalUsername;
   }
 
-  void checkUsername() async {
+  Future<bool> checkUsername() async {
     _username = myController.text.trim().toLowerCase();
-    firestoreInstance
+    var isAvailable = false;
+    QuerySnapshot qSnap = await firestoreInstance
         .collection("usernames")
         .where("name", isEqualTo: _username)
-        .getDocuments()
-        .then((string) {
-      if (string.documents.isEmpty) {
+        .getDocuments();
+       
+      if (qSnap.documents.isEmpty) {
+        isAvailable = true;
         setState(() {
           debugPrint("true");
           usernameAvailable = true;
@@ -223,11 +226,11 @@ class LoginState extends State<Login> {
           usernameAvailable = false;
         });
       }
-    });
+   return isAvailable;
   }
 
   List<Widget> usernameAndPassword() {
-    switch (_formType) {
+    switch (_formType)  {
       case FormType.register:
         return [
           new ListTile(
@@ -248,6 +251,7 @@ class LoginState extends State<Login> {
               autocorrect: false,
               // focusNode: _focus,
               validator: (val) {
+                // bool isAvailable = await checkUsername();
                 if (val.isEmpty) {
                   return "Username can't be empty";
                 }
@@ -327,21 +331,22 @@ class LoginState extends State<Login> {
               },
             ),
           ),
-          // padded(
-          //     child: new TextField(
-          //         style: new TextStyle(
-          //             color: UIData.white, fontSize: UIData.fontSize18),
-          //         key: new Key('checkpassword'),
-          //         decoration: new InputDecoration(
-          //             border: OutlineInputBorder(),
-          //             labelText: 'Confirm Password',
-          //             fillColor: UIData.white,
-          //             labelStyle: new TextStyle(color: Colors.grey[600])),
-          //         obscureText: true,
-          //         autocorrect: false,
-          //         onChanged: (String str) {
-          //           _doubleCheckPassword = str;
-          //         })),
+          ListTile(
+            title: new Text(
+              "By clicking Create an account you agree to our Terms.",
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+            subtitle: new FlatButton(
+                child: new Text(
+                  "Terms, Policies And Agreements",
+                  style: TextStyle(color: UIData.white),
+                ),
+                onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => TermsAndConditions()),
+                    )),
+          ),
         ];
       case FormType.login:
         return [
@@ -436,9 +441,6 @@ class LoginState extends State<Login> {
         ];
       case FormType.register:
         return [
-          Padding(
-            padding: EdgeInsets.only(top: 8),
-          ),
           new PrimaryButton(
             key: new Key('createaccount'),
             text: 'Create an account',

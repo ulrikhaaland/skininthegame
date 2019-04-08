@@ -14,6 +14,7 @@ import 'package:yadda/pages/profile/profile_page.dart';
 import 'package:yadda/pages/inAppPurchase/subscription.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:yadda/utils/delete.dart';
+import 'package:yadda/pages/inAppPurchase/subLevel.dart';
 
 SearchBar searchBar;
 
@@ -44,8 +45,7 @@ class GamePage extends StatefulWidget {
   GamePageState createState() => GamePageState();
 }
 
-class GamePageState extends State<GamePage> {
-  // static final formKey = new GlobalKey<FormState>();
+class GamePageState extends State<GamePage> with WidgetsBindingObserver {
   GlobalKey<ScaffoldState> _key = new GlobalKey<ScaffoldState>();
   final bool newGroupOption = true;
   final Firestore firestoreInstance = Firestore.instance;
@@ -95,18 +95,52 @@ class GamePageState extends State<GamePage> {
     } else {
       nightmodeIcon = FontAwesomeIcons.moon;
     }
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   dispose() {
     super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case (AppLifecycleState.resumed):
+        {
+          _registeredGames();
+          print("resumed");
+        }
+        break;
+
+      case (AppLifecycleState.inactive):
+        {
+          print("inactive");
+        }
+        break;
+      case (AppLifecycleState.paused):
+        {
+          print("paused");
+        }
+        break;
+      case (AppLifecycleState.suspending):
+        {
+          print("Suspending");
+        }
+        break;
+      default:
+    }
   }
 
   checkSubLevel() {
-    widget.user.subLevel = 0;
-    // SubLevel().getSubLevel().then((onValue) =>
-    //     widget.user != null ? widget.user.subLevel = onValue : null);
-  }
+    try {
+      SubLevel().getSubLevel().then((onValue) =>
+          widget.user != null ? widget.user.subLevel = onValue : null);
+    } catch (e) {}
+  } 
 
   @override
   Widget build(BuildContext context) {
@@ -225,7 +259,7 @@ class GamePageState extends State<GamePage> {
                                 )),
                       ),
                 ),
-                
+
                 new ListTile(
                   leading: IconButton(
                     icon: Icon(nightmodeIcon, size: 20, color: UIData.yellow),
