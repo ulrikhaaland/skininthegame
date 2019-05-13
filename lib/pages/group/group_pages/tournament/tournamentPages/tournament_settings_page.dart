@@ -8,7 +8,7 @@ import 'tournament_createPlayer_page.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/log.dart';
 import 'package:yadda/objects/game.dart';
-import 'package:yadda/pages/inAppPurchase/subscription.dart';
+// import 'package:yadda/pages/inAppPurchase/subscription.dart';
 import 'package:yadda/utils/layout.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 
@@ -448,61 +448,61 @@ class TournamentSettingsPageState extends State<TournamentSettingsPage>
                                       ? val = widget.game.maxPlayers.toString()
                                       : null;
 
-                                  if (widget.user.subLevel < 2) {
-                                    String sub;
-                                    if (widget.user.subLevel == 1 &&
-                                        int.tryParse(val) > 27) {
-                                      sub =
-                                          "Your current subscription only allows \n27 players per tournament";
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  Subscription(
-                                                    user: widget.user,
-                                                    info: true,
-                                                    title: sub,
-                                                  )));
-                                      return sub;
-                                    } else if (widget.user.subLevel == 0 &&
-                                        int.tryParse(val) > 9) {
-                                      sub =
-                                          "Your current subscription only allows \n9 players per tournament";
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  Subscription(
-                                                    user: widget.user,
-                                                    info: true,
-                                                    title: sub,
-                                                  )));
-                                      return sub;
-                                    }
-                                  }
+                                  // if (widget.user.subLevel < 2) {
+                                  //   String sub;
+                                  //   if (widget.user.subLevel == 1 &&
+                                  //       int.tryParse(val) > 27) {
+                                  //     sub =
+                                  //         "Your current subscription only allows \n27 players per tournament";
+                                  //     Navigator.push(
+                                  //         context,
+                                  //         MaterialPageRoute(
+                                  //             builder: (context) =>
+                                  //                 Subscription(
+                                  //                   user: widget.user,
+                                  //                   info: true,
+                                  //                   title: sub,
+                                  //                 )));
+                                  //     return sub;
+                                  //   } else if (widget.user.subLevel == 0 &&
+                                  //       int.tryParse(val) > 9) {
+                                  //     sub =
+                                  //         "Your current subscription only allows \n9 players per tournament";
+                                  //     Navigator.push(
+                                  //         context,
+                                  //         MaterialPageRoute(
+                                  //             builder: (context) =>
+                                  //                 Subscription(
+                                  //                   user: widget.user,
+                                  //                   info: true,
+                                  //                   title: sub,
+                                  //                 )));
+                                  //     return sub;
+                                  //   }
+                                  // }
                                 } else {
                                   return "Input must be a number!";
                                 }
                               },
                               onSaved: (val) {
                                 if (val.isEmpty) {
-                                  switch (widget.user.subLevel) {
-                                    case (0):
-                                      widget.game.setMaxPlayers(9);
-                                      break;
-                                    case (1):
-                                      widget.game.setMaxPlayers(18);
-                                      break;
-                                    case (2):
-                                      widget.game.setMaxPlayers(27);
-                                      break;
-                                  }
-                                } else if (widget.user.subLevel == 1 &&
-                                    int.tryParse(val) > 27) {
+                                  // switch (widget.user.subLevel) {
+                                  //   case (0):
+                                  //     widget.game.setMaxPlayers(9);
+                                  //     break;
+                                  //   case (1):
+                                  //     widget.game.setMaxPlayers(18);
+                                  //     break;
+                                  //   case (2):
                                   widget.game.setMaxPlayers(27);
-                                } else if (widget.user.subLevel == 0 &&
-                                    int.tryParse(val) > 9) {
-                                  widget.game.setMaxPlayers(9);
+                                  // break;
+                                  // }
+                                  // } else if (widget.user.subLevel == 1 &&
+                                  //     int.tryParse(val) > 27) {
+                                  //   widget.game.setMaxPlayers(27);
+                                  // } else if (widget.user.subLevel == 0 &&
+                                  //     int.tryParse(val) > 9) {
+                                  //   widget.game.setMaxPlayers(9);
                                 } else {
                                   widget.game.setMaxPlayers(int.tryParse(val));
                                 }

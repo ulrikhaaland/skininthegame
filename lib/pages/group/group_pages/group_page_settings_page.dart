@@ -4,8 +4,10 @@ import 'package:yadda/utils/uidata.dart';
 import 'package:yadda/pages/group/new/newInviteUser_page.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
-import 'package:yadda/widgets/primary_button.dart';
+import '../../../service/service_provider.dart';
 import 'package:yadda/widgets/report_dialog.dart';
+import '../../../widgets/nav_helper_text.dart';
+import 'package:yadda/widgets/nav_appbar.dart';
 
 class GroupSettingsPage extends StatefulWidget {
   GroupSettingsPage(
@@ -15,6 +17,7 @@ class GroupSettingsPage extends StatefulWidget {
       this.initState,
       this.onUpdate,
       this.group,
+      this.navHelperTextList,
       this.publicGroup})
       : super(key: key);
 
@@ -24,6 +27,7 @@ class GroupSettingsPage extends StatefulWidget {
   final Group group;
   final bool publicGroup;
   final bool newGroupOption;
+  final List<String> navHelperTextList;
 
   @override
   GroupSettingsPageState createState() => GroupSettingsPageState();
@@ -99,32 +103,39 @@ class GroupSettingsPageState extends State<GroupSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    if (!widget.navHelperTextList.contains("Group")) {
+      widget.navHelperTextList.add("Group");
+    }
+    return Scaffold(
       resizeToAvoidBottomPadding: true,
-      appBar: new AppBar(
-        actions: <Widget>[
-          new IconButton(
-            icon: new Icon(Icons.more_vert),
-            iconSize: UIData.iconSizeAppBar,
-            onPressed: () {
-              ReportDialog dialog = new ReportDialog(
-                text: "Report group",
-                reportedId: widget.group.id,
-                reportedById: widget.user.id,
-                type: "group",
-              );
-              showDialog(context: context, child: dialog);
-            },
-          )
-        ],
-        elevation: 0,
-        iconTheme: IconThemeData(color: UIData.blackOrWhite),
-        backgroundColor: UIData.appBarColor,
-        title: new Text(
-          "Settings",
-          style: new TextStyle(
-              fontSize: UIData.fontSize24, color: UIData.blackOrWhite),
-        ),
+      appBar: PreferredSize(
+        preferredSize: Size(
+            0, ServiceProvider.instance.screenService.getHeight(context) / 10),
+        child: Container(
+            color: UIData.appBarColor,
+            child: NavAppBar(
+              navItemList: widget.navHelperTextList,
+              titleText: "Settings",
+              actions: <Widget>[
+                Column(
+                  children: <Widget>[
+                    new IconButton(
+                      icon: new Icon(Icons.more_vert),
+                      iconSize: UIData.iconSizeAppBar,
+                      onPressed: () {
+                        ReportDialog dialog = new ReportDialog(
+                          text: "Report group",
+                          reportedId: widget.group.id,
+                          reportedById: widget.user.id,
+                          type: "group",
+                        );
+                        showDialog(context: context, child: dialog);
+                      },
+                    )
+                  ],
+                ),
+              ],
+            )),
       ),
       backgroundColor: UIData.dark,
       body: setScreen(),
@@ -223,6 +234,7 @@ class GroupSettingsPageState extends State<GroupSettingsPage> {
                   builder: (context) => InviteUserPage(
                         group: widget.group,
                         user: widget.user,
+                        navHelperTextList: widget.navHelperTextList,
                       )),
             );
           },

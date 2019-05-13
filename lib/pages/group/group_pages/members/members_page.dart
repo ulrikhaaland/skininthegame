@@ -183,7 +183,7 @@ class MembersPageState extends State<MembersPage> {
       adminString = "Make admin";
     }
     bool enabled;
-    if (document.documentID == widget.user.id) {
+    if (document.documentID == widget.user.id || document.documentID == widget.group.host) {
       enabled = false;
     } else {
       enabled = widget.group.admin;
@@ -266,6 +266,7 @@ class MembersPageState extends State<MembersPage> {
     if (document.data["admin"]) {
       adminText = " (admin)";
     }
+
     bool isAdmin = document.data["admin"];
     IconData adminIcon;
     String adminString;
@@ -277,7 +278,8 @@ class MembersPageState extends State<MembersPage> {
       adminString = "Make admin";
     }
     bool enabled;
-    if (document.documentID == widget.user.id) {
+    if (document.documentID == widget.user.id ||
+        document.documentID == widget.group.host) {
       enabled = false;
     } else {
       enabled = widget.group.admin;

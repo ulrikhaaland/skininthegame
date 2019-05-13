@@ -6,8 +6,8 @@ import 'package:yadda/utils/uidata.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/essentials.dart';
-import 'package:yadda/pages/inAppPurchase/subscription.dart';
-import 'package:yadda/pages/inAppPurchase/subLevel.dart';
+// import 'package:yadda/pages/inAppPurchase/subscription.dart';
+// import 'package:yadda/pages/inAppPurchase/subLevel.dart';
 import 'package:yadda/utils/layout.dart';
 
 class NewGroup extends StatefulWidget {
@@ -65,25 +65,25 @@ class NewGroupState extends State<NewGroup> {
                 textAlign: TextAlign.center,
               ),
               onPressed: () async {
-                if (await SubLevel()
-                    .groupsLeft(widget.user.id, widget.user.subLevel)) {
-                  setState(() {
-                    isLoading = true;
-                  });
-                  setGroupId();
-                } else {
-                  int i;
-                  widget.user.subLevel == 0 ? i = 3 : i = 10;
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => Subscription(
-                                user: widget.user,
-                                info: true,
-                                title:
-                                    "Your current subscription does only allow you to be a part of $i groups at any given time",
-                              )));
-                }
+                // if (await SubLevel()
+                //     .groupsLeft(widget.user.id, widget.user.subLevel)) {
+                setState(() {
+                  isLoading = true;
+                });
+                setGroupId();
+                // } else {
+                //   int i;
+                //   widget.user.subLevel == 0 ? i = 3 : i = 10;
+                //   Navigator.push(
+                //       context,
+                //       MaterialPageRoute(
+                //           builder: (context) => Subscription(
+                //                 user: widget.user,
+                //                 info: true,
+                //                 title:
+                //                     "Your current subscription does only allow you to be a part of $i groups at any given time",
+                //               )));
+                // }
               }),
         ],
         title: new Text(
@@ -247,7 +247,8 @@ class NewGroupState extends State<NewGroup> {
           child: new Text(
               "You can provide an optional description for your group.",
               key: new Key('hint'),
-              style: new TextStyle(fontSize: UIData.fontSize12, color: Colors.grey[600]),
+              style: new TextStyle(
+                  fontSize: UIData.fontSize12, color: Colors.grey[600]),
               textAlign: TextAlign.center),
         ),
         Padding(
@@ -265,8 +266,8 @@ class NewGroupState extends State<NewGroup> {
         ),
         new Padding(
           padding: EdgeInsets.only(left: 18.0, right: 18.0),
-          child: 
-         Layout().divider(),),
+          child: Layout().divider(),
+        ),
         new ListTile(
             leading: new Icon(
               publicIcon,
@@ -289,8 +290,8 @@ class NewGroupState extends State<NewGroup> {
             }),
         new Padding(
           padding: EdgeInsets.only(left: 18.0, right: 18.0),
-          child: 
-         Layout().divider(),),
+          child: Layout().divider(),
+        ),
         new ListTile(
             leading: new Icon(privateIcon, size: 40.0, color: UIData.green),
             title: new Text(
@@ -309,15 +310,16 @@ class NewGroupState extends State<NewGroup> {
             }),
         new Padding(
           padding: EdgeInsets.only(left: 18.0, right: 18.0),
-          child: 
-         Layout().divider(),),
+          child: Layout().divider(),
+        ),
         Padding(
           padding: EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0),
         ),
         padded(
             child: new Text(publicPrivateText,
                 key: new Key('hint'),
-                style: new TextStyle(fontSize: UIData.fontSize12, color: Colors.grey[600]),
+                style: new TextStyle(
+                    fontSize: UIData.fontSize12, color: Colors.grey[600]),
                 textAlign: TextAlign.center)),
         paddedTwo(),
       ],

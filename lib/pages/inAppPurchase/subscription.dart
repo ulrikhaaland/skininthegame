@@ -430,7 +430,7 @@ class _SubscriptionState extends State<Subscription> {
                     height: 50.0,
                     child: PrimaryButton(
                       onPressed: () => _buySubscription(_items[1]),
-                      text: whaleTitle+"dasdasd",
+                      text: whaleTitle,
                     ),
                   ),
                   new Align(

@@ -10,7 +10,7 @@ import 'package:yadda/objects/resultgame.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:yadda/pages/results/graph.dart';
 import 'package:yadda/widgets/primary_button.dart';
-import 'package:yadda/pages/inAppPurchase/subscription.dart';
+// import 'package:yadda/pages/inAppPurchase/subscription.dart';
 import 'package:yadda/widgets/report_dialog.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -408,7 +408,7 @@ class ProfilePageState extends State<ProfilePage>
               textColor: Colors.black,
               elevation: 8.0,
               onPressed: () {
-                if (userProfile.shareResults && widget.user.subLevel > 0) {
+                if (userProfile.shareResults) {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -418,13 +418,13 @@ class ProfilePageState extends State<ProfilePage>
                                 isLoading: true,
                               )));
                 } else {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => Subscription(
-                                user: userProfile,
-                                title: "Subscriptions",
-                              )));
+                  // Navigator.push(
+                  //     context,
+                  //     MaterialPageRoute(
+                  //         builder: (context) => Subscription(
+                  //               user: userProfile,
+                  //               title: "Subscriptions",
+                  //             )));
                 }
               }),
         ),
@@ -518,13 +518,13 @@ class ProfilePageState extends State<ProfilePage>
                       height: 50.0,
                       child: PrimaryButton(
                         text: "Subscribe",
-                        onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Subscription(
-                                      user: widget.user,
-                                      title: "Subscription",
-                                    ))),
+                        // onPressed: () => Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //         builder: (context) => Subscription(
+                        //               user: widget.user,
+                        //               title: "Subscription",
+                        //             ))),
                       ),
                     ),
                   ],

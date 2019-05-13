@@ -13,8 +13,8 @@ import '../group/group_pages/feed/feed_page.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/essentials.dart';
-import 'package:yadda/pages/inAppPurchase/subLevel.dart';
-import 'package:yadda/pages/inAppPurchase/subscription.dart';
+// import 'package:yadda/pages/inAppPurchase/subLevel.dart';
+// import 'package:yadda/pages/inAppPurchase/subscription.dart';
 
 class GroupDashboard extends StatefulWidget {
   const GroupDashboard(
@@ -27,6 +27,7 @@ class GroupDashboard extends StatefulWidget {
       this.onUpdate,
       this.groupName,
       this.group,
+      this.navHelperTextList,
       this.updateState})
       : super(key: key);
   final BaseAuth auth;
@@ -38,6 +39,7 @@ class GroupDashboard extends StatefulWidget {
   final VoidCallback onUpdate;
   final User user;
   final Group group;
+  final List<String> navHelperTextList;
 
   @override
   GroupDashboardState createState() => GroupDashboardState();
@@ -90,6 +92,7 @@ class GroupDashboardState extends State<GroupDashboard> {
     checkIfMemberAndGetUserInfo();
     getThumbs();
     // getGroup();
+    widget.navHelperTextList.add("Group");
   }
 
   @override
@@ -245,43 +248,42 @@ class GroupDashboardState extends State<GroupDashboard> {
             ),
           ),
           onTap: () async {
-            if (await SubLevel()
-                .groupsLeft(widget.user.id, widget.user.subLevel)) {
-              setState(() {
-                isLoading = true;
-              });
+            // if (await SubLevel()
+            //     .groupsLeft(widget.user.id, widget.user.subLevel)) {
+            setState(() {
+              isLoading = true;
+            });
 
-              addMemberToGroup();
-              QuerySnapshot qSnap = await fireStoreInstance
-                  .collection("users/${widget.user.id}/grouprequests")
-                  .getDocuments();
-              widget.user.notifications = qSnap.documents.length;
-              Scaffold.of(formKey.currentState.context)
-                  .showSnackBar(new SnackBar(
-                backgroundColor: UIData.yellow,
-                content: new Text(
-                  "You have joined group ${group.name}",
-                  textAlign: TextAlign.center,
-                  style: new TextStyle(color: UIData.whiteOrBlack),
-                ),
-              ));
+            addMemberToGroup();
+            QuerySnapshot qSnap = await fireStoreInstance
+                .collection("users/${widget.user.id}/grouprequests")
+                .getDocuments();
+            widget.user.notifications = qSnap.documents.length;
+            Scaffold.of(formKey.currentState.context).showSnackBar(new SnackBar(
+              backgroundColor: UIData.yellow,
+              content: new Text(
+                "You have joined group ${group.name}",
+                textAlign: TextAlign.center,
+                style: new TextStyle(color: UIData.whiteOrBlack),
+              ),
+            ));
 
-              setState(() {
-                isLoading = false;
-              });
-            } else {
-              int i;
-              widget.user.subLevel == 0 ? i = 3 : i = 10;
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => Subscription(
-                            user: widget.user,
-                            info: true,
-                            title:
-                                "Your current subscription does only allow you to be a part of $i groups at any given time",
-                          )));
-            }
+            setState(() {
+              isLoading = false;
+            });
+            // } else {
+            //   int i;
+            //   widget.user.subLevel == 0 ? i = 3 : i = 10;
+            //   Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //           builder: (context) => Subscription(
+            //                 user: widget.user,
+            //                 info: true,
+            //                 title:
+            //                     "Your current subscription does only allow you to be a part of $i groups at any given time",
+            //               )));
+            // }
           });
     } else if (isMember == true) {
       return new IconButton(
@@ -291,6 +293,9 @@ class GroupDashboardState extends State<GroupDashboard> {
           size: UIData.iconSizeAppBar,
         ),
         onPressed: () {
+          if (!widget.navHelperTextList.contains("Group")) {
+            widget.navHelperTextList.add("Group");
+          }
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -298,6 +303,7 @@ class GroupDashboardState extends State<GroupDashboard> {
                       user: widget.user,
                       group: group,
                       publicGroup: publicGroup,
+                      navHelperTextList: widget.navHelperTextList,
                     )),
           );
         },

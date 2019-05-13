@@ -11,10 +11,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:yadda/pages/results/graph.dart';
 import 'package:yadda/pages/profile/invite_page.dart';
 import 'package:yadda/pages/profile/profile_page.dart';
-import 'package:yadda/pages/inAppPurchase/subscription.dart';
+// import 'package:yadda/pages/inAppPurchase/subscription.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:yadda/utils/delete.dart';
-import 'package:yadda/pages/inAppPurchase/subLevel.dart';
+// import 'package:yadda/pages/inAppPurchase/subLevel.dart';
 
 SearchBar searchBar;
 
@@ -87,7 +87,7 @@ class GamePageState extends State<GamePage> with WidgetsBindingObserver {
   @override
   initState() {
     super.initState();
-    checkSubLevel();
+    // checkSubLevel();
     currentUserId = widget.user.id;
     _registeredGames();
     if (widget.user.nightMode) {
@@ -135,12 +135,13 @@ class GamePageState extends State<GamePage> with WidgetsBindingObserver {
     }
   }
 
-  checkSubLevel() {
-    try {
-      SubLevel().getSubLevel().then((onValue) =>
-          widget.user != null ? widget.user.subLevel = onValue : null);
-    } catch (e) {}
-  } 
+  // checkSubLevel() {
+  //   widget.user.subLevel = 2;
+  //   // try {
+  //   //   SubLevel().getSubLevel().then((onValue) =>
+  //   //       widget.user != null ? widget.user.subLevel = onValue : null);
+  //   // } catch (e) {}
+  // } 
 
   @override
   Widget build(BuildContext context) {
@@ -209,7 +210,7 @@ class GamePageState extends State<GamePage> with WidgetsBindingObserver {
                     ),
                   ),
                   onTap: () {
-                    if (widget.user.subLevel > 0) {
+                    // if (widget.user.subLevel > 0) {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -218,16 +219,16 @@ class GamePageState extends State<GamePage> with WidgetsBindingObserver {
                                     currentUser: widget.user,
                                     isLoading: true,
                                   )));
-                    } else {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Subscription(
-                                    user: widget.user,
-                                    title: "Subscription",
-                                    from: "results",
-                                  )));
-                    }
+                    // } else {
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //         builder: (context) => Subscription(
+                      //               user: widget.user,
+                      //               title: "Subscription",
+                      //               from: "results",
+                      //             )));
+                    // }
                   },
                 ),
                 new ListTile(
@@ -622,6 +623,7 @@ class GamePageState extends State<GamePage> with WidgetsBindingObserver {
                         updateState: () => updateState(),
                         // groupType: type,
                         onUpdate: () => _registeredGames(),
+                        navHelperTextList: List(),
                       )),
             );
           },

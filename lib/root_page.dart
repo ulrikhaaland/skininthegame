@@ -13,7 +13,7 @@ import 'package:yadda/objects/group.dart';
 import 'package:yadda/utils/uidata.dart';
 import 'dart:async';
 import 'package:yadda/pages/update_page.dart';
-import 'package:yadda/pages/inAppPurchase/subLevel.dart';
+// import 'package:yadda/pages/inAppPurchase/subLevel.dart';
 import 'package:yadda/utils/ProfilePic.dart';
 
 class RootPage extends StatefulWidget {
@@ -51,7 +51,7 @@ class RootPageState extends State<RootPage> {
   initState() {
     super.initState();
     getUserId();
-    checkSubLevel();
+    // checkSubLevel();
     firebaseMessaging.configure(onLaunch: (Map<String, dynamic> msg) {
       print("onLaunch called");
       handleMessage(msg);
@@ -82,13 +82,13 @@ class RootPageState extends State<RootPage> {
     super.dispose();
   }
 
-  checkSubLevel() {
-    try {
-      SubLevel()
-          .getSubLevel()
-          .then((onValue) => user != null ? user.subLevel = onValue : null);
-    } catch (e) {}
-  }
+  // checkSubLevel() {
+  //   try {
+  //     SubLevel()
+  //         .getSubLevel()
+  //         .then((onValue) => user != null ? user.subLevel = onValue : null);
+  //   } catch (e) {}
+  // }
 
   Future<String> updateFcmToken() async {
     if (currentUser != null) {
@@ -210,7 +210,7 @@ class RootPageState extends State<RootPage> {
         await ProfilePicture().getDownloadUrl(docSnap.data["id"]),
         docSnap.data["currency"],
         docSnap.data["appversion"],
-        subLevel,
+        3,
         notifications: qSnap.documents.length,
       );
       double version = 0;

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:yadda/auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:yadda/service/service_provider.dart';
 import 'package:yadda/utils/uidata.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/pages/userSearch/search.dart';
 import 'package:yadda/objects/group.dart';
 
 import 'package:yadda/utils/time.dart';
+import 'package:yadda/widgets/nav_appbar.dart';
 
 SearchBar searchBar;
 bool _fresh = false;
@@ -21,9 +23,11 @@ AppBar _buildAppBar(BuildContext context) {
 }
 
 class InviteUserPage extends StatefulWidget {
-  const InviteUserPage({Key key, this.user, this.group}) : super(key: key);
+  const InviteUserPage({Key key, this.user, this.group, this.navHelperTextList})
+      : super(key: key);
   final User user;
   final Group group;
+  final List navHelperTextList;
 
   @override
   InviteUserPageState createState() => InviteUserPageState();
@@ -79,46 +83,54 @@ class InviteUserPageState extends State<InviteUserPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.navHelperTextList.contains("Settings")) {
+      widget.navHelperTextList.add("Settings");
+    }
     return Scaffold(
         resizeToAvoidBottomPadding: true,
         backgroundColor: UIData.dark,
-        appBar: new AppBar(
-          backgroundColor: UIData.appBarColor,
-          iconTheme: IconThemeData(color: UIData.blackOrWhite),
-          elevation: 0,
-          title: new Directionality(
-            textDirection: Directionality.of(context),
-            child: TextField(
-              autofocus: true,
-              autocorrect: false,
-              style: new TextStyle(color: UIData.blackOrWhite),
-              decoration: InputDecoration(
-                fillColor: UIData.white,
-                labelText: 'Search for users',
-                labelStyle: new TextStyle(color: Colors.grey[600]),
-                icon: new Icon(Icons.supervised_user_circle,
-                    size: 40.0, color: UIData.blue),
+        appBar: PreferredSize(
+          preferredSize: Size(0,
+              ServiceProvider.instance.screenService.getHeight(context) / 10),
+          child: Container(
+            color: UIData.appBarColor,
+            child: NavAppBar(
+              navItemList: widget.navHelperTextList,
+              title: Directionality(
+                textDirection: Directionality.of(context),
+                child: TextField(
+                  autofocus: true,
+                  autocorrect: false,
+                  style: TextStyle(color: UIData.blackOrWhite),
+                  decoration: InputDecoration(
+                    fillColor: UIData.white,
+                    labelText: 'Search for users',
+                    labelStyle: TextStyle(color: Colors.grey[600]),
+                    icon: Icon(Icons.supervised_user_circle,
+                        size: 40.0, color: UIData.blue),
+                  ),
+                  onChanged: (String value) {
+                    userSearchName = value.toLowerCase();
+                    if (screen == 0) {
+                      setState(() {
+                        screen = 1;
+
+                        setScreen();
+                      });
+                    } else if (value == "") {
+                      setState(() {
+                        screen = 0;
+
+                        setScreen();
+                      });
+                    } else if (screen == 1) {
+                      setState(() {
+                        setScreen();
+                      });
+                    }
+                  },
+                ),
               ),
-              onChanged: (String value) {
-                userSearchName = value.toLowerCase();
-                if (screen == 0) {
-                  setState(() {
-                    screen = 1;
-
-                    setScreen();
-                  });
-                } else if (value == "") {
-                  setState(() {
-                    screen = 0;
-
-                    setScreen();
-                  });
-                } else if (screen == 1) {
-                  setState(() {
-                    setScreen();
-                  });
-                }
-              },
             ),
           ),
         ),

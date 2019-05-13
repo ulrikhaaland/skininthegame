@@ -10,7 +10,7 @@ import 'package:yadda/objects/game.dart';
 import 'package:yadda/utils/layout.dart';
 import 'package:yadda/utils/essentials.dart';
 import 'package:yadda/utils/cloudFunctions.dart';
-import 'package:yadda/pages/inAppPurchase/subscription.dart';
+// import 'package:yadda/pages/inAppPurchase/subscription.dart';
 
 class NewCashGame extends StatefulWidget {
   NewCashGame({Key key, this.user, this.group, this.fromCashGamePage})
@@ -364,36 +364,36 @@ class NewCashGameState extends State<NewCashGame> {
                       int isNumber = int.tryParse(val);
                       if (isNumber != null) {
                         val.isEmpty ? val = game.maxPlayers.toString() : null;
-                        if (widget.user.subLevel < 2) {
-                          String sub;
-                          if (widget.user.subLevel == 1 &&
-                              int.tryParse(val) > 9) {
-                            sub =
-                                "Your current subscription only allows \n9 players per cash game";
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Subscription(
-                                          user: widget.user,
-                                          info: true,
-                                          title: sub,
-                                        )));
-                            return sub;
-                          } else if (widget.user.subLevel == 0 &&
-                              int.tryParse(val) > 6) {
-                            sub =
-                                "Your current subscription only allows \n6 players per cash game";
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Subscription(
-                                          user: widget.user,
-                                          info: true,
-                                          title: sub,
-                                        )));
-                            return sub;
-                          }
-                        }
+                        // if (widget.user.subLevel < 2) {
+                        //   String sub;
+                        //   if (widget.user.subLevel == 1 &&
+                        //       int.tryParse(val) > 9) {
+                        //     sub =
+                        //         "Your current subscription only allows \n9 players per cash game";
+                        //     Navigator.push(
+                        //         context,
+                        //         MaterialPageRoute(
+                        //             builder: (context) => Subscription(
+                        //                   user: widget.user,
+                        //                   info: true,
+                        //                   title: sub,
+                        //                 )));
+                        //     return sub;
+                        //   } else if (widget.user.subLevel == 0 &&
+                        //       int.tryParse(val) > 6) {
+                        //     sub =
+                        //         "Your current subscription only allows \n6 players per cash game";
+                        //     Navigator.push(
+                        //         context,
+                        //         MaterialPageRoute(
+                        //             builder: (context) => Subscription(
+                        //                   user: widget.user,
+                        //                   info: true,
+                        //                   title: sub,
+                        //                 )));
+                        //     return sub;
+                        //   }
+                        // }
                       } else {
                         return "Input must be a number!";
                       }
@@ -580,23 +580,24 @@ class NewCashGameState extends State<NewCashGame> {
                 ),
                 value: notifyMembers,
                 onChanged: (val) {
-                  if (widget.user.subLevel == 0) {
-                    showDisabledNotifications = true;
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Subscription(
-                                  user: widget.user,
-                                  info: true,
-                                  title:
-                                      "Your current subscription does not include notifications",
-                                )));
-                  } else {
+                  // if (widget.user.subLevel == 0) {
+                  //   showDisabledNotifications = true;
+                  //   Navigator.push(
+                  //       context,
+                  //       MaterialPageRoute(
+                  //           builder: (context) => Subscription(
+                  //                 user: widget.user,
+                  //                 info: true,
+                  //                 title:
+                  //                     "Your current subscription does not include notifications",
+                  //               )));
+                  // } else {
+                  // }
+                  setState(() {
                     notifyMembers = val;
-                  }
-                  setState(() {});
+                  });
                 }),
-            disabledNotifications(),
+            // disabledNotifications(),
             Padding(
               padding: EdgeInsets.only(top: 16),
             ),
@@ -632,23 +633,24 @@ class NewCashGameState extends State<NewCashGame> {
                 ),
                 value: game.showMoneyOnTable,
                 onChanged: (val) {
-                  if (widget.user.subLevel == 0) {
-                    showDisabledMoneyOnTheTable = true;
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Subscription(
-                                  user: widget.user,
-                                  info: true,
-                                  title:
-                                      "Your current subscription does not include showing money on the table",
-                                )));
-                  } else {
+                  // if (widget.user.subLevel == 0) {
+                  //   showDisabledMoneyOnTheTable = true;
+                  //   Navigator.push(
+                  //       context,
+                  //       MaterialPageRoute(
+                  //           builder: (context) => Subscription(
+                  //                 user: widget.user,
+                  //                 info: true,
+                  //                 title:
+                  //                     "Your current subscription does not include showing money on the table",
+                  //               )));
+                  // } else {
+                  setState(() {
                     game.showMoneyOnTable = val;
-                    setState(() {});
-                  }
+                  });
+                  // }
                 }),
-            disabledMoneyOnTheTable(),
+            // disabledMoneyOnTheTable(),
             Padding(
               padding: EdgeInsets.only(top: 16),
             ),
@@ -659,33 +661,33 @@ class NewCashGameState extends State<NewCashGame> {
       return Container();
   }
 
-  bool showDisabledNotifications = false;
-  Widget disabledNotifications() {
-    if (showDisabledNotifications) {
-      return new Padding(
-          padding: EdgeInsets.only(left: 20.0, right: 20.0),
-          child: Text(
-            "Your current subscription does not include notifications",
-            style: new TextStyle(color: Colors.red),
-          ));
-    } else {
-      return new Container();
-    }
-  }
+  // bool showDisabledNotifications = false;
+  // Widget disabledNotifications() {
+  //   if (showDisabledNotifications) {
+  //     return new Padding(
+  //         padding: EdgeInsets.only(left: 20.0, right: 20.0),
+  //         child: Text(
+  //           "Your current subscription does not include notifications",
+  //           style: new TextStyle(color: Colors.red),
+  //         ));
+  //   } else {
+  //     return new Container();
+  //   }
+  // }
 
-  bool showDisabledMoneyOnTheTable = false;
-  Widget disabledMoneyOnTheTable() {
-    if (showDisabledMoneyOnTheTable) {
-      return new Padding(
-          padding: EdgeInsets.only(left: 20.0, right: 20.0, bottom: 16.0),
-          child: Text(
-            "Your current subscription does not include showing money on the table",
-            style: new TextStyle(color: Colors.red),
-          ));
-    } else {
-      return new Container();
-    }
-  }
+  // bool showDisabledMoneyOnTheTable = false;
+  // Widget disabledMoneyOnTheTable() {
+  //   if (showDisabledMoneyOnTheTable) {
+  //     return new Padding(
+  //         padding: EdgeInsets.only(left: 20.0, right: 20.0, bottom: 16.0),
+  //         child: Text(
+  //           "Your current subscription does not include showing money on the table",
+  //           style: new TextStyle(color: Colors.red),
+  //         ));
+  //   } else {
+  //     return new Container();
+  //   }
+  // }
 
   DateTime _date = new DateTime.now();
   TimeOfDay _time = new TimeOfDay.now();

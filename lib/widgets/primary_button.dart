@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../service/service_provider.dart';
 
 class PrimaryButton extends StatelessWidget {
   PrimaryButton({
@@ -14,13 +15,17 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new ConstrainedBox(
-      constraints: BoxConstraints(minWidth: 600.0, minHeight: 50.0),
-      child: new RaisedButton(
-          child: new Text(text,
-              style: new TextStyle(color: Colors.black, fontSize: 20.0)),
-          shape: new RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10.0))),
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+          minWidth: ServiceProvider.instance.screenService
+              .getPortraitWidthByPercentage(context, 80),
+          minHeight: ServiceProvider.instance.screenService
+              .getPortraitHeightByPercentage(context, 6)),
+      child: RaisedButton(
+          child:
+              Text(text, style: TextStyle(color: Colors.black, fontSize: 20.0)),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(24.0))),
           color: color,
           textColor: Colors.black,
           elevation: 8.0,

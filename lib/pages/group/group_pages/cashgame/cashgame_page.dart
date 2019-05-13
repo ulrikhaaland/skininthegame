@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:yadda/service/service_provider.dart';
 import 'package:yadda/utils/uidata.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yadda/pages/group/group_pages/cashgame/cashgame_settings_page.dart';
 import 'package:yadda/utils/time.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/pages/group/new/new_post_page.dart';
+import 'package:yadda/widgets/primary_button.dart';
 import 'cashgame_player_page.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:yadda/objects/group.dart';
@@ -52,6 +54,7 @@ class CashGamePageState extends State<CashGamePage>
   String playerName;
   String host;
   String joinLeave = "";
+  List<PayoutRequest> payoutRequests = <PayoutRequest>[];
 
   String logPath;
   String gamePath;
@@ -116,6 +119,7 @@ class CashGamePageState extends State<CashGamePage>
     } else {
       _tabController = new TabController(vsync: this, length: 4);
     }
+
     if (widget.history == true) {
       activeOrNot = "players";
       playerOrResultsIcon = FontAwesomeIcons.trophy;
@@ -126,6 +130,7 @@ class CashGamePageState extends State<CashGamePage>
         'groups/${widget.group.id}/games/type/$cashGameActiveOrHistory/${widget.gameId}';
     logPath = "$gamePath/log";
     getGroup();
+    calculatePayouts();
   }
 
   @override
@@ -486,9 +491,9 @@ class CashGamePageState extends State<CashGamePage>
     });
   }
 
-  Widget floatingActionButton() {
+  FloatingActionButton floatingActionButton() {
     if (!widget.history && !game.stopReg || hasJoined) {
-      return new FloatingActionButton(
+      return FloatingActionButton(
         backgroundColor: color,
         tooltip: "Join",
         child: Text(joinLeave),
@@ -824,176 +829,133 @@ class CashGamePageState extends State<CashGamePage>
   }
 
   void calculatePayouts() async {
-    int i = 0;
-    QuerySnapshot qSnap =
-        await firestoreInstance.collection("$gamePath/payouts").getDocuments();
-    if (qSnap.documents.isNotEmpty) {
-      qSnap.documents.forEach((doc) {
-        firestoreInstance
-            .document("$gamePath/payouts/${doc.documentID}")
-            .delete();
-      });
-    }
-    firestoreInstance.document("$gamePath/payouts/-").setData({
-      "data": 1,
+    setState(() {
+      isLoading = true;
     });
-    firestoreInstance.document(gamePath).updateData({
-      "calculatepayouts": true,
+    payoutRequests.clear();
+    List<PayoutPlayer> negativeList = <PayoutPlayer>[];
+    List<PayoutPlayer> positiveList = <PayoutPlayer>[];
+
+    // Delete previous payouts in db
+    firestoreInstance
+        .collection("$gamePath/payouts")
+        .getDocuments()
+        .then((qSnap) {
+      qSnap.documents.forEach((doc) => firestoreInstance
+          .document("$gamePath/payouts/${doc.documentID}")
+          .delete());
     });
-    game.calculatePayouts = true;
-    List<Person> personList = new List();
-    firestoreInstance.runTransaction((Transaction tx) async {
-      QuerySnapshot qSnap = await firestoreInstance
-          .collection("$gamePath/players")
-          .getDocuments();
-      int q = 0;
-      qSnap.documents.forEach((DocumentSnapshot doc) {
+
+    // Get all players
+    firestoreInstance
+        .collection("$gamePath/players")
+        .getDocuments()
+        .then((playerDocs) {
+      playerDocs.documents.forEach((doc) {
+        // Sort players into lists negative and positive result
         int payout = doc.data["payout"];
-
         int buyin = doc.data["buyin"];
-        int result = payout - buyin;
-        bool isNegative;
-        if (result.isNegative) {
-          isNegative = true;
+
+        if (buyin == 0 && payout == 0) {
+        } else if (buyin > payout) {
+          negativeList.add(PayoutPlayer(
+            name: doc.data["name"],
+            payOrPaidAmount: buyin - payout,
+          ));
         } else {
-          isNegative = false;
+          positiveList.add(PayoutPlayer(
+            name: doc.data["name"],
+            payOrPaidAmount: payout - buyin,
+          ));
         }
-        Person person = new Person(doc.data["name"], result, isNegative, q);
-        personList.add(person);
-        q++;
       });
 
-      Person personNegative;
-      Person personPositive;
+      PayoutPlayer pay;
+      PayoutPlayer paid;
 
-      while (personList.isNotEmpty) {
-        int n = 0;
-        int p = 0;
-        for (int i = 0; i < personList.length; i++) {
-          if (personList[i].result.isNegative || personList[i].result == 0) {
-            n++;
-          }
-          if (!personList[i].result.isNegative || personList[i].result == 0) {
-            p++;
+      while (negativeList.isNotEmpty || positiveList.isNotEmpty) {
+        // Find player with biggest the loss
+        for (PayoutPlayer player in negativeList) {
+          if (positiveList.isEmpty) {
+            payoutRequests.add(PayoutRequest(
+              personNegative: player.name,
+              hasLeft: true,
+              payout: player.payOrPaidAmount,
+            ));
+          } else if (pay == null) {
+            pay = player;
+          } else if (pay.payOrPaidAmount < player.payOrPaidAmount) {
+            pay = player;
           }
         }
-        if (n == personList.length) {
-          for (int i = 0; i < personList.length;) {
-            int z = personList[0].result.abs();
-            if (personList[0].result != 0) {
-              await firestoreInstance.collection("$gamePath/payouts").add({
-                "sentence": "${personList[0].name} has $z left to pay out.",
-                "personnegative": "",
-                "personpositive": "",
-                "result": "",
-              });
-            }
 
-            personList.removeAt(i);
-          }
-          if (widget.history) {
-            setState(() {
-              isLoading = false;
-            });
-          }
-          if (i == 0) {
-            i++;
-            Essentials().showSnackBar(
-                "Payouts has been updated", formKey.currentState.context);
-          }
-        } else if (p == personList.length) {
-          for (int i = 0; i < personList.length;) {
-            await firestoreInstance.collection("$gamePath/payouts").add({
-              "sentence":
-                  "${personList[0].name} is missing ${personList[0].result}.",
-              "personnegative": "",
-              "personpositive": "",
-              "result": "",
-            });
-            personList.removeAt(i);
-          }
-          if (widget.history) {
-            setState(() {
-              isLoading = false;
-            });
-          }
-
-          if (i == 0) {
-            i++;
-            Essentials().showSnackBar(
-                "Payouts has been updated", formKey.currentState.context);
+        // Find player with the biggest win
+        for (PayoutPlayer player in positiveList) {
+          if (negativeList.isEmpty) {
+            payoutRequests.add(PayoutRequest(
+              personPositive: player.name,
+              isMissing: true,
+              payout: player.payOrPaidAmount,
+            ));
+          } else if (paid == null) {
+            paid = player;
+          } else if (paid.payOrPaidAmount < player.payOrPaidAmount) {
+            paid = player;
           }
         }
-        if (personList.length != 0) {
-          int i = random.nextInt(personList.length);
-          for (int i = 0; i < personList.length; i++) {
-            personList[i].setIndex(i);
+
+        // If either list is empty at this point then everything has been handled and the loop should break after passing the data
+        if (negativeList.isEmpty || positiveList.isEmpty) {
+          for (PayoutRequest req in payoutRequests) {
+            firestoreInstance.collection("$gamePath/payouts").add({
+              "payout": req.payout,
+              "personNegative": req.personNegative,
+              "personPositive": req.personPositive,
+              "hasLeft": req.hasLeft,
+              "isMissing": req.isMissing,
+            });
           }
-          if (personNegative == null) {
-            if (personList[i].resultIsNegative == true) {
-              personNegative = personList[i];
-            }
+          setState(() {
+            isLoading = false;
+          });
+          break;
+        }
+
+        int tx = paid.payOrPaidAmount - pay.payOrPaidAmount;
+        int txPayout;
+
+        // Match up the two players, the one with the loss pays the one with the win and add the data to a payoutRequest obj.
+        if (pay != null && paid != null) {
+          tx.isNegative
+              ? txPayout = paid.payOrPaidAmount
+              : txPayout = pay.payOrPaidAmount;
+
+          if (tx == 0) {
+            txPayout = paid.payOrPaidAmount;
           }
-          if (personPositive == null) {
-            if (!personList[i].resultIsNegative == true &&
-                personList[i].result != 0) {
-              personPositive = personList[i];
-            }
+
+          payoutRequests.add(PayoutRequest(
+            payout: txPayout,
+            personNegative: pay.name,
+            personPositive: paid.name,
+          ));
+
+          if (tx.isNegative) {
+            negativeList
+                .firstWhere((p) => p.name == pay.name, orElse: () => null)
+                .payOrPaidAmount -= txPayout;
+            positiveList.remove(paid);
+          } else if (!tx.isNegative && tx != 0) {
+            positiveList
+                .firstWhere((p) => p.name == paid.name, orElse: () => null)
+                .payOrPaidAmount -= txPayout;
+            negativeList.remove(pay);
+          } else if (tx == 0) {
+            negativeList.remove(pay);
+            positiveList.remove(paid);
           }
-          if (personPositive != null && personNegative != null) {
-            int pRes = personPositive.result;
-            int nRes = personNegative.result;
-            int fRes = nRes + pRes;
-            if (fRes.isNegative) {
-              personNegative.setResult(fRes);
-
-              await firestoreInstance.collection("$gamePath/payouts").add({
-                "sentence":
-                    "${personNegative.name} pays ${personPositive.name} ${personPositive.result}.",
-                "personnegative": personNegative.name,
-                "personpositive": personPositive.name,
-                "result": personPositive.result,
-              });
-
-              personList
-                  .removeWhere((item) => item.name == personPositive.name);
-              personPositive = null;
-            } else if (fRes == 0) {
-              personList
-                  .removeWhere((item) => item.name == personPositive.name);
-              personList
-                  .removeWhere((item) => item.name == personNegative.name);
-              await firestoreInstance.collection("$gamePath/payouts").add({
-                "sentence":
-                    "${personNegative.name} pays ${personPositive.name} ${personPositive.result}.",
-                "personnegative": personNegative.name,
-                "personpositive": personPositive.name,
-                "result": personPositive.result,
-              });
-
-              personPositive = null;
-              personNegative = null;
-              setState(() {
-                isLoading = false;
-              });
-              Essentials().showSnackBar(
-                  "Payouts has been updated", formKey.currentState.context);
-            } else if (!fRes.isNegative) {
-              personPositive.setResult(fRes);
-              int abs = personNegative.result.abs();
-              await firestoreInstance.collection("$gamePath/payouts").add({
-                "sentence":
-                    "${personNegative.name} pays ${personPositive.name} $abs.",
-                "personnegative": personNegative.name,
-                "personpositive": personPositive.name,
-                "result": abs,
-              });
-
-              personList.remove(personList[personNegative.index]);
-
-              personNegative = null;
-            }
-          }
+          pay = null;
+          paid = null;
         }
       }
     });
@@ -1151,68 +1113,147 @@ class CashGamePageState extends State<CashGamePage>
         });
   }
 
-  Widget payoutsList(BuildContext context, DocumentSnapshot document) {
-    if (document.documentID == "-") {
-      return new RaisedButton(
-        color: UIData.yellowOrWhite,
-        child: new Text(
-          "Calculate payouts",
-          style: new TextStyle(
-              fontSize: UIData.fontSize20, color: UIData.whiteOrBlack),
+  Widget payoutsList() {
+    Widget payoutBtn = Container(
+      height: 12,
+    );
+    if (widget.group.admin) {
+      payoutBtn = Padding(
+        padding: EdgeInsets.only(top: 12, bottom: 12),
+        child: PrimaryButton(
+          color: UIData.yellowOrWhite,
+          text: "Calculate payouts",
+          onPressed: () => calculatePayouts(),
         ),
-        onPressed: () => calculatePayouts(),
       );
     }
-    return new ListTile(
-      dense: true,
-      title: new Row(
-        // crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return SingleChildScrollView(
+      child: Column(
         children: <Widget>[
-          new Text(
-            "${document.data["personnegative"]} ",
-            style: new TextStyle(color: UIData.red, fontSize: 20.0),
-            overflow: TextOverflow.ellipsis,
-          ),
-
-          // new Icon(Icons.arrow_forward, color: UIData.blackOrWhite,),
-          new Text(
-            "${document.data["personpositive"]} ",
-            style: new TextStyle(color: UIData.green, fontSize: 20.0),
-            overflow: TextOverflow.ellipsis,
-            // textAlign: TextAlign.center,
-          ),
+          payoutBtn,
+          Column(
+            children: payoutRequests.map((r) {
+              if (r.hasLeft != null) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      "${r.personNegative} has ${r.payout} left to pay",
+                      style: TextStyle(color: UIData.red, fontSize: 20.0),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                );
+              } else if (r.isMissing != null) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      "${r.personPositive} is missing ${r.payout}",
+                      style: TextStyle(color: UIData.red, fontSize: 20.0),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                );
+              } else {
+                return Container(
+                  height: ServiceProvider.instance.screenService
+                      .getPortraitHeightByPercentage(context, 10),
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: 12),
+                    child: Card(
+                      elevation: 3,
+                      color: UIData.listColor,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: <Widget>[
+                              Container(
+                                width: ServiceProvider.instance.screenService
+                                    .getPortraitWidthByPercentage(context, 30),
+                                child: Text(
+                                  r.personNegative,
+                                  style: TextStyle(
+                                      color: UIData.red, fontSize: 20.0),
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.left,
+                                ),
+                              ),
+                              Container(
+                                width: ServiceProvider.instance.screenService
+                                    .getPortraitWidthByPercentage(context, 30),
+                                child: Icon(
+                                  Icons.arrow_forward,
+                                  color: UIData.blackOrWhite,
+                                ),
+                              ),
+                              Container(
+                                width: ServiceProvider.instance.screenService
+                                    .getPortraitWidthByPercentage(context, 30),
+                                child: Text(
+                                  r.personPositive,
+                                  style: TextStyle(
+                                      color: UIData.green, fontSize: 20.0),
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.left,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            "Amount: ${r.payout} ",
+                            style: TextStyle(
+                                color: UIData.blackOrWhite, fontSize: 20.0),
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }
+            }).toList(),
+          )
         ],
       ),
-      contentPadding: EdgeInsets.all(10.0),
-      subtitle: new Text(
-        "${document.data["sentence"]}",
-        // overflow: TextOverflow.ellipsis,
-        textAlign: TextAlign.center,
-
-        style: new TextStyle(
-            color: UIData.blackOrWhite,
-            fontSize: UIData.fontSize16,
-            letterSpacing: .50),
-      ),
     );
-  }
 
-  Widget payouts() {
-    return StreamBuilder(
-        stream: firestoreInstance
-            .collection(
-                "groups/$groupId/games/type/cashgamehistory/${widget.gameId}/payouts")
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return loading();
-          return ListView.builder(
-            itemExtent: 60.0,
-            itemCount: snapshot.data.documents.length,
-            itemBuilder: (context, index) =>
-                payoutsList(context, snapshot.data.documents[index]),
-          );
-        });
+    // return ListTile(
+    //   dense: true,
+    //   title: Row(
+    //     // crossAxisAlignment: CrossAxisAlignment.end,
+    //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //     children: <Widget>[
+    //       Text(
+    //         "${document.data["personnegative"]} ",
+    //         style: TextStyle(color: UIData.red, fontSize: 20.0),
+    //         overflow: TextOverflow.ellipsis,
+    //       ),
+
+    //       // Icon(Icons.arrow_forward, color: UIData.blackOrWhite,),
+    //       Text(
+    //         "${document.data["personpositive"]} ",
+    //         style: TextStyle(color: UIData.green, fontSize: 20.0),
+    //         overflow: TextOverflow.ellipsis,
+    //         // textAlign: TextAlign.center,
+    //       ),
+    //     ],
+    //   ),
+    //   contentPadding: EdgeInsets.all(10.0),
+    //   subtitle: Text(
+    //     "${document.data["sentence"]}",
+    //     // overflow: TextOverflow.ellipsis,
+    //     textAlign: TextAlign.center,
+
+    //     style: TextStyle(
+    //         color: UIData.blackOrWhite,
+    //         fontSize: UIData.fontSize16,
+    //         letterSpacing: .50),
+    //   ),
+    // );
   }
 
   Widget queue() {
@@ -1339,7 +1380,7 @@ class CashGamePageState extends State<CashGamePage>
     }
   }
 
-  setPlayersOrResult() {
+  Widget setPlayersOrResult() {
     if (widget.history == true) {
       return resultStream();
     } else {
@@ -1347,9 +1388,9 @@ class CashGamePageState extends State<CashGamePage>
     }
   }
 
-  setQueueOrPayouts() {
+  Widget setQueueOrPayouts() {
     if (widget.history == true) {
-      return payouts();
+      return payoutsList();
     } else {
       return queue();
     }
@@ -1644,4 +1685,30 @@ class CashGamePageState extends State<CashGamePage>
           }
         });
   }
+}
+
+// Used to hold player info when calculating payouts
+class PayoutPlayer {
+  PayoutPlayer({
+    this.payOrPaidAmount,
+    @required this.name,
+  });
+
+  int payOrPaidAmount;
+  final String name;
+}
+
+class PayoutRequest {
+  PayoutRequest({
+    this.payout,
+    this.personNegative,
+    this.personPositive,
+    this.hasLeft,
+    this.isMissing,
+  });
+  final bool isMissing;
+  final bool hasLeft;
+  final String personNegative;
+  final String personPositive;
+  final int payout;
 }

@@ -10,7 +10,7 @@ import 'package:yadda/objects/game.dart';
 import 'package:yadda/utils/essentials.dart';
 import 'package:yadda/utils/layout.dart';
 import 'package:yadda/utils/cloudFunctions.dart';
-import 'package:yadda/pages/inAppPurchase/subscription.dart';
+// import 'package:yadda/pages/inAppPurchase/subscription.dart';
 
 class NewTournament extends StatefulWidget {
   NewTournament({Key key, this.user, this.group, this.fromTournamentGroupPage})
@@ -370,59 +370,59 @@ class NewTournamentState extends State<NewTournament> {
                     int isNumber = int.tryParse(val);
                     if (isNumber != null) {
                       val.isEmpty ? val = game.maxPlayers.toString() : null;
-                      if (widget.user.subLevel < 2) {
-                        String sub;
-                        if (widget.user.subLevel == 1 &&
-                            int.tryParse(val) > 27) {
-                          sub =
-                              "Your current subscription only allows \n27 players per tournament";
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Subscription(
-                                        user: widget.user,
-                                        info: true,
-                                        title: sub,
-                                      )));
-                          return sub;
-                        } else if (widget.user.subLevel == 0 &&
-                            int.tryParse(val) > 9) {
-                          sub =
-                              "Your current subscription only allows \n9 players per tournament";
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Subscription(
-                                        user: widget.user,
-                                        info: true,
-                                        title: sub,
-                                      )));
-                          return sub;
-                        }
-                      }
+                      // if (widget.user.subLevel < 2) {
+                      //   String sub;
+                      //   if (widget.user.subLevel == 1 &&
+                      //       int.tryParse(val) > 27) {
+                      //     sub =
+                      //         "Your current subscription only allows \n27 players per tournament";
+                      //     Navigator.push(
+                      //         context,
+                      //         MaterialPageRoute(
+                      //             builder: (context) => Subscription(
+                      //                   user: widget.user,
+                      //                   info: true,
+                      //                   title: sub,
+                      //                 )));
+                      //     return sub;
+                      //   } else if (widget.user.subLevel == 0 &&
+                      //       int.tryParse(val) > 9) {
+                      //     sub =
+                      //         "Your current subscription only allows \n9 players per tournament";
+                      //     Navigator.push(
+                      //         context,
+                      //         MaterialPageRoute(
+                      //             builder: (context) => Subscription(
+                      //                   user: widget.user,
+                      //                   info: true,
+                      //                   title: sub,
+                      //                 )));
+                      //     return sub;
+                      //   }
+                      // }
                     } else {
                       return "Input must be a number!";
                     }
                   },
                   onSaved: (val) {
                     if (val.isEmpty) {
-                      switch (widget.user.subLevel) {
-                        case (0):
-                          game.setMaxPlayers(9);
-                          break;
-                        case (1):
-                          game.setMaxPlayers(18);
-                          break;
-                        case (2):
+                      // switch (widget.user.subLevel) {
+                      //   case (0):
+                      //     game.setMaxPlayers(9);
+                      //     break;
+                      //   case (1):
+                      //     game.setMaxPlayers(18);
+                      //     break;
+                      //   case (2):
                           game.setMaxPlayers(27);
-                          break;
-                      }
-                    } else if (widget.user.subLevel == 1 &&
-                        int.tryParse(val) > 27) {
-                      game.setMaxPlayers(27);
-                    } else if (widget.user.subLevel == 0 &&
-                        int.tryParse(val) > 9) {
-                      game.setMaxPlayers(9);
+                      //     break;
+                      // }
+                    // } else if (widget.user.subLevel == 1 &&
+                    //     int.tryParse(val) > 27) {
+                    //   game.setMaxPlayers(27);
+                    // } else if (widget.user.subLevel == 0 &&
+                    //     int.tryParse(val) > 9) {
+                    //   game.setMaxPlayers(9);
                     } else {
                       game.setMaxPlayers(int.tryParse(val));
                     }
@@ -655,28 +655,27 @@ class NewTournamentState extends State<NewTournament> {
               ),
               value: notifyMembers,
               onChanged: (val) {
-                if (widget.user.subLevel == 0) {
-                  showDisabledNotifications = true;
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => Subscription(
-                                user: widget.user,
-                                info: true,
-                                title:
-                                    "Your current subscription does not include notifications",
-                              )));
-                } else {
+                // if (widget.user.subLevel == 0) {
+                //   showDisabledNotifications = true;
+                //   Navigator.push(
+                //       context,
+                //       MaterialPageRoute(
+                //           builder: (context) => Subscription(
+                //                 user: widget.user,
+                //                 info: true,
+                //                 title:
+                //                     "Your current subscription does not include notifications",
+                //               )));
+                // } else {
                   if (val == true) {
                     notifyMembers = true;
                   } else {
                     notifyMembers = false;
                   }
-                }
-
+                // }
                 setState(() {});
               }),
-          disabledNotifications(),
+          // disabledNotifications(),
           Padding(
             padding: EdgeInsets.only(bottom: 48.0),
           )
@@ -759,19 +758,19 @@ class NewTournamentState extends State<NewTournament> {
     }
   }
 
-  bool showDisabledNotifications = false;
-  Widget disabledNotifications() {
-    if (showDisabledNotifications) {
-      return new Padding(
-          padding: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 18.0),
-          child: Text(
-            "Your current subscription does not include notifications",
-            style: new TextStyle(color: Colors.red),
-          ));
-    } else {
-      return new Container();
-    }
-  }
+  // bool showDisabledNotifications = false;
+  // Widget disabledNotifications() {
+  //   if (showDisabledNotifications) {
+  //     return new Padding(
+  //         padding: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 18.0),
+  //         child: Text(
+  //           "Your current subscription does not include notifications",
+  //           style: new TextStyle(color: Colors.red),
+  //         ));
+  //   } else {
+  //     return new Container();
+  //   }
+  // }
 
   DateTime _date = new DateTime.now();
   TimeOfDay _time = new TimeOfDay.now();

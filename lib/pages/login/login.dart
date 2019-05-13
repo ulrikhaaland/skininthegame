@@ -62,7 +62,7 @@ class LoginState extends State<Login> {
         appBar: new AppBar(
           automaticallyImplyLeading: false,
           title: new Text(
-            "Skin In The Game",
+            "Preflop",
             style: new TextStyle(
                 color: UIData.blackOrWhite, fontSize: UIData.fontSize24),
           ),
@@ -339,7 +339,7 @@ class LoginState extends State<Login> {
             subtitle: new FlatButton(
                 child: new Text(
                   "Terms, Policies And Agreements",
-                  style: TextStyle(color: UIData.white),
+                  style: TextStyle(color: UIData.blackOrWhite),
                 ),
                 onPressed: () => Navigator.push(
                       context,

@@ -11,7 +11,7 @@ import 'package:yadda/utils/log.dart';
 import 'package:yadda/objects/game.dart';
 import 'package:yadda/auth.dart';
 import 'package:yadda/utils/layout.dart';
-import 'package:yadda/pages/inAppPurchase/subscription.dart';
+// import 'package:yadda/pages/inAppPurchase/subscription.dart';
 import 'package:yadda/utils/essentials.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 
@@ -410,61 +410,61 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
                                       ? val = widget.game.maxPlayers.toString()
                                       : null;
 
-                                  if (widget.user.subLevel < 2) {
-                                    String sub;
-                                    if (widget.user.subLevel == 1 &&
-                                        int.tryParse(val) > 9) {
-                                      sub =
-                                          "Your current subscription only allows \n9 players per cash game";
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  Subscription(
-                                                    user: widget.user,
-                                                    info: true,
-                                                    title: sub,
-                                                  )));
-                                      return sub;
-                                    } else if (widget.user.subLevel == 0 &&
-                                        int.tryParse(val) > 6) {
-                                      sub =
-                                          "Your current subscription only allows \n6 players per cash game";
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  Subscription(
-                                                    user: widget.user,
-                                                    info: true,
-                                                    title: sub,
-                                                  )));
-                                      return sub;
-                                    }
-                                  }
+                                  // if (widget.user.subLevel < 2) {
+                                  //   String sub;
+                                  //   if (widget.user.subLevel == 1 &&
+                                  //       int.tryParse(val) > 9) {
+                                  //     sub =
+                                  //         "Your current subscription only allows \n9 players per cash game";
+                                  //     Navigator.push(
+                                  //         context,
+                                  //         MaterialPageRoute(
+                                  //             builder: (context) =>
+                                  //                 Subscription(
+                                  //                   user: widget.user,
+                                  //                   info: true,
+                                  //                   title: sub,
+                                  //                 )));
+                                  //     return sub;
+                                  //   } else if (widget.user.subLevel == 0 &&
+                                  //       int.tryParse(val) > 6) {
+                                  //     sub =
+                                  //         "Your current subscription only allows \n6 players per cash game";
+                                  //     Navigator.push(
+                                  //         context,
+                                  //         MaterialPageRoute(
+                                  //             builder: (context) =>
+                                  //                 Subscription(
+                                  //                   user: widget.user,
+                                  //                   info: true,
+                                  //                   title: sub,
+                                  //                 )));
+                                  //     return sub;
+                                  //   }
+                                  // }
                                 } else {
                                   return "Input must be a number!";
                                 }
                               },
                               onSaved: (val) {
                                 if (val.isEmpty) {
-                                  switch (widget.user.subLevel) {
-                                    case (0):
-                                      widget.game.setMaxPlayers(6);
-                                      break;
-                                    case (1):
-                                      widget.game.setMaxPlayers(9);
-                                      break;
-                                    case (2):
-                                      widget.game.setMaxPlayers(9);
-                                      break;
-                                  }
-                                } else if (widget.user.subLevel == 1 &&
-                                    int.tryParse(val) > 9) {
+                                  // switch (widget.user.subLevel) {
+                                  //   case (0):
+                                  //     widget.game.setMaxPlayers(6);
+                                  //     break;
+                                  //   case (1):
+                                  //     widget.game.setMaxPlayers(9);
+                                  //     break;
+                                  //   case (2):
                                   widget.game.setMaxPlayers(9);
-                                } else if (widget.user.subLevel == 0 &&
-                                    int.tryParse(val) > 6) {
-                                  widget.game.setMaxPlayers(6);
+                                  // break;
+                                  // }
+                                  // } else if (widget.user.subLevel == 1 &&
+                                  //     int.tryParse(val) > 9) {
+                                  //   widget.game.setMaxPlayers(9);
+                                  // } else if (widget.user.subLevel == 0 &&
+                                  //     int.tryParse(val) > 6) {
+                                  //   widget.game.setMaxPlayers(6);
                                 } else {
                                   widget.game.setMaxPlayers(int.tryParse(val));
                                 }
@@ -652,23 +652,24 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
                             ),
                             value: widget.game.showMoneyOnTable,
                             onChanged: (val) {
-                              if (widget.user.subLevel == 0) {
-                                showDisabledMoneyOnTheTable = true;
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => Subscription(
-                                              user: widget.user,
-                                              info: true,
-                                              title:
-                                                  "Your current subscription does not include showing money on the table",
-                                            )));
-                              } else {
+                              // if (widget.user.subLevel == 0) {
+                              //   showDisabledMoneyOnTheTable = true;
+                              //   Navigator.push(
+                              //       context,
+                              //       MaterialPageRoute(
+                              //           builder: (context) => Subscription(
+                              //                 user: widget.user,
+                              //                 info: true,
+                              //                 title:
+                              //                     "Your current subscription does not include showing money on the table",
+                              //               )));
+                              // } else {
+                              setState(() {
                                 widget.game.showMoneyOnTable = val;
-                                setState(() {});
-                              }
+                              });
+                              // }
                             }),
-                        disabledMoneyOnTheTable(),
+                        // disabledMoneyOnTheTable(),
                         Padding(
                           padding: EdgeInsets.only(bottom: 16.0),
                         ),
@@ -684,19 +685,19 @@ class CashGameSettingsPageState extends State<CashGameSettingsPage>
     );
   }
 
-  bool showDisabledMoneyOnTheTable = false;
-  Widget disabledMoneyOnTheTable() {
-    if (showDisabledMoneyOnTheTable) {
-      return new Padding(
-          padding: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
-          child: Text(
-            "Your current subscription does not include showing money on the table",
-            style: new TextStyle(color: Colors.red),
-          ));
-    } else {
-      return new Container();
-    }
-  }
+  // bool showDisabledMoneyOnTheTable = false;
+  // Widget disabledMoneyOnTheTable() {
+  //   if (showDisabledMoneyOnTheTable) {
+  //     return new Padding(
+  //         padding: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
+  //         child: Text(
+  //           "Your current subscription does not include showing money on the table",
+  //           style: new TextStyle(color: Colors.red),
+  //         ));
+  //   } else {
+  //     return new Container();
+  //   }
+  // }
 
   bool validateAndSave() {
     final form = formKey.currentState;

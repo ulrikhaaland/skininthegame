@@ -8,8 +8,8 @@ import 'package:yadda/pages/profile/profile_page.dart';
 import 'package:yadda/objects/user.dart';
 import 'package:yadda/utils/layout.dart';
 import 'package:yadda/widgets/primary_button.dart';
-import 'package:yadda/pages/inAppPurchase/subLevel.dart';
-import 'package:yadda/pages/inAppPurchase/subscription.dart';
+// import 'package:yadda/pages/inAppPurchase/subLevel.dart';
+// import 'package:yadda/pages/inAppPurchase/subscription.dart';
 import 'package:yadda/pages/group/group_page_one.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -273,8 +273,8 @@ class PageOneState extends State<PageOne> {
             color: UIData.yellow,
             text: "Join",
             onPressed: () async {
-              if (await SubLevel()
-                  .groupsLeft(widget.user.id, widget.user.subLevel)) {
+              // if (await SubLevel()
+              //     .groupsLeft(widget.user.id, widget.user.subLevel)) {
                 setState(() {
                   isLoading = true;
                 });
@@ -287,19 +287,19 @@ class PageOneState extends State<PageOne> {
                   typeOfCode = "onetimegroupcode";
                 }
                 _getGroup(typeOfCode);
-              } else {
-                int i;
-                widget.user.subLevel == 0 ? i = 3 : i = 10;
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => Subscription(
-                              user: widget.user,
-                              info: true,
-                              title:
-                                  "Your current subscription does only allow you to be a part of $i groups at any given time",
-                            )));
-              }
+              // } else {
+              //   int i;
+              //   widget.user.subLevel == 0 ? i = 3 : i = 10;
+              //   Navigator.push(
+              //       context,
+              //       MaterialPageRoute(
+              //           builder: (context) => Subscription(
+              //                 user: widget.user,
+              //                 info: true,
+              //                 title:
+              //                     "Your current subscription does only allow you to be a part of $i groups at any given time",
+              //               )));
+              // }
             }),
       ),
     ]);
@@ -345,7 +345,7 @@ class PageOneState extends State<PageOne> {
 
   void _saveGroup() async {
     bool admin = false;
-    if (await SubLevel().groupsLeft(widget.user.id, widget.user.subLevel)) {
+    // if (await SubLevel().groupsLeft(widget.user.id, widget.user.subLevel)) {
       if (groupCode.contains("r")) {
       } else if (groupCode.contains("o")) {
         firestoreInstance
@@ -383,18 +383,19 @@ class PageOneState extends State<PageOne> {
                 )),
       );
       isLoading = false;
-    }
-    int i;
-    widget.user.subLevel == 0 ? i = 3 : i = 10;
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => Subscription(
-                  user: widget.user,
-                  info: true,
-                  title:
-                      "Your current subscription only allows you to be a part of $i groups at any given time",
-                )));
+    // } else {
+    //   int i;
+    //   widget.user.subLevel == 0 ? i = 3 : i = 10;
+    //   Navigator.push(
+    //       context,
+    //       MaterialPageRoute(
+    //           builder: (context) => Subscription(
+    //                 user: widget.user,
+    //                 info: true,
+    //                 title:
+    //                     "Your current subscription only allows you to be a part of $i groups at any given time",
+    //               )));
+    // }
   }
 
   void onChanged(String value) {
