@@ -257,34 +257,49 @@ class GroupSettingsPageState extends State<GroupSettingsPage> {
 
   void _showAlert() {
     AlertDialog dialog = new AlertDialog(
+      backgroundColor: UIData.dark,
       title: new Text(
         "Are you sure you want to leave the group?",
+        style: TextStyle(color: UIData.blackOrWhite),
         textAlign: TextAlign.center,
       ),
       contentPadding: EdgeInsets.all(20.0),
-      actions: <Widget>[
-        new FlatButton(
-          onPressed: () {
-            fireStoreInstance
-                .document("users/$currentUserId/groups/$groupId")
-                .delete();
-            fireStoreInstance
-                .document("groups/$groupId/members/$currentUserId")
-                .delete();
-            Navigator.of(context)..pop()..pop()..pop();
-          },
-          child: new Text(
-            "Yes",
-            textAlign: TextAlign.left,
+      content: Container(
+          child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          new FlatButton(
+            onPressed: () {
+              fireStoreInstance
+                  .document("users/$currentUserId/groups/$groupId")
+                  .delete();
+              fireStoreInstance
+                  .document("groups/$groupId/members/$currentUserId")
+                  .delete();
+              Navigator.of(context)..pop()..pop()..pop();
+            },
+            child: new Text(
+              "Yes",
+              style: TextStyle(
+                color: UIData.red,
+              ),
+              textAlign: TextAlign.left,
+            ),
           ),
-        ),
-        new FlatButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: new Text("Cancel"),
-        ),
-      ],
+          new FlatButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: new Text(
+              "Cancel",
+              style: TextStyle(
+                color: UIData.blue,
+              ),
+            ),
+          ),
+        ],
+      )),
+      actions: <Widget>[],
     );
     showDialog(context: context, child: dialog);
   }

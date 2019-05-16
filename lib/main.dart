@@ -19,12 +19,12 @@ class MyApp extends StatelessWidget {
       color: UIData.darkest,
       title: 'Preflop',
       theme: new ThemeData(
-          dialogTheme: DialogTheme(
-              elevation: 1,
-              // backgroundColor: UIData.dark,
-              titleTextStyle: TextStyle(
-                  color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
-              contentTextStyle: TextStyle(color: UIData.blackOrWhite)),
+          // dialogTheme: DialogTheme(
+          //     elevation: 1,
+          //     // backgroundColor: UIData.dark,
+          //     titleTextStyle: TextStyle(
+          //         color: UIData.blackOrWhite, fontSize: UIData.fontSize20),
+          //     contentTextStyle: TextStyle(color: UIData.blackOrWhite)),
           tabBarTheme: TabBarTheme(
               labelColor: UIData.blackOrWhite,
               unselectedLabelColor: Colors.grey[600]),

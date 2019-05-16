@@ -105,7 +105,9 @@ class InviteUserPageState extends State<InviteUserPage> {
                   decoration: InputDecoration(
                     fillColor: UIData.white,
                     labelText: 'Search for users',
-                    labelStyle: TextStyle(color: Colors.grey[600]),
+                    labelStyle: TextStyle(
+                      color: Colors.grey[600],
+                    ),
                     icon: Icon(Icons.supervised_user_circle,
                         size: 40.0, color: UIData.blue),
                   ),
